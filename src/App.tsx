@@ -169,6 +169,9 @@ export default function App() {
           status: mergedRecord.statusAtEnd,
           statusReason: mergedRecord.statusReason,
           recommendedActionSnippet: mergedRecord.recommendedAction?.title,
+          currentCapabilityId: execution.currentCapabilityId,
+          overallReadinessScore: execution.overallReadinessScore,
+          capabilities: execution.updatedCapabilities,
           daysHistory: newHistory,
         };
       })

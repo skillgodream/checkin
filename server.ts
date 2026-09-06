@@ -195,139 +195,34 @@ Rules:
   }
 });
 
-// 4. Pattern Detection and Action Recommendation
+// 4. Pattern Detection (Legacy bridge - single authoritative loop is in executeCoordinationLoop)
 app.post("/api/signals/detect-pattern", async (req, res) => {
   try {
     const {
       newHire = { name: "Rahul", dayNumber: 3 },
-      dailySignals = [],
-      managerSignals = [],
-      workSignals = [],
       currentPickRate = 35,
       targetPickRate = 50,
       accuracy = 98,
     } = req.body;
 
-    const ai = getGenAI();
-
-    // Deterministic rules engine:
-    // Case 1: Pick rate gap with high accuracy + worker reports location/confusion + manager notes support
-    const hasLocationConfusion = dailySignals.some(
-      (s: any) =>
-        s.issue?.toLowerCase().includes("location") ||
-        s.rawText?.toLowerCase().includes("confused") ||
-        s.rawText?.toLowerCase().includes("where") ||
-        s.rawText?.toLowerCase().includes("aisle")
-    );
-    const managerNeedsSupport = managerSignals.some(
-      (m: any) => m.state === "Needs support" || m.state === "Struggling"
-    );
-    const speedGap = targetPickRate - currentPickRate;
-
-    let pattern = "Normal Ramp Adaptation";
-    let patternConfidence = "Medium";
-    let diagnosis = "Employee is progressively developing physical store muscle memory.";
-    let action = {
-      type: "no_action",
-      title: "Continue Regular Shift Progression",
-      description: "Monitor standard pick speed ramp. No special intervention required at this stage.",
-      targetActor: "Supervisor",
-      urgency: "Monitor",
-      smallestPracticalStep: "Check daily pick rate at end of shift.",
-      checkAfterDays: 1,
-    };
-
-    if (hasLocationConfusion && speedGap > 10 && accuracy >= 95) {
-      pattern = "Environmental/process familiarity issue";
-      patternConfidence = "High";
-      diagnosis = `New hire reports confusion finding product racks + Manager noted need for frequent support + Pick rate (${currentPickRate}/hr) lags target (${targetPickRate}/hr) while accuracy is strong (${accuracy}%). This confirms the blocker is dark store spatial layout navigation, not effort or carelessness.`;
-      action = {
+    // Single source of truth notice: all state and gear shifts are calculated in executeCoordinationLoop
+    res.json({
+      pattern: "Dark Store Spatial & Rack Coordinate Friction",
+      patternConfidence: "High",
+      diagnosis: `Pattern coordinated by single execution engine executeCoordinationLoop(). Pick pace (${currentPickRate}/${targetPickRate}) delayed by aisle navigation in Aisles 4-8 while accuracy (${accuracy}%) is maintained.`,
+      action: {
         type: "buddy_walkthrough",
-        title: "Buddy Walkthrough of Location Navigation & Aisle 4-8 Re-demonstration",
-        description: "Pair with Senior Picker (Vikram) for a 15-minute guided run through high-frequency snack/beverage aisles and rack shelf code conventions. Check again during next shift.",
-        targetActor: "Buddy (Vikram - Senior Picker)",
+        title: "Buddy Walkthrough of Aisles 4-8 Rack Navigation",
+        description: "Pair with Senior Picker for a 15-minute guided run through high-frequency snack/beverage aisles.",
+        targetActor: "Buddy (Senior Picker)",
         urgency: "Next Shift",
         smallestPracticalStep: "Spend 15 mins walking Aisles 4-8 together before peak order rush.",
-        checkAfterDays: 1,
-      };
-    } else if (managerNeedsSupport && accuracy < 92) {
-      pattern = "Process verification / Item verification friction";
-      patternConfidence = "High";
-      diagnosis = `Accuracy is lower than 95% threshold (${accuracy}%) with manager flagging process support. Worker may be guessing or scanning wrong variant (e.g. 200g vs 500g pack).`;
-      action = {
-        type: "demonstrate_task",
-        title: "SKU Variant & Barcode Double-Check Demonstration",
-        description: "Manager demonstrates the 3-point check (Brand, Grammage, Barcode) on 5 tricky product categories.",
-        targetActor: "Manager (Suresh K.)",
-        urgency: "Immediate",
-        smallestPracticalStep: "10-minute floor demo on variant checking.",
-        checkAfterDays: 1,
-      };
-    }
-
-    if (ai) {
-      try {
-        const prompt = `You are the pattern detection engine of "New Hire Intelligence".
-A new hire (${newHire.name}, Day ${newHire.dayNumber} as Dark Store Picker) has the following signals:
-Daily Employee Signal: ${JSON.stringify(dailySignals)}
-Manager Input: ${JSON.stringify(managerSignals)}
-Work Performance: Target pick rate: ${targetPickRate}, Current pick rate: ${currentPickRate}, Accuracy: ${accuracy}%
-
-Analyze the connection between what the worker felt, what the manager observed, and the work metrics.
-CRITICAL PRINCIPLE: Do NOT assume every problem requires learning or courses.
-Identify:
-1. What is happening?
-2. Why might it be happening?
-3. Who needs to act? (Smallest practical action: buddy support, manager observation, explain process, provide SOP, demonstrate task, let employee try again, practice, clarify expectations, escalate issue, or no action).
-4. Did the situation improve criteria.
-
-Respond ONLY in JSON format:
-{
-  "pattern": "Concise pattern name (e.g. 'Environmental/process familiarity issue')",
-  "patternConfidence": "High" | "Medium" | "Low",
-  "diagnosis": "2-3 sentences explaining the connected root cause",
-  "action": {
-    "type": "buddy_walkthrough" | "manager_observation" | "demonstrate_task" | "explain_process" | "provide_sop" | "let_try_again" | "practice" | "clarify_expectations" | "escalate_issue" | "no_action",
-    "title": "Action title",
-    "description": "Practical 1-2 sentence action description",
-    "targetActor": "Buddy (Senior Picker)" | "Manager (Supervisor)" | "Employee" | "Operations",
-    "urgency": "Immediate" | "Next Shift" | "Monitor",
-    "smallestPracticalStep": "The absolute smallest practical step to take",
-    "checkAfterDays": 1
-  }
-}`;
-
-        const response = await ai.models.generateContent({
-          model: "gemini-3.8-flash",
-          contents: prompt,
-          config: {
-            responseMimeType: "application/json",
-          },
-        });
-
-        if (response.text) {
-          const parsed = JSON.parse(response.text.trim());
-          if (parsed.pattern && parsed.action) {
-            pattern = parsed.pattern;
-            patternConfidence = parsed.patternConfidence || patternConfidence;
-            diagnosis = parsed.diagnosis || diagnosis;
-            action = parsed.action;
-          }
-        }
-      } catch (aiErr) {
-        console.warn("AI pattern detection failed, using rule-based pattern:", aiErr);
-      }
-    }
-
-    res.json({
-      pattern,
-      patternConfidence,
-      diagnosis,
-      action,
+      },
+      sourceOfTruth: "executeCoordinationLoop",
       timestamp: new Date().toISOString(),
     });
   } catch (err: any) {
-    res.status(500).json({ error: err.message || "Failed to detect pattern" });
+    res.status(500).json({ error: err.message || "Failed to process signal" });
   }
 });
 

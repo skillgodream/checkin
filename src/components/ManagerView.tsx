@@ -17,6 +17,13 @@ import {
   Sliders,
   FileCheck2,
   ChevronRight,
+  Phone,
+  MessageSquare,
+  ShieldCheck,
+  TrendingUp,
+  X,
+  Clock,
+  ThumbsUp,
 } from "lucide-react";
 
 interface ManagerViewProps {
@@ -65,7 +72,7 @@ export const ManagerView: React.FC<ManagerViewProps> = ({
   );
   const [managerNote, setManagerNote] = useState(
     currentRecord.managerSignal?.notes ||
-      (currentDay === 3 ? "Rahul asks for location help repeatedly on multi-aisle grocery orders." : "")
+      (currentDay === 3 ? "Repeated location searches on multi-aisle grocery orders." : "")
   );
   const [isSavingManagerSignal, setIsSavingManagerSignal] = useState(false);
 
@@ -78,10 +85,13 @@ export const ManagerView: React.FC<ManagerViewProps> = ({
   // Action Check / Outcome state
   const [outcomeStatus, setOutcomeStatus] = useState<"yes" | "no" | "partial">("yes");
   const [outcomeNotes, setOutcomeNotes] = useState(
-    `Buddy ${activeHire.buddy.split(" ")[0]} walked aisles with ${activeHire.name.split(" ")[0]}. Navigation improved and pick pace recovered.`
+    `Buddy ${activeHire.buddy.split(" ")[0]} walked aisles 4-8 with ${activeHire.name.split(" ")[0]}. Navigation improved and pick pace recovered.`
   );
   const [isRecordingOutcome, setIsRecordingOutcome] = useState(false);
   const [showOutcomeDrawer, setShowOutcomeDrawer] = useState(false);
+
+  // Modal inspection for individual dossier tiles
+  const [activeTileModal, setActiveTileModal] = useState<"worker_signal" | "pattern" | "action" | "metrics" | null>(null);
 
   // Synchronize internal form fields when active employee or day changes
   useEffect(() => {
@@ -92,7 +102,7 @@ export const ManagerView: React.FC<ManagerViewProps> = ({
     setManagerNote(
       currentRecord.managerSignal?.notes ||
         (currentDay === 3 && activeHire.id === "nh-rahul-01"
-          ? "Rahul asks for location help repeatedly on multi-aisle grocery orders."
+          ? "Repeated location searches on multi-aisle grocery orders."
           : "")
     );
     setTargetRate(currentRecord.workSignal.targetPickRate || 50);
@@ -101,7 +111,7 @@ export const ManagerView: React.FC<ManagerViewProps> = ({
     setOutcomeStatus(currentRecord.actionOutcome?.improved || "yes");
     setOutcomeNotes(
       currentRecord.actionOutcome?.notes ||
-        `Buddy ${activeHire.buddy.split(" ")[0]} walked aisles with ${activeHire.name.split(" ")[0]}. Navigation improved and pick pace recovered.`
+        `Buddy ${activeHire.buddy.split(" ")[0]} walked aisles 4-8 with ${activeHire.name.split(" ")[0]}. Navigation improved and pick pace recovered.`
     );
   }, [currentDay, activeHire.id, currentRecord.managerSignal, currentRecord.workSignal, currentRecord.actionOutcome]);
 
@@ -161,56 +171,110 @@ export const ManagerView: React.FC<ManagerViewProps> = ({
     setTimeout(() => setIsRecordingOutcome(false), 300);
   };
 
+  // Status metrics counts
+  const needsAttentionCount = newHires.filter((h) => h.status === "Needs attention").length;
+  const atRiskCount = newHires.filter((h) => h.status === "At risk").length;
+  const doingWellCount = newHires.filter((h) => h.status === "Doing well").length;
+
+  const isSupportCompleted = Boolean(currentRecord.actionOutcome && currentRecord.actionOutcome.improved);
+
   return (
-    <div className="max-w-lg mx-auto pb-28 pt-4 px-3 sm:px-4 space-y-4">
-      {/* Mobile Question Header: Which new hire needs my attention today? */}
-      <div className="bg-white rounded-2xl border border-slate-200/80 p-4 shadow-2xs">
-        <div className="flex items-center gap-2 mb-1">
-          <span className="w-2 h-2 rounded-full bg-blue-600 animate-pulse"></span>
-          <span className="text-[10px] font-bold uppercase tracking-wider text-slate-500">
-            Shift Supervisor Console
+    <div className="max-w-md mx-auto px-4 py-3 space-y-4 pb-28 select-none">
+      {/* ========================================================= */}
+      {/* 1. TOP GREETING HEADER (Matches Unified App Style)        */}
+      {/* ========================================================= */}
+      <div className="flex items-center justify-between pt-1">
+        <div>
+          <h1 className="text-xl sm:text-2xl font-black text-slate-900 tracking-tight flex items-center gap-1.5">
+            <span>Shift Triage</span>
+            <span className="text-lg">📋</span>
+          </h1>
+          <p className="text-xs text-slate-500 font-medium mt-0.5">
+            Dark Store #104 • Day {currentDay} of 14
+          </p>
+        </div>
+
+        {/* Quick Triage Status Capsule */}
+        <div className="flex items-center gap-1 bg-white p-1 rounded-full border border-slate-200/90 shadow-2xs text-xs font-bold">
+          <span className="px-2.5 py-0.5 rounded-full bg-amber-100 text-amber-900 flex items-center gap-1">
+            <span className="w-1.5 h-1.5 rounded-full bg-amber-500"></span>
+            {needsAttentionCount} Needs Help
           </span>
         </div>
-        <h2 className="text-base sm:text-lg font-bold text-slate-900 tracking-tight">
-          Which new hire needs attention today?
-        </h2>
-        <p className="text-xs text-slate-500 mt-0.5">
-          Synthesizes worker feedback, floor metrics, and observations to isolate real friction.
-        </p>
+      </div>
 
-        {/* Quick Triage Status Filter Pills */}
-        <div className="mt-3 grid grid-cols-3 gap-1.5 text-center text-xs">
-          <div className="bg-amber-50 border border-amber-200/80 p-2 rounded-xl">
-            <span className="text-[10px] font-semibold text-amber-700 block">Attention</span>
-            <span className="text-sm font-bold text-amber-900">
-              {newHires.filter((h) => h.status === "Needs attention").length} New Hire
+      {/* ========================================================= */}
+      {/* 2. HERO STATUS CARD (Vibrant, Bold & Reassuring)          */}
+      {/* ========================================================= */}
+      <div
+        className={`bg-gradient-to-br ${
+          isSupportCompleted
+            ? "from-emerald-600 to-teal-700 text-white shadow-emerald-500/20"
+            : activeHire.status === "Needs attention"
+            ? "from-blue-600 to-indigo-700 text-white shadow-blue-500/20"
+            : activeHire.status === "At risk"
+            ? "from-rose-600 to-red-700 text-white shadow-rose-500/20"
+            : "from-slate-800 to-slate-950 text-white shadow-slate-900/20"
+        } rounded-3xl p-4 sm:p-5 shadow-lg relative overflow-hidden transition-all`}
+      >
+        <div className="absolute -right-6 -bottom-6 w-28 h-28 bg-white/10 rounded-full blur-xl pointer-events-none" />
+        <div className="absolute -left-6 -top-6 w-24 h-24 bg-white/10 rounded-full blur-lg pointer-events-none" />
+
+        <div className="relative z-10 space-y-3">
+          <div className="flex items-center justify-between">
+            <span className="px-3 py-1 rounded-full text-xs font-bold tracking-wide uppercase bg-white/20 text-white backdrop-blur-xs">
+              {isSupportCompleted
+                ? "Loop Completed (Closed) ✅"
+                : activeHire.status === "Needs attention"
+                ? "Floor Intervention Needed 🤝"
+                : activeHire.status === "At risk"
+                ? "High Priority Attention ⚠️"
+                : "Ramp Curve On Track 👍"}
             </span>
+
+            <button
+              id="open-check-outcome-btn"
+              onClick={() => setShowOutcomeDrawer(!showOutcomeDrawer)}
+              className="flex items-center gap-1.5 px-3 py-1 rounded-full bg-white/95 hover:bg-white text-slate-900 text-xs font-bold shadow-xs cursor-pointer active:scale-95 transition-all"
+            >
+              <FileCheck2 className="w-3.5 h-3.5 text-blue-600" />
+              <span>{isSupportCompleted ? "View Outcome" : "Record Check"}</span>
+            </button>
           </div>
-          <div className="bg-rose-50 border border-rose-200/80 p-2 rounded-xl">
-            <span className="text-[10px] font-semibold text-rose-700 block">At Risk</span>
-            <span className="text-sm font-bold text-rose-900">
-              {newHires.filter((h) => h.status === "At risk").length} New Hire
+
+          <div>
+            <h2 className="text-lg sm:text-xl font-black leading-snug tracking-tight">
+              {activeHire.name}: {currentRecord.identifiedPattern?.patternName || "Floor Ramp Progression"}
+            </h2>
+            <p className="text-xs sm:text-sm font-normal text-white/90 leading-relaxed mt-1">
+              {currentRecord.identifiedPattern?.diagnosis ||
+                "Rahul is experiencing dark store rack navigation friction in Aisles 4-8. Accuracy is 98%, but aisle searches slow down pick pace."}
+            </p>
+          </div>
+
+          <div className="pt-2 border-t border-white/15 flex items-center justify-between text-xs font-bold text-white/95">
+            <span>
+              Picks: {currentRecord.workSignal.actualPickRate}/hr (Target: {currentRecord.workSignal.targetPickRate})
             </span>
-          </div>
-          <div className="bg-emerald-50 border border-emerald-200/80 p-2 rounded-xl">
-            <span className="text-[10px] font-semibold text-emerald-700 block">Doing Well</span>
-            <span className="text-sm font-bold text-emerald-900">
-              {newHires.filter((h) => h.status === "Doing well").length} New Hires
+            <span className="text-[11px] font-medium text-white/80">
+              Buddy: {activeHire.buddy.split(" ")[0]}
             </span>
           </div>
         </div>
       </div>
 
-      {/* Horizontal Mobile Carousel / Picker List */}
+      {/* ========================================================= */}
+      {/* 3. COHORT PICKER CAROUSEL (Chunky Squircles)               */}
+      {/* ========================================================= */}
       <div>
-        <div className="flex items-center justify-between mb-2 px-1">
-          <span className="text-xs font-bold uppercase tracking-wider text-slate-500">
-            Floor Pickers ({newHires.length})
+        <div className="flex items-center justify-between mb-2 px-0.5">
+          <span className="text-xs font-bold uppercase tracking-wider text-slate-400">
+            Active Cohort ({newHires.length})
           </span>
           <span className="text-[11px] text-slate-400">Tap to inspect</span>
         </div>
 
-        <div className="flex gap-2 overflow-x-auto pb-1 scrollbar-none snap-x">
+        <div className="flex gap-2.5 overflow-x-auto pb-1 scrollbar-none snap-x">
           {newHires.map((hire) => {
             const isSelected = hire.id === activeHire.id;
             const hireRecord = hire.daysHistory.find((d) => d.dayNumber === currentDay) || hire.daysHistory[0];
@@ -220,29 +284,29 @@ export const ManagerView: React.FC<ManagerViewProps> = ({
                 key={hire.id}
                 id={`hire-chip-${hire.id}`}
                 onClick={() => onSelectHire(hire.id)}
-                className={`snap-start min-w-[210px] p-3 rounded-2xl border text-left transition-all cursor-pointer shrink-0 ${
+                className={`snap-start min-w-[200px] p-3.5 rounded-3xl border text-left transition-all cursor-pointer shrink-0 shadow-xs active:scale-97 ${
                   isSelected
-                    ? "bg-slate-900 text-white border-slate-900 shadow-xs"
-                    : "bg-white border-slate-200/80 text-slate-800 hover:border-slate-300"
+                    ? "bg-slate-900 text-white border-slate-900 shadow-md ring-2 ring-slate-900/10"
+                    : "bg-white border-slate-200/90 text-slate-800 hover:border-blue-300"
                 }`}
               >
-                <div className="flex items-center justify-between gap-2 mb-1.5">
+                <div className="flex items-center justify-between gap-2 mb-2">
                   <div className="flex items-center gap-2">
                     <img
                       src={hire.avatar}
                       alt={hire.name}
-                      className="w-7 h-7 rounded-full object-cover border border-slate-300 shrink-0"
+                      className="w-8 h-8 rounded-full object-cover border-2 border-slate-200 shrink-0"
                     />
                     <div className="min-w-0">
                       <h4 className="text-xs font-bold truncate leading-tight">{hire.name}</h4>
-                      <span className={`text-[10px] ${isSelected ? "text-slate-300" : "text-slate-500"}`}>
-                        Day {hire.currentDay}
+                      <span className={`text-[10px] font-medium ${isSelected ? "text-slate-300" : "text-slate-500"}`}>
+                        Day {hire.currentDay} of 14
                       </span>
                     </div>
                   </div>
 
                   <span
-                    className={`px-1.5 py-0.2 rounded-full text-[9px] font-bold shrink-0 ${
+                    className={`px-2 py-0.5 rounded-full text-[9px] font-black shrink-0 ${
                       hire.status === "Doing well"
                         ? "bg-emerald-500/20 text-emerald-300 border border-emerald-500/30"
                         : hire.status === "Needs attention"
@@ -254,13 +318,13 @@ export const ManagerView: React.FC<ManagerViewProps> = ({
                   </span>
                 </div>
 
-                <p className={`text-[11px] line-clamp-2 ${isSelected ? "text-slate-200" : "text-slate-600"}`}>
+                <p className={`text-[11px] line-clamp-2 leading-relaxed ${isSelected ? "text-slate-200" : "text-slate-600"}`}>
                   {hire.statusReason}
                 </p>
 
-                <div className="mt-2 flex items-center justify-between text-[10px] pt-1.5 border-t border-slate-200/30">
+                <div className="mt-2.5 flex items-center justify-between text-[10px] pt-2 border-t border-slate-200/20">
                   <span className={isSelected ? "text-slate-300" : "text-slate-500"}>
-                    Picks: <strong>{hireRecord?.workSignal?.actualPickRate || 35}/h</strong>
+                    {hireRecord?.workSignal?.actualPickRate || 35} picks/hr
                   </span>
                   <span className="text-emerald-400 font-bold">
                     {hireRecord?.workSignal?.accuracyRate || 98}% Acc
@@ -272,235 +336,127 @@ export const ManagerView: React.FC<ManagerViewProps> = ({
         </div>
       </div>
 
-      {/* Active New Hire Detailed Dossier */}
-      <div className="bg-white rounded-2xl border border-slate-200/80 p-4 shadow-2xs space-y-3.5">
-        {/* Profile row with Check Outcome action */}
-        <div className="flex items-center justify-between gap-2">
-          <div className="flex items-center gap-3">
-            <img
-              src={activeHire.avatar}
-              alt={activeHire.name}
-              className="w-11 h-11 rounded-xl object-cover border border-slate-200 shadow-2xs"
-            />
-            <div>
-              <div className="flex items-center gap-1.5">
-                <h3 className="text-sm font-bold text-slate-900">{activeHire.name}</h3>
-                <span
-                  className={`px-2 py-0.2 rounded-full text-[10px] font-bold ${
-                    activeHire.status === "Doing well"
-                      ? "bg-emerald-100 text-emerald-800 border border-emerald-200"
-                      : activeHire.status === "Needs attention"
-                      ? "bg-amber-100 text-amber-800 border border-amber-200"
-                      : "bg-rose-100 text-rose-800 border border-rose-200"
-                  }`}
-                >
-                  {activeHire.status}
-                </span>
-              </div>
-              <p className="text-[11px] text-slate-500">
-                Buddy: {activeHire.buddy.split(" ")[0]} • Supervisor: {activeHire.supervisor.split(" ")[0]}
-              </p>
-            </div>
-          </div>
+      {/* ========================================================= */}
+      {/* 4. 2x2 SQUIRCLE DOSSIER TILES (Same Design System)        */}
+      {/* ========================================================= */}
+      <div>
+        <div className="flex items-center justify-between mb-2 px-0.5">
+          <span className="text-xs font-bold uppercase tracking-wider text-slate-400">
+            {activeHire.name.split(" ")[0]}'s Signals & Actions
+          </span>
+          <span className="text-[11px] text-slate-400">Tap tile to inspect</span>
+        </div>
 
+        <div className="grid grid-cols-2 gap-2.5 sm:gap-3">
+          {/* Tile 1: Worker Spoken Voice Signal (Blue) */}
           <button
-            id="open-check-outcome-btn"
-            onClick={() => setShowOutcomeDrawer(!showOutcomeDrawer)}
-            className="inline-flex items-center gap-1 px-3 py-1.5 rounded-xl text-xs font-bold bg-blue-600 hover:bg-blue-700 text-white shadow-2xs cursor-pointer active:scale-95 transition-all shrink-0"
+            onClick={() => setActiveTileModal("worker_signal")}
+            className="flex flex-col items-start justify-between p-3.5 sm:p-4 rounded-3xl bg-white border border-slate-200/90 hover:border-blue-300 hover:bg-blue-50/40 shadow-xs active:scale-97 transition-all cursor-pointer group text-left"
           >
-            <FileCheck2 className="w-3.5 h-3.5" />
-            <span>Check</span>
+            <div className="w-11 h-11 rounded-2xl bg-blue-500 text-white flex items-center justify-center shadow-xs group-hover:scale-105 transition-transform mb-3">
+              <MessageSquare className="w-5 h-5" />
+            </div>
+            <div>
+              <span className="text-sm font-bold text-slate-900 block leading-tight">
+                Worker Signal
+              </span>
+              <span className="text-[11px] text-slate-500 font-medium mt-0.5 block truncate max-w-[130px]">
+                "{currentRecord.dailySignal?.rawText || "Aisles 4-8 confusion"}"
+              </span>
+            </div>
+          </button>
+
+          {/* Tile 2: Pattern Synthesis (Purple) */}
+          <button
+            onClick={() => setActiveTileModal("pattern")}
+            className="flex flex-col items-start justify-between p-3.5 sm:p-4 rounded-3xl bg-white border border-slate-200/90 hover:border-purple-300 hover:bg-purple-50/40 shadow-xs active:scale-97 transition-all cursor-pointer group text-left"
+          >
+            <div className="w-11 h-11 rounded-2xl bg-purple-600 text-white flex items-center justify-center shadow-xs group-hover:scale-105 transition-transform mb-3">
+              <Zap className="w-5 h-5" />
+            </div>
+            <div>
+              <span className="text-sm font-bold text-slate-900 block leading-tight">
+                Root Cause
+              </span>
+              <span className="text-[11px] text-purple-700 font-bold mt-0.5 block">
+                {currentRecord.identifiedPattern?.patternName || "Rack Navigation"}
+              </span>
+            </div>
+          </button>
+
+          {/* Tile 3: Smallest Practical Action (Emerald) */}
+          <button
+            onClick={() => setActiveTileModal("action")}
+            className="flex flex-col items-start justify-between p-3.5 sm:p-4 rounded-3xl bg-white border border-slate-200/90 hover:border-emerald-300 hover:bg-emerald-50/40 shadow-xs active:scale-97 transition-all cursor-pointer group text-left"
+          >
+            <div className="w-11 h-11 rounded-2xl bg-emerald-600 text-white flex items-center justify-center shadow-xs group-hover:scale-105 transition-transform mb-3">
+              <Sparkles className="w-5 h-5" />
+            </div>
+            <div>
+              <span className="text-sm font-bold text-slate-900 block leading-tight">
+                Smallest Action
+              </span>
+              <span className="text-[11px] text-emerald-700 font-bold mt-0.5 block">
+                {currentRecord.recommendedAction ? "Walkthrough planned" : "Routine ramp"}
+              </span>
+            </div>
+          </button>
+
+          {/* Tile 4: Floor Metrics & Pace (Amber) */}
+          <button
+            onClick={() => setActiveTileModal("metrics")}
+            className="flex flex-col items-start justify-between p-3.5 sm:p-4 rounded-3xl bg-white border border-slate-200/90 hover:border-amber-300 hover:bg-amber-50/40 shadow-xs active:scale-97 transition-all cursor-pointer group text-left"
+          >
+            <div className="w-11 h-11 rounded-2xl bg-amber-500 text-white flex items-center justify-center shadow-xs group-hover:scale-105 transition-transform mb-3">
+              <Sliders className="w-5 h-5" />
+            </div>
+            <div>
+              <span className="text-sm font-bold text-slate-900 block leading-tight">
+                Floor Pace
+              </span>
+              <span className="text-[11px] text-amber-700 font-bold mt-0.5 block">
+                {currentRecord.workSignal.actualPickRate}/hr (98% Acc)
+              </span>
+            </div>
           </button>
         </div>
-
-        {/* 3. Pattern Detection Synthesis Card */}
-        <div className="p-3.5 bg-slate-50 rounded-xl border border-slate-200/70 text-xs">
-          <div className="flex items-center justify-between mb-1">
-            <span className="text-[10px] font-bold uppercase tracking-wider text-slate-500 flex items-center gap-1">
-              <Zap className="w-3.5 h-3.5 text-blue-600" />
-              Pattern Detection (Synthesis)
-            </span>
-            <span className="text-[10px] font-bold px-2 py-0.2 rounded bg-blue-100 text-blue-800">
-              {currentRecord.identifiedPattern?.patternConfidence || "High"} Confidence
-            </span>
-          </div>
-
-          <h4 className="text-xs font-bold text-slate-900">
-            {currentRecord.identifiedPattern?.patternName || "Layout Familiarity Bottleneck"}
-          </h4>
-          <p className="text-xs text-slate-700 mt-1 leading-relaxed">
-            {currentRecord.identifiedPattern?.diagnosis ||
-              "Rahul is experiencing dark store rack navigation friction in Aisles 4-8. High accuracy (98%) indicates strong care, but location searches slow down pick pace."}
-          </p>
-
-          {/* Connected Signals Mini Chips */}
-          <div className="mt-2.5 pt-2 border-t border-slate-200/80 space-y-1 text-[11px]">
-            <div className="text-slate-700">
-              <strong className="text-slate-900">🗣️ Worker:</strong> "{currentRecord.dailySignal?.rawText || "Confused where products are"}"
-            </div>
-            <div className="text-slate-700">
-              <strong className="text-slate-900">👔 Manager:</strong> {currentRecord.managerSignal?.state || "Needs support"} ({currentRecord.managerSignal?.issueCategory || "Process"})
-            </div>
-            <div className="text-slate-700">
-              <strong className="text-slate-900">📊 Work:</strong> {currentRecord.workSignal.actualPickRate}/hr (Target {currentRecord.workSignal.targetPickRate}/hr), Accuracy {currentRecord.workSignal.accuracyRate}%
-            </div>
-          </div>
-        </div>
-
-        {/* 4. Smallest Practical Action Card */}
-        {currentRecord.recommendedAction && (
-          <div className="p-3.5 bg-blue-50/70 rounded-xl border border-blue-200/70 text-xs">
-            <div className="flex items-center justify-between mb-1">
-              <span className="text-[10px] font-bold text-blue-900 uppercase tracking-wider flex items-center gap-1">
-                <Sparkles className="w-3.5 h-3.5 text-blue-600" />
-                Smallest Practical Action
-              </span>
-              <span className="text-[10px] font-bold px-2 py-0.2 rounded-full bg-white text-blue-700 border border-blue-200">
-                For: {currentRecord.recommendedAction.targetActor}
-              </span>
-            </div>
-
-            <h4 className="text-xs font-bold text-slate-900">
-              {currentRecord.recommendedAction.title}
-            </h4>
-            <p className="text-xs text-slate-700 mt-0.5">
-              {currentRecord.recommendedAction.description}
-            </p>
-
-            <div className="mt-2 pt-2 border-t border-blue-100 flex items-center justify-between text-[11px]">
-              <span className="text-slate-600 font-medium">
-                Step: <strong>{currentRecord.recommendedAction.smallestPracticalStep}</strong>
-              </span>
-              <span
-                className={`px-1.5 py-0.2 rounded font-bold text-[10px] ${
-                  currentRecord.recommendedAction.status === "completed"
-                    ? "bg-emerald-100 text-emerald-800"
-                    : "bg-amber-100 text-amber-800"
-                }`}
-              >
-                {currentRecord.recommendedAction.status.toUpperCase()}
-              </span>
-            </div>
-          </div>
-        )}
-
-        {/* Action Outcome Banner if recorded */}
-        {currentRecord.actionOutcome && (
-          <div className="p-3.5 bg-emerald-50 rounded-xl border border-emerald-200 text-xs">
-            <div className="flex items-center justify-between mb-1">
-              <span className="text-[10px] font-bold text-emerald-900 uppercase tracking-wider flex items-center gap-1">
-                <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600" />
-                Check Result (Loop Closed)
-              </span>
-              <span className="text-[10px] font-bold px-2 py-0.2 rounded bg-white text-emerald-800 border border-emerald-200">
-                {currentRecord.actionOutcome.improved.toUpperCase()}
-              </span>
-            </div>
-            <p className="text-xs text-slate-700 font-medium">
-              "{currentRecord.actionOutcome.notes}"
-            </p>
-            {currentRecord.actionOutcome.subsequentPickRate && (
-              <p className="text-[11px] font-bold text-emerald-800 mt-1">
-                ⚡ Pick pace recovered to {currentRecord.actionOutcome.subsequentPickRate} items/hr!
-              </p>
-            )}
-          </div>
-        )}
       </div>
 
-      {/* Outcome Check Drawer/Modal */}
-      {showOutcomeDrawer && (
-        <div className="bg-white rounded-2xl border-2 border-blue-500 p-4 shadow-md text-xs space-y-3">
-          <div className="flex items-center justify-between">
-            <h4 className="text-xs font-bold text-slate-900 flex items-center gap-1.5">
-              <FileCheck2 className="w-4 h-4 text-blue-600" />
-              Did the situation improve after the intervention?
-            </h4>
-            <button
-              onClick={() => setShowOutcomeDrawer(false)}
-              className="text-slate-400 hover:text-slate-600 cursor-pointer"
-            >
-              ✕
-            </button>
-          </div>
-
-          <div className="grid grid-cols-3 gap-1.5">
-            {(["yes", "partial", "no"] as const).map((st) => (
-              <button
-                key={st}
-                type="button"
-                onClick={() => setOutcomeStatus(st)}
-                className={`py-2 px-1 rounded-xl text-center font-bold text-xs cursor-pointer transition-all ${
-                  outcomeStatus === st
-                    ? st === "yes"
-                      ? "bg-emerald-600 text-white shadow-2xs"
-                      : st === "partial"
-                      ? "bg-amber-600 text-white shadow-2xs"
-                      : "bg-rose-600 text-white shadow-2xs"
-                    : "bg-slate-100 text-slate-700 hover:bg-slate-200"
-                }`}
-              >
-                {st === "yes" ? "Yes (Improved)" : st === "partial" ? "Partial" : "No (Stalled)"}
-              </button>
-            ))}
-          </div>
-
-          <div>
-            <label className="block text-[11px] font-semibold text-slate-700 mb-1">
-              Floor Observation Notes:
-            </label>
-            <textarea
-              id="outcome-notes-input"
-              value={outcomeNotes}
-              onChange={(e) => setOutcomeNotes(e.target.value)}
-              rows={2}
-              className="w-full p-2.5 rounded-xl border border-slate-200 bg-slate-50 text-xs focus:outline-none focus:ring-2 focus:ring-blue-500"
-            />
-          </div>
-
-          <div className="flex justify-end gap-2 pt-1">
-            <button
-              onClick={() => setShowOutcomeDrawer(false)}
-              className="px-3 py-1.5 rounded-xl text-slate-600 hover:bg-slate-100 font-medium cursor-pointer"
-            >
-              Cancel
-            </button>
-            <button
-              id="save-outcome-btn"
-              onClick={handleRecordOutcome}
-              disabled={isRecordingOutcome}
-              className="px-4 py-1.5 rounded-xl text-white bg-blue-600 hover:bg-blue-700 font-bold cursor-pointer transition-colors shadow-2xs"
-            >
-              {isRecordingOutcome ? "Saving..." : "Save Outcome"}
-            </button>
-          </div>
-        </div>
-      )}
-
-      {/* 5-Second Supervisor Floor Check-in */}
-      <div className="bg-white rounded-2xl border border-slate-200/80 p-4 shadow-2xs text-xs space-y-3">
+      {/* ========================================================= */}
+      {/* 5. SUPERVISOR 5-SECOND OBSERVATION CARD                   */}
+      {/* ========================================================= */}
+      <div className="bg-white rounded-3xl p-4 sm:p-5 border border-slate-200/90 shadow-xs space-y-3.5">
         <div className="flex items-center justify-between">
-          <h4 className="text-xs font-bold text-slate-900 flex items-center gap-1.5">
-            <User className="w-4 h-4 text-blue-600" />
-            Manager 5-Second Observation
-          </h4>
-          <span className="text-[10px] text-slate-400 font-medium">Single-tap evaluation</span>
+          <div className="flex items-center gap-2">
+            <div className="w-8 h-8 rounded-full bg-blue-100 text-blue-700 flex items-center justify-center">
+              <User className="w-4 h-4" />
+            </div>
+            <div>
+              <h3 className="text-xs sm:text-sm font-bold text-slate-900 leading-tight">
+                5-Second Observation
+              </h3>
+              <p className="text-[10px] text-slate-400">Single-tap floor rating for {activeHire.name.split(" ")[0]}</p>
+            </div>
+          </div>
+          <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">
+            Fast Floor Check
+          </span>
         </div>
 
-        {/* 3 Large Touch State Buttons */}
-        <div className="grid grid-cols-3 gap-1.5">
+        {/* 3 Touch State Buttons */}
+        <div className="grid grid-cols-3 gap-2">
           {(["Doing well", "Needs support", "Struggling"] as const).map((st) => (
             <button
               key={st}
               id={`mgr-state-${st.toLowerCase().replace(" ", "-")}`}
               onClick={() => setManagerState(st)}
-              className={`py-2.5 px-1 text-center rounded-xl text-xs font-bold transition-all cursor-pointer ${
+              className={`py-3 px-1 text-center rounded-2xl text-xs font-bold transition-all cursor-pointer shadow-2xs active:scale-95 ${
                 managerState === st
                   ? st === "Doing well"
-                    ? "bg-emerald-600 text-white shadow-2xs"
+                    ? "bg-emerald-600 text-white shadow-emerald-600/30"
                     : st === "Needs support"
-                    ? "bg-amber-600 text-white shadow-2xs"
-                    : "bg-rose-600 text-white shadow-2xs"
+                    ? "bg-amber-500 text-white shadow-amber-500/30"
+                    : "bg-rose-600 text-white shadow-rose-600/30"
                   : "bg-slate-100 text-slate-700 hover:bg-slate-200"
               }`}
             >
@@ -511,18 +467,18 @@ export const ManagerView: React.FC<ManagerViewProps> = ({
 
         {/* Issue Category Chips */}
         {managerState !== "Doing well" && (
-          <div>
-            <span className="block text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-1">
+          <div className="space-y-1.5 pt-1">
+            <span className="block text-[10px] font-bold text-slate-400 uppercase tracking-wider">
               Issue Category:
             </span>
-            <div className="flex flex-wrap gap-1">
+            <div className="flex flex-wrap gap-1.5">
               {(["Speed", "Accuracy", "Process", "Tool", "Confidence"] as const).map((cat) => (
                 <button
                   key={cat}
                   onClick={() => setIssueType(cat)}
-                  className={`text-[11px] px-2.5 py-1 rounded-lg font-semibold cursor-pointer transition-colors ${
+                  className={`text-xs px-3 py-1.5 rounded-full font-bold cursor-pointer transition-colors ${
                     issueType === cat
-                      ? "bg-slate-900 text-white"
+                      ? "bg-slate-900 text-white shadow-2xs"
                       : "bg-slate-100 text-slate-600 hover:bg-slate-200"
                   }`}
                 >
@@ -535,16 +491,16 @@ export const ManagerView: React.FC<ManagerViewProps> = ({
 
         {/* Quick Floor Note */}
         <div>
-          <span className="block text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-1">
-            Floor Observation Note:
+          <span className="block text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1">
+            Floor Note:
           </span>
           <input
             id="mgr-note-input"
             type="text"
             value={managerNote}
             onChange={(e) => setManagerNote(e.target.value)}
-            placeholder="e.g. Needs help locating items in Aisles 4-8"
-            className="w-full text-xs p-2.5 rounded-xl border border-slate-200 bg-slate-50 focus:outline-none focus:ring-2 focus:ring-blue-500"
+            placeholder="e.g. Needs help finding items in Aisles 4 to 8"
+            className="w-full text-xs p-3 rounded-2xl border border-slate-200 bg-slate-50 focus:outline-none focus:ring-2 focus:ring-blue-500 shadow-2xs"
           />
         </div>
 
@@ -552,61 +508,298 @@ export const ManagerView: React.FC<ManagerViewProps> = ({
           id="submit-mgr-signal-btn"
           onClick={handleSaveManagerSignal}
           disabled={isSavingManagerSignal}
-          className="w-full py-2.5 rounded-xl text-xs font-bold text-white bg-slate-900 hover:bg-slate-800 active:scale-95 transition-all cursor-pointer shadow-2xs"
+          className="w-full py-3.5 rounded-2xl text-xs font-black text-white bg-slate-900 hover:bg-slate-800 active:scale-98 transition-all cursor-pointer shadow-sm flex items-center justify-center gap-2"
         >
-          {isSavingManagerSignal ? "Synthesizing signals..." : "Save Observation & Re-evaluate"}
+          {isSavingManagerSignal ? (
+            <>
+              <span className="w-3.5 h-3.5 border-2 border-white border-t-transparent rounded-full animate-spin"></span>
+              <span>Synthesizing signals...</span>
+            </>
+          ) : (
+            <>
+              <Zap className="w-4 h-4 text-amber-400" />
+              <span>Save Observation & Re-evaluate Loop</span>
+            </>
+          )}
         </button>
       </div>
 
-      {/* Manual Shift Work Signal */}
-      <div className="bg-white rounded-2xl border border-slate-200/80 p-4 shadow-2xs text-xs space-y-3">
-        <div className="flex items-center justify-between">
-          <h4 className="text-xs font-bold text-slate-900 flex items-center gap-1.5">
-            <Sliders className="w-4 h-4 text-blue-600" />
-            Shift Performance Metrics
-          </h4>
-          <span className="text-[10px] text-slate-400">Picks/hour & accuracy</span>
-        </div>
+      {/* ========================================================= */}
+      {/* 6. OUTCOME RECORDING DRAWER / MODAL                       */}
+      {/* ========================================================= */}
+      {showOutcomeDrawer && (
+        <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-xs flex items-center justify-center p-4">
+          <div className="bg-white rounded-3xl max-w-sm w-full p-5 shadow-2xl border border-slate-100 space-y-4 animate-in fade-in zoom-in duration-150">
+            <div className="flex items-center justify-between border-b border-slate-100 pb-2.5">
+              <div className="flex items-center gap-2">
+                <div className="w-9 h-9 rounded-2xl bg-blue-600 text-white flex items-center justify-center">
+                  <FileCheck2 className="w-5 h-5" />
+                </div>
+                <div>
+                  <h3 className="text-sm font-bold text-slate-900">
+                    Floor Intervention Check
+                  </h3>
+                  <p className="text-[11px] text-slate-500">Close the feedback loop</p>
+                </div>
+              </div>
+              <button
+                onClick={() => setShowOutcomeDrawer(false)}
+                className="p-1 rounded-full text-slate-400 hover:text-slate-800 cursor-pointer"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
 
-        <div>
-          <div className="flex justify-between mb-1 text-slate-700 font-medium text-[11px]">
-            <span>Current Pick Rate:</span>
-            <span className="font-bold text-slate-900">{actualRate} items/hr (Target {targetRate})</span>
+            <p className="text-xs text-slate-600 leading-relaxed">
+              Did the situation improve after buddy <strong>{activeHire.buddy.split(" ")[0]}</strong>'s walkthrough with <strong>{activeHire.name.split(" ")[0]}</strong>?
+            </p>
+
+            <div className="grid grid-cols-3 gap-2">
+              {(["yes", "partial", "no"] as const).map((st) => (
+                <button
+                  key={st}
+                  type="button"
+                  onClick={() => setOutcomeStatus(st)}
+                  className={`py-2.5 px-1 rounded-2xl text-center font-bold text-xs cursor-pointer transition-all shadow-2xs ${
+                    outcomeStatus === st
+                      ? st === "yes"
+                        ? "bg-emerald-600 text-white"
+                        : st === "partial"
+                        ? "bg-amber-500 text-white"
+                        : "bg-rose-600 text-white"
+                      : "bg-slate-100 text-slate-700 hover:bg-slate-200"
+                  }`}
+                >
+                  {st === "yes" ? "Improved 👍" : st === "partial" ? "Partial ⏳" : "Stalled ❌"}
+                </button>
+              ))}
+            </div>
+
+            <div>
+              <label className="block text-[11px] font-bold text-slate-600 uppercase tracking-wider mb-1">
+                Floor Outcome Notes:
+              </label>
+              <textarea
+                id="outcome-notes-input"
+                value={outcomeNotes}
+                onChange={(e) => setOutcomeNotes(e.target.value)}
+                rows={2}
+                className="w-full p-3 rounded-2xl border border-slate-200 bg-slate-50 text-xs focus:outline-none focus:ring-2 focus:ring-blue-500"
+              />
+            </div>
+
+            <div className="flex gap-2 pt-1">
+              <button
+                onClick={() => setShowOutcomeDrawer(false)}
+                className="flex-1 py-2.5 rounded-2xl bg-slate-100 text-slate-700 text-xs font-bold cursor-pointer"
+              >
+                Cancel
+              </button>
+              <button
+                id="save-outcome-btn"
+                onClick={handleRecordOutcome}
+                disabled={isRecordingOutcome}
+                className="flex-1 py-2.5 rounded-2xl bg-blue-600 hover:bg-blue-700 text-white text-xs font-bold shadow-md cursor-pointer transition-all active:scale-95"
+              >
+                {isRecordingOutcome ? "Saving..." : "Save Outcome"}
+              </button>
+            </div>
           </div>
-          <input
-            type="range"
-            min={15}
-            max={70}
-            value={actualRate}
-            onChange={(e) => setActualRate(Number(e.target.value))}
-            className="w-full accent-blue-600"
-          />
         </div>
+      )}
 
-        <div>
-          <div className="flex justify-between mb-1 text-slate-700 font-medium text-[11px]">
-            <span>Pick Accuracy:</span>
-            <span className="font-bold text-emerald-700">{accuracyRate}% (Target 98%)</span>
+      {/* ========================================================= */}
+      {/* DOSSIER TILE DETAIL MODALS                                */}
+      {/* ========================================================= */}
+      {activeTileModal === "worker_signal" && (
+        <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-xs flex items-center justify-center p-4">
+          <div className="bg-white rounded-3xl max-w-sm w-full p-5 shadow-2xl border border-slate-100 space-y-3.5 animate-in fade-in zoom-in duration-150">
+            <div className="flex items-center justify-between border-b border-slate-100 pb-2.5">
+              <div className="flex items-center gap-2">
+                <div className="w-9 h-9 rounded-2xl bg-blue-500 text-white flex items-center justify-center">
+                  <MessageSquare className="w-5 h-5" />
+                </div>
+                <div>
+                  <h3 className="text-sm font-bold text-slate-900">Worker Voice Signal</h3>
+                  <p className="text-[11px] text-slate-500">{activeHire.name} • Spoken</p>
+                </div>
+              </div>
+              <button onClick={() => setActiveTileModal(null)} className="p-1 text-slate-400 hover:text-slate-800">
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+
+            <div className="p-3 bg-blue-50 rounded-2xl border border-blue-100 text-xs text-blue-950 italic">
+              "{currentRecord.dailySignal?.rawText || "Confused where products are located in Aisles 4-8."}"
+            </div>
+
+            <div className="space-y-1.5 text-xs text-slate-600">
+              <p><strong>Input Method:</strong> {currentRecord.dailySignal?.inputMethod || "Voice note"}</p>
+              <p><strong>Reported:</strong> {currentRecord.dailySignal?.timestamp || "Morning shift"}</p>
+              <p><strong>Companion Reassurance:</strong> {currentRecord.dailySignal?.companionResponse || "Buddy Vikram alerted to help."}</p>
+            </div>
+
+            <button onClick={() => setActiveTileModal(null)} className="w-full py-2.5 bg-slate-900 text-white rounded-2xl text-xs font-bold cursor-pointer">
+              Close
+            </button>
           </div>
-          <input
-            type="range"
-            min={80}
-            max={100}
-            value={accuracyRate}
-            onChange={(e) => setAccuracyRate(Number(e.target.value))}
-            className="w-full accent-emerald-600"
-          />
         </div>
+      )}
 
-        <button
-          id="update-work-signal-btn"
-          onClick={handleSaveWorkSignal}
-          disabled={isUpdatingWorkSignal}
-          className="w-full py-2 rounded-xl text-xs font-bold text-slate-800 bg-slate-100 hover:bg-slate-200 transition-colors cursor-pointer"
-        >
-          {isUpdatingWorkSignal ? "Recalculating..." : "Update Performance Metrics"}
-        </button>
-      </div>
+      {activeTileModal === "pattern" && (
+        <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-xs flex items-center justify-center p-4">
+          <div className="bg-white rounded-3xl max-w-sm w-full p-5 shadow-2xl border border-slate-100 space-y-3.5 animate-in fade-in zoom-in duration-150">
+            <div className="flex items-center justify-between border-b border-slate-100 pb-2.5">
+              <div className="flex items-center gap-2">
+                <div className="w-9 h-9 rounded-2xl bg-purple-600 text-white flex items-center justify-center">
+                  <Zap className="w-5 h-5" />
+                </div>
+                <div>
+                  <h3 className="text-sm font-bold text-slate-900">Central Synthesis</h3>
+                  <p className="text-[11px] text-slate-500">3-Signal Cross-Referencing</p>
+                </div>
+              </div>
+              <button onClick={() => setActiveTileModal(null)} className="p-1 text-slate-400 hover:text-slate-800">
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+
+            <div className="p-3 bg-purple-50 rounded-2xl border border-purple-100 text-xs space-y-1">
+              <span className="text-[10px] font-bold text-purple-700 uppercase">Diagnosis:</span>
+              <p className="text-slate-800 font-medium">
+                {currentRecord.identifiedPattern?.diagnosis ||
+                  "Navigation bottleneck in Aisles 4-8. Accuracy is solid (98%), indicating high diligence. Only physical shelf familiarity is missing."}
+              </p>
+            </div>
+
+            <div className="space-y-1.5 text-xs text-slate-600">
+              <p><strong>Confidence:</strong> {currentRecord.identifiedPattern?.patternConfidence || "High"}</p>
+              <p><strong>Risk Level:</strong> {activeHire.status}</p>
+            </div>
+
+            <button onClick={() => setActiveTileModal(null)} className="w-full py-2.5 bg-slate-900 text-white rounded-2xl text-xs font-bold cursor-pointer">
+              Close
+            </button>
+          </div>
+        </div>
+      )}
+
+      {activeTileModal === "action" && (
+        <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-xs flex items-center justify-center p-4">
+          <div className="bg-white rounded-3xl max-w-sm w-full p-5 shadow-2xl border border-slate-100 space-y-3.5 animate-in fade-in zoom-in duration-150">
+            <div className="flex items-center justify-between border-b border-slate-100 pb-2.5">
+              <div className="flex items-center gap-2">
+                <div className="w-9 h-9 rounded-2xl bg-emerald-600 text-white flex items-center justify-center">
+                  <Sparkles className="w-5 h-5" />
+                </div>
+                <div>
+                  <h3 className="text-sm font-bold text-slate-900">Smallest Practical Action</h3>
+                  <p className="text-[11px] text-slate-500">Targeted Floor Step</p>
+                </div>
+              </div>
+              <button onClick={() => setActiveTileModal(null)} className="p-1 text-slate-400 hover:text-slate-800">
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+
+            <div className="p-3.5 bg-emerald-50 rounded-2xl border border-emerald-100 space-y-1.5">
+              {currentRecord.recommendedAction?.decisionType && (
+                <span className="text-[10px] font-black uppercase tracking-wider px-2 py-0.5 rounded-full bg-emerald-200 text-emerald-900 inline-block mb-1">
+                  {currentRecord.recommendedAction.decisionType.replace(/_/g, " ")}
+                </span>
+              )}
+              <h4 className="text-xs font-bold text-emerald-950">
+                {currentRecord.recommendedAction?.title || "15-minute Aisle 4-8 Walkthrough"}
+              </h4>
+              <p className="text-xs text-emerald-900">
+                {currentRecord.recommendedAction?.description || "Senior Buddy walks rack locations before the evening rush."}
+              </p>
+              {currentRecord.recommendedAction?.rationale && (
+                <p className="text-[11px] text-emerald-800 italic pt-0.5">
+                  <strong>Adaptive Rationale:</strong> {currentRecord.recommendedAction.rationale}
+                </p>
+              )}
+              <p className="text-[11px] font-semibold text-emerald-800 pt-1 border-t border-emerald-200">
+                Assigned to: {currentRecord.recommendedAction?.targetActor || "Buddy Vikram"}
+              </p>
+            </div>
+
+            <button onClick={() => setActiveTileModal(null)} className="w-full py-2.5 bg-slate-900 text-white rounded-2xl text-xs font-bold cursor-pointer">
+              Close
+            </button>
+          </div>
+        </div>
+      )}
+
+      {activeTileModal === "metrics" && (
+        <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-xs flex items-center justify-center p-4">
+          <div className="bg-white rounded-3xl max-w-sm w-full p-5 shadow-2xl border border-slate-100 space-y-3.5 animate-in fade-in zoom-in duration-150">
+            <div className="flex items-center justify-between border-b border-slate-100 pb-2.5">
+              <div className="flex items-center gap-2">
+                <div className="w-9 h-9 rounded-2xl bg-amber-500 text-white flex items-center justify-center">
+                  <Sliders className="w-5 h-5" />
+                </div>
+                <div>
+                  <h3 className="text-sm font-bold text-slate-900">Floor Metrics Tuning</h3>
+                  <p className="text-[11px] text-slate-500">Actual pace & scanner accuracy</p>
+                </div>
+              </div>
+              <button onClick={() => setActiveTileModal(null)} className="p-1 text-slate-400 hover:text-slate-800">
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+
+            <div className="space-y-3 text-xs">
+              <div>
+                <div className="flex justify-between mb-1 font-semibold text-slate-700">
+                  <span>Pick Pace:</span>
+                  <span className="font-bold text-slate-900">{actualRate} items/hr (Target: {targetRate})</span>
+                </div>
+                <input
+                  type="range"
+                  min={15}
+                  max={70}
+                  value={actualRate}
+                  onChange={(e) => setActualRate(Number(e.target.value))}
+                  className="w-full accent-blue-600 cursor-pointer"
+                />
+              </div>
+
+              <div>
+                <div className="flex justify-between mb-1 font-semibold text-slate-700">
+                  <span>Scanning Accuracy:</span>
+                  <span className="font-bold text-emerald-700">{accuracyRate}%</span>
+                </div>
+                <input
+                  type="range"
+                  min={80}
+                  max={100}
+                  value={accuracyRate}
+                  onChange={(e) => setAccuracyRate(Number(e.target.value))}
+                  className="w-full accent-emerald-600 cursor-pointer"
+                />
+              </div>
+            </div>
+
+            <div className="flex gap-2 pt-1">
+              <button onClick={() => setActiveTileModal(null)} className="flex-1 py-2.5 rounded-2xl bg-slate-100 text-slate-700 text-xs font-bold cursor-pointer">
+                Cancel
+              </button>
+              <button
+                id="update-work-signal-btn"
+                onClick={() => {
+                  handleSaveWorkSignal();
+                  setActiveTileModal(null);
+                }}
+                disabled={isUpdatingWorkSignal}
+                className="flex-1 py-2.5 rounded-2xl bg-slate-900 text-white text-xs font-bold cursor-pointer"
+              >
+                {isUpdatingWorkSignal ? "Saving..." : "Save Metrics"}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

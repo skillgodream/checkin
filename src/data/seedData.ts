@@ -1,4 +1,166 @@
-import { NewHire, OrganizationSummary } from "../types";
+import {
+  NewHire,
+  OrganizationSummary,
+  DARK_STORE_CAPABILITIES,
+  CapabilityState,
+} from "../types";
+
+export function createDefaultCapabilitiesLedger(): Record<number, CapabilityState> {
+  const ledger: Record<number, CapabilityState> = {};
+  for (const cap of DARK_STORE_CAPABILITIES) {
+    ledger[cap.id] = {
+      capabilityId: cap.id,
+      exposure: "not_exposed",
+      evidence: "none",
+      performance: "unknown",
+      mastery: "locked",
+      lastAssessedAt: "Not started",
+      reinforcementCount: 0,
+    };
+  }
+  return ledger;
+}
+
+function buildRahulLedger(): Record<number, CapabilityState> {
+  const ledger = createDefaultCapabilitiesLedger();
+  ledger[1] = {
+    capabilityId: 1,
+    exposure: "exposed",
+    evidence: "demonstrated",
+    performance: "on_target",
+    mastery: "proficient",
+    lastAssessedAt: "Day 1",
+    reinforcementCount: 0,
+    notes: "Adheres to PPE and zone safety.",
+  };
+  ledger[2] = {
+    capabilityId: 2,
+    exposure: "exposed",
+    evidence: "demonstrated",
+    performance: "on_target",
+    mastery: "proficient",
+    lastAssessedAt: "Day 1",
+    reinforcementCount: 0,
+    notes: "Comfortable with handheld terminal and Bluetooth ring scanner.",
+  };
+  ledger[3] = {
+    capabilityId: 3,
+    exposure: "exposed",
+    evidence: "inconsistent",
+    performance: "below_target",
+    mastery: "in_progress",
+    lastAssessedAt: "Day 3",
+    reinforcementCount: 1,
+    notes: "Confused by Aisles 4-8 shelf coordinates. Requires buddy walkthrough.",
+  };
+  ledger[4] = {
+    capabilityId: 4,
+    exposure: "exposed",
+    evidence: "emerging",
+    performance: "below_target",
+    mastery: "in_progress",
+    lastAssessedAt: "Day 2",
+    reinforcementCount: 0,
+  };
+  ledger[5] = {
+    capabilityId: 5,
+    exposure: "exposed",
+    evidence: "emerging",
+    performance: "below_target",
+    mastery: "in_progress",
+    lastAssessedAt: "Day 2",
+    reinforcementCount: 0,
+    notes: "Picks solo snacks orders, but multi-aisle grocery slows pace.",
+  };
+  return ledger;
+}
+
+function buildPriyaLedger(): Record<number, CapabilityState> {
+  const ledger = createDefaultCapabilitiesLedger();
+  // Capabilities 1 to 15 fully mastered or proficient
+  for (let i = 1; i <= 15; i++) {
+    ledger[i] = {
+      capabilityId: i,
+      exposure: "exposed",
+      evidence: "demonstrated",
+      performance: i <= 10 ? "exceeding" : "on_target",
+      mastery: i <= 10 ? "mastered" : "proficient",
+      lastAssessedAt: "Day 8",
+      reinforcementCount: 0,
+    };
+  }
+  ledger[16] = {
+    capabilityId: 16,
+    exposure: "exposed",
+    evidence: "demonstrated",
+    performance: "on_target",
+    mastery: "proficient",
+    lastAssessedAt: "Day 8",
+    reinforcementCount: 0,
+  };
+  ledger[20] = {
+    capabilityId: 20,
+    exposure: "exposed",
+    evidence: "emerging",
+    performance: "on_target",
+    mastery: "in_progress",
+    lastAssessedAt: "Day 8",
+    reinforcementCount: 0,
+    notes: "Sustaining 54 items/hr across all zones. Candidate for mentor.",
+  };
+  return ledger;
+}
+
+function buildAmitLedger(): Record<number, CapabilityState> {
+  const ledger = createDefaultCapabilitiesLedger();
+  ledger[1] = {
+    capabilityId: 1,
+    exposure: "exposed",
+    evidence: "demonstrated",
+    performance: "on_target",
+    mastery: "proficient",
+    lastAssessedAt: "Day 1",
+    reinforcementCount: 0,
+  };
+  ledger[2] = {
+    capabilityId: 2,
+    exposure: "exposed",
+    evidence: "demonstrated",
+    performance: "on_target",
+    mastery: "proficient",
+    lastAssessedAt: "Day 2",
+    reinforcementCount: 0,
+  };
+  ledger[3] = {
+    capabilityId: 3,
+    exposure: "exposed",
+    evidence: "demonstrated",
+    performance: "on_target",
+    mastery: "proficient",
+    lastAssessedAt: "Day 3",
+    reinforcementCount: 0,
+  };
+  ledger[5] = {
+    capabilityId: 5,
+    exposure: "exposed",
+    evidence: "demonstrated",
+    performance: "on_target",
+    mastery: "proficient",
+    lastAssessedAt: "Day 3",
+    reinforcementCount: 0,
+  };
+  ledger[6] = {
+    capabilityId: 6,
+    exposure: "exposed",
+    evidence: "inconsistent",
+    performance: "below_target",
+    mastery: "in_progress",
+    lastAssessedAt: "Day 4",
+    reinforcementCount: 1,
+    notes: "Variant rush: confused 200g vs 500g pouches; 3 mis-picks at QC.",
+  };
+  return ledger;
+}
 
 export const initialRahul: NewHire = {
   id: "nh-rahul-01",
@@ -15,6 +177,9 @@ export const initialRahul: NewHire = {
   status: "Needs attention",
   statusReason: "Pick rate below curve (35 vs 50) + reported aisle confusion + frequent manager support",
   recommendedActionSnippet: "Buddy walkthrough of Aisles 4-8 rack navigation & short re-demonstration",
+  currentCapabilityId: 3,
+  overallReadinessScore: 35,
+  capabilities: buildRahulLedger(),
   daysHistory: [
     {
       dayNumber: 1,
@@ -281,6 +446,9 @@ export const initialCohort: NewHire[] = [
     status: "Doing well",
     statusReason: "Consistently exceeding target pick rate (54 vs 50) with 99% accuracy.",
     recommendedActionSnippet: "No intervention needed; consider peer mentor candidate.",
+    currentCapabilityId: 15,
+    overallReadinessScore: 85,
+    capabilities: buildPriyaLedger(),
     daysHistory: [
       {
         dayNumber: 8,
@@ -333,6 +501,9 @@ export const initialCohort: NewHire[] = [
     status: "At risk",
     statusReason: "Accuracy dropped to 86% due to variant confusion (e.g. 250g vs 500g pouch).",
     recommendedActionSnippet: "Demonstrate task: 3-point check (Brand, Variant Grammage, Barcode)",
+    currentCapabilityId: 6,
+    overallReadinessScore: 40,
+    capabilities: buildAmitLedger(),
     daysHistory: [
       {
         dayNumber: 4,
