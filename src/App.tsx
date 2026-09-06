@@ -1,0 +1,335 @@
+import React, { useState, useEffect } from "react";
+import { Header, ActiveTab } from "./components/Header";
+import { BottomNav } from "./components/BottomNav";
+import { NewHireView } from "./components/NewHireView";
+import { ManagerView } from "./components/ManagerView";
+import { OrganizationView } from "./components/OrganizationView";
+import { LoopInspectorModal } from "./components/LoopInspectorModal";
+import { initialCohort, initialOrgSummary } from "./data/seedData";
+import {
+  NewHire,
+  DailySignal,
+  ManagerSignal,
+  WorkSignal,
+  ActionOutcome,
+  DayRecord,
+} from "./types";
+import { executeCoordinationLoop, askCompanion } from "./services/intelligence";
+
+const STORAGE_KEY_HIRES = "checkin_checkout_cohort_v2";
+const STORAGE_KEY_DAY = "checkin_checkout_day_v2";
+const STORAGE_KEY_ACTIVE_HIRE = "checkin_checkout_active_hire_v2";
+
+export default function App() {
+  const [newHires, setNewHires] = useState<NewHire[]>(() => {
+    try {
+      const saved = localStorage.getItem(STORAGE_KEY_HIRES);
+      if (saved) {
+        const parsed = JSON.parse(saved);
+        if (Array.isArray(parsed) && parsed.length > 0) {
+          return parsed;
+        }
+      }
+    } catch (e) {
+      console.warn("Could not load saved state from localStorage:", e);
+    }
+    return initialCohort;
+  });
+
+  const [currentDay, setCurrentDay] = useState<number>(() => {
+    try {
+      const saved = localStorage.getItem(STORAGE_KEY_DAY);
+      if (saved) {
+        const parsed = Number(saved);
+        if (!isNaN(parsed) && parsed >= 1 && parsed <= 14) {
+          return parsed;
+        }
+      }
+    } catch (e) {}
+    return 3; // Starts at Day 3 where the MVP scenario pivots
+  });
+
+  const [activeTab, setActiveTab] = useState<ActiveTab>("new_hire");
+  const [activeHireId, setActiveHireId] = useState<string>(() => {
+    try {
+      const saved = localStorage.getItem(STORAGE_KEY_ACTIVE_HIRE);
+      if (saved) return saved;
+    } catch (e) {}
+    return "nh-rahul-01";
+  });
+
+  const [orgSummary, setOrgSummary] = useState(initialOrgSummary);
+  const [isLoopModalOpen, setIsLoopModalOpen] = useState<boolean>(false);
+  const [hasApiKey, setHasApiKey] = useState<boolean>(false);
+  const [isFramed, setIsFramed] = useState<boolean>(true);
+
+  // Synchronize state changes to localStorage
+  useEffect(() => {
+    try {
+      localStorage.setItem(STORAGE_KEY_HIRES, JSON.stringify(newHires));
+    } catch (e) {
+      console.warn("Failed to persist cohort state:", e);
+    }
+  }, [newHires]);
+
+  useEffect(() => {
+    try {
+      localStorage.setItem(STORAGE_KEY_DAY, String(currentDay));
+    } catch (e) {}
+  }, [currentDay]);
+
+  useEffect(() => {
+    try {
+      localStorage.setItem(STORAGE_KEY_ACTIVE_HIRE, activeHireId);
+    } catch (e) {}
+  }, [activeHireId]);
+
+  useEffect(() => {
+    fetch("/api/health")
+      .then((res) => res.json())
+      .then((data) => {
+        if (data && data.hasApiKey) {
+          setHasApiKey(true);
+        }
+      })
+      .catch((err) => {
+        console.warn("Could not check health endpoint:", err);
+      });
+  }, []);
+
+  const activeHire = newHires.find((h) => h.id === activeHireId) || newHires[0];
+
+  // Helper to update a hire's day record and recalculate coordination pattern through single execution authority
+  const updateHireAndRecalculate = (
+    hireId: string,
+    dayNum: number,
+    updater: (currentRecord: DayRecord, hire: NewHire) => Partial<DayRecord>
+  ) => {
+    setNewHires((prevHires) =>
+      prevHires.map((hire) => {
+        if (hire.id !== hireId) return hire;
+
+        // Find or create record for dayNum
+        const existingRecordIndex = hire.daysHistory.findIndex((d) => d.dayNumber === dayNum);
+        const existingRecord: DayRecord =
+          existingRecordIndex >= 0
+            ? hire.daysHistory[existingRecordIndex]
+            : {
+                dayNumber: dayNum,
+                date: `Day ${dayNum}`,
+                workSignal: {
+                  dayNumber: dayNum,
+                  targetPickRate: 50,
+                  actualPickRate: 35,
+                  accuracyRate: 98,
+                  ordersCompleted: 44,
+                  targetOrders: 65,
+                },
+                statusAtEnd: hire.status,
+                statusReason: hire.statusReason,
+              };
+
+        const partialUpdate = updater(existingRecord, hire);
+        const mergedRecord: DayRecord = {
+          ...existingRecord,
+          ...partialUpdate,
+        };
+
+        const previousRecord = hire.daysHistory.find((d) => d.dayNumber === dayNum - 1);
+
+        // AUTHORITATIVE SINGLE LOOP EXECUTION: Observe -> Understand -> Connect -> Act -> Check
+        const execution = executeCoordinationLoop({
+          hire,
+          dayNumber: dayNum,
+          dailySignal: mergedRecord.dailySignal,
+          managerSignal: mergedRecord.managerSignal,
+          workSignal: mergedRecord.workSignal,
+          actionOutcome: mergedRecord.actionOutcome,
+          previousRecord,
+          existingAction: mergedRecord.recommendedAction,
+        });
+
+        mergedRecord.identifiedPattern = execution.pattern;
+        mergedRecord.recommendedAction = execution.action;
+        mergedRecord.statusAtEnd = execution.updatedStatus;
+        mergedRecord.statusReason = execution.statusReason;
+
+        // Update daysHistory array
+        const newHistory = [...hire.daysHistory];
+        if (existingRecordIndex >= 0) {
+          newHistory[existingRecordIndex] = mergedRecord;
+        } else {
+          newHistory.push(mergedRecord);
+        }
+
+        // Return updated hire with real authoritative state
+        return {
+          ...hire,
+          currentDay: Math.max(hire.currentDay, dayNum),
+          status: mergedRecord.statusAtEnd,
+          statusReason: mergedRecord.statusReason,
+          recommendedActionSnippet: mergedRecord.recommendedAction?.title,
+          daysHistory: newHistory,
+        };
+      })
+    );
+  };
+
+  // 1. Daily Signal submitted by Frontline New Hire
+  const handleDailySignalSubmitted = (signal: DailySignal) => {
+    updateHireAndRecalculate(activeHire.id, currentDay, () => ({
+      dailySignal: signal,
+    }));
+  };
+
+  // 2. Manager Fast 5-sec signal submitted
+  const handleManagerSignalSubmitted = (hireId: string, signal: ManagerSignal) => {
+    updateHireAndRecalculate(hireId, currentDay, () => ({
+      managerSignal: signal,
+    }));
+  };
+
+  // 3. Work Signal manual or automated update
+  const handleWorkSignalUpdated = (hireId: string, workSignal: WorkSignal) => {
+    updateHireAndRecalculate(hireId, currentDay, () => ({
+      workSignal,
+    }));
+  };
+
+  // 4. Action Outcome recorded (Closing the loop)
+  const handleActionOutcomeRecorded = (hireId: string, outcome: ActionOutcome) => {
+    updateHireAndRecalculate(hireId, currentDay, (currentRecord) => {
+      const updatedAction = currentRecord.recommendedAction
+        ? { ...currentRecord.recommendedAction, status: "completed" as const }
+        : undefined;
+
+      const updatedWorkSignal: WorkSignal = {
+        ...currentRecord.workSignal,
+        actualPickRate: outcome.subsequentPickRate || 48,
+        accuracyRate: outcome.subsequentAccuracy || 99,
+      };
+
+      return {
+        actionOutcome: outcome,
+        recommendedAction: updatedAction,
+        workSignal: updatedWorkSignal,
+      };
+    });
+  };
+
+  // Select day in scenario
+  const handleSelectDay = (day: number) => {
+    setCurrentDay(day);
+  };
+
+  // Reset demo to initial state
+  const handleResetDemo = () => {
+    try {
+      localStorage.removeItem(STORAGE_KEY_HIRES);
+      localStorage.removeItem(STORAGE_KEY_DAY);
+      localStorage.removeItem(STORAGE_KEY_ACTIVE_HIRE);
+    } catch (e) {}
+    setNewHires(initialCohort);
+    setCurrentDay(3);
+    setActiveHireId("nh-rahul-01");
+  };
+
+  const handleAskHelp = async (question: string) => {
+    return askCompanion(question, currentDay);
+  };
+
+  const doingWellCount = newHires.filter((h) => h.status === "Doing well").length;
+  const needsAttentionCount = newHires.filter((h) => h.status === "Needs attention").length;
+  const atRiskCount = newHires.filter((h) => h.status === "At risk").length;
+
+  return (
+    <div className={`min-h-screen bg-slate-100 text-slate-900 flex flex-col font-sans antialiased ${isFramed ? "md:py-4 md:px-4" : ""}`}>
+      {/* Mobile Device Chassis Shell */}
+      <div
+        className={`w-full mx-auto flex flex-col bg-slate-50 transition-all ${
+          isFramed
+            ? "max-w-md md:rounded-[36px] md:shadow-2xl md:border md:border-slate-300/80 md:overflow-hidden md:ring-8 md:ring-slate-900/5 min-h-screen md:min-h-[850px]"
+            : "max-w-lg min-h-screen shadow-xs"
+        }`}
+      >
+        {/* Subtle phone speaker notch for framed mobile experience on desktop */}
+        {isFramed && (
+          <div className="hidden md:flex items-center justify-center pt-2 pb-1 bg-white border-b border-slate-100">
+            <div className="w-16 h-1 rounded-full bg-slate-200"></div>
+          </div>
+        )}
+
+        {/* Global Mobile Header */}
+        <Header
+          activeTab={activeTab}
+          setActiveTab={setActiveTab}
+          currentDay={currentDay}
+          onSelectDay={handleSelectDay}
+          onResetDemo={handleResetDemo}
+          onOpenLoopModal={() => setIsLoopModalOpen(true)}
+          hasApiKey={hasApiKey}
+          doingWellCount={doingWellCount}
+          needsAttentionCount={needsAttentionCount}
+          atRiskCount={atRiskCount}
+          isFramed={isFramed}
+          onToggleFrame={() => setIsFramed(!isFramed)}
+        />
+
+        {/* Main Experience View */}
+        <main className="flex-1 overflow-y-auto">
+          {activeTab === "new_hire" && (
+            <NewHireView
+              newHire={activeHire}
+              currentDay={currentDay}
+              onDailySignalSubmitted={handleDailySignalSubmitted}
+              onAskHelp={handleAskHelp}
+              onSelectDay={handleSelectDay}
+            />
+          )}
+
+          {activeTab === "manager" && (
+            <ManagerView
+              newHires={newHires}
+              activeHireId={activeHireId}
+              onSelectHire={(id) => setActiveHireId(id)}
+              currentDay={currentDay}
+              onManagerSignalSubmitted={handleManagerSignalSubmitted}
+              onWorkSignalUpdated={handleWorkSignalUpdated}
+              onActionOutcomeRecorded={handleActionOutcomeRecorded}
+            />
+          )}
+
+          {activeTab === "organization" && (
+            <OrganizationView
+              summary={orgSummary}
+              newHires={newHires}
+              onSelectHireForManager={(hireId) => {
+                setActiveHireId(hireId);
+                setActiveTab("manager");
+              }}
+              onOpenLoopModal={() => setIsLoopModalOpen(true)}
+            />
+          )}
+        </main>
+
+        {/* Fixed Mobile Bottom Navigation */}
+        <BottomNav
+          activeTab={activeTab}
+          setActiveTab={setActiveTab}
+          onOpenLoopModal={() => setIsLoopModalOpen(true)}
+          needsAttentionCount={needsAttentionCount}
+          atRiskCount={atRiskCount}
+          currentDay={currentDay}
+        />
+      </div>
+
+      {/* Core Loop Inspector Modal */}
+      <LoopInspectorModal
+        isOpen={isLoopModalOpen}
+        onClose={() => setIsLoopModalOpen(false)}
+        newHire={activeHire}
+        currentDay={currentDay}
+      />
+    </div>
+  );
+}

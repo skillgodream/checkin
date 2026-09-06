@@ -1,0 +1,6 @@
+{
+  "name": "Checkin Checkout",
+  "description": "Intelligent frontline ramp coordination and daily check-in loop for blue-collar new hires.",
+  "requestFramePermissions": ["microphone"],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
