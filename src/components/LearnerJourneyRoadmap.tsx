@@ -21,6 +21,7 @@ interface LearnerJourneyRoadmapProps {
   isHindi?: boolean;
   onNavigateToSection?: (section: "modules" | "buddy" | "dashboard") => void;
   onOpenWorkTools?: () => void;
+  onSelectStage?: () => void;
 }
 
 export const LearnerJourneyRoadmap: React.FC<LearnerJourneyRoadmapProps> = ({
@@ -29,6 +30,7 @@ export const LearnerJourneyRoadmap: React.FC<LearnerJourneyRoadmapProps> = ({
   isHindi = false,
   onNavigateToSection,
   onOpenWorkTools,
+  onSelectStage,
 }) => {
   const [showFullRoadmapModal, setShowFullRoadmapModal] = useState<boolean>(false);
   const [playingAudio, setPlayingAudio] = useState<boolean>(false);
