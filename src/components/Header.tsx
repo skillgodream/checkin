@@ -10,6 +10,7 @@ import {
   ChevronRight,
   Gauge,
   Languages,
+  UserCheck,
 } from "lucide-react";
 import { Logo } from "./Logo";
 export type ActiveTab = "new_hire" | "manager" | "organization";
@@ -22,6 +23,8 @@ interface HeaderProps {
   onResetDemo?: () => void;
   onOpenLoopModal: () => void;
   onOpenTelemetryDial?: () => void;
+  onOpenBuddy?: () => void;
+  onOpenOnboarding?: () => void;
   hasApiKey: boolean;
   doingWellCount?: number;
   needsAttentionCount?: number;
@@ -31,6 +34,7 @@ interface HeaderProps {
   isHindi?: boolean;
   onToggleLanguage?: () => void;
   learnerName?: string;
+  buddyName?: string;
 }
 
 export const Header: React.FC<HeaderProps> = ({
@@ -40,6 +44,8 @@ export const Header: React.FC<HeaderProps> = ({
   onSelectDay,
   onOpenLoopModal,
   onOpenTelemetryDial,
+  onOpenBuddy,
+  onOpenOnboarding,
   hasApiKey,
   doingWellCount = 8,
   needsAttentionCount = 3,
@@ -47,6 +53,7 @@ export const Header: React.FC<HeaderProps> = ({
   isHindi = true,
   onToggleLanguage,
   learnerName = "Rahul",
+  buddyName = "Vikram",
 }) => {
   const [isEyeMenuOpen, setIsEyeMenuOpen] = useState(false);
   const eyeMenuRef = useRef<HTMLDivElement>(null);
@@ -122,19 +129,19 @@ export const Header: React.FC<HeaderProps> = ({
             </div>
           </div>
 
-          {/* Right Action Icons with Permanent Eye Control and Direct Dial Gauge */}
+          {/* Right Action Icons with Permanent Eye Control and Direct Buddy Place Button */}
           <div className="flex items-center gap-1.5 shrink-0">
-            {/* Direct Dial Gauge Button (Opens the Round Temperature/Pick Rate Telemetry Page) */}
-            {onOpenTelemetryDial && (
+            {/* Direct Buddy Place Button (Replaces top telemetry gauge) */}
+            {onOpenBuddy && (
               <button
-                id="header-dial-gauge-btn"
-                onClick={onOpenTelemetryDial}
-                title="Live Pick Rate & Readiness Gauge"
-                aria-label="Live Pick Rate & Readiness Gauge"
-                className="p-2 rounded-2xl transition-all cursor-pointer flex items-center justify-center relative active:scale-95 bg-gradient-to-r from-violet-600 to-fuchsia-600 text-white shadow-sm shadow-purple-500/25 hover:opacity-95 ring-1 ring-purple-300/40"
+                id="header-buddy-btn"
+                onClick={onOpenBuddy}
+                title={isHindi ? `फ्लोर साथी (${buddyName}) से तुरंत सहायता लें` : `Floor Buddy (${buddyName}) Quick Assist`}
+                aria-label="Floor Buddy Quick Assist"
+                className="p-2 rounded-2xl transition-all cursor-pointer flex items-center justify-center relative active:scale-95 bg-gradient-to-r from-emerald-600 to-teal-600 text-white shadow-sm shadow-emerald-500/25 hover:opacity-95 ring-1 ring-emerald-300/40"
               >
-                <Gauge className="w-4 h-4 stroke-[2.2]" />
-                <span className="absolute -top-0.5 -right-0.5 w-2 h-2 rounded-full bg-emerald-400 ring-2 ring-white" />
+                <UserCheck className="w-4 h-4 stroke-[2.2]" />
+                <span className="absolute -top-0.5 -right-0.5 w-2 h-2 rounded-full bg-emerald-400 ring-2 ring-white animate-pulse" />
               </button>
             )}
 
@@ -277,6 +284,33 @@ export const Header: React.FC<HeaderProps> = ({
                       </span>
                     </button>
 
+                    {/* Item 4: Onboarding Welcome Screen */}
+                    {onOpenOnboarding && (
+                      <button
+                        id="eye-menu-onboarding"
+                        onClick={() => {
+                          onOpenOnboarding();
+                          setIsEyeMenuOpen(false);
+                        }}
+                        className="w-full flex items-center justify-between px-3 py-2 rounded-xl text-xs font-bold text-slate-700 hover:bg-slate-100 hover:text-slate-900 transition-all cursor-pointer"
+                      >
+                        <div className="flex items-center gap-2.5">
+                          <div className="p-1.5 rounded-lg bg-rose-50 text-rose-600">
+                            <Sparkles className="w-3.5 h-3.5 stroke-[2.2]" />
+                          </div>
+                          <div className="text-left">
+                            <div className="leading-tight">Onboarding Page</div>
+                            <div className="text-[10px] text-slate-400 font-normal">
+                              Start my day landing
+                            </div>
+                          </div>
+                        </div>
+                        <span className="text-[10px] font-bold text-rose-600 bg-rose-50 px-1.5 py-0.5 rounded-md">
+                          Intro
+                        </span>
+                      </button>
+                    )}
+
                     {/* Return to Learner Companion if in manager/org view */}
                     {isBackstageActive && (
                       <div className="pt-1 mt-1 border-t border-slate-100">
@@ -296,8 +330,8 @@ export const Header: React.FC<HeaderProps> = ({
           </div>
         </div>
 
-        {/* Second Row: Scenario Stepper */}
-        {activeTab !== "new_hire" ? (
+        {/* Second Row: Scenario Stepper for Manager */}
+        {activeTab !== "new_hire" && (
           <>
             {/* Scenario Day Stepper (Rounded Squircles) */}
             <div className="mt-2.5 flex items-center justify-between gap-1 bg-slate-100/90 p-1 rounded-2xl border border-slate-200/70 text-xs">
@@ -383,30 +417,6 @@ export const Header: React.FC<HeaderProps> = ({
               </button>
             </div>
           </>
-        ) : (
-          /* Clean, quiet learner scenario switcher */
-          <div className="mt-2 flex items-center justify-between text-xs px-1">
-            <div className="flex items-center gap-1.5">
-              <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
-              <span className="text-xs font-bold text-slate-800">Store Buddy Connected</span>
-            </div>
-            {/* Minimal scenario testing switcher for demo */}
-            <div className="flex items-center gap-1 bg-slate-100 p-1 rounded-2xl border border-slate-200/80 text-[11px]">
-              {[1, 3, 4, 5].map((d) => (
-                <button
-                  key={d}
-                  onClick={() => onSelectDay(d)}
-                  className={`px-2.5 py-1 rounded-xl font-bold transition-all cursor-pointer ${
-                    currentDay === d
-                      ? "bg-white text-slate-900 shadow-2xs font-black"
-                      : "text-slate-500 hover:text-slate-800"
-                  }`}
-                >
-                  Day {d}
-                </button>
-              ))}
-            </div>
-          </div>
         )}
       </div>
     </header>

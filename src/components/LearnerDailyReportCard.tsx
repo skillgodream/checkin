@@ -1,148 +1,130 @@
 import React, { useState } from "react";
 import {
   Calendar,
-  CheckCircle2,
-  AlertCircle,
   TrendingUp,
-  Target,
-  Sparkles,
-  ArrowRight,
   ShieldCheck,
-  UserCheck,
-  Zap,
+  Package,
+  AlertTriangle,
+  ArrowRight,
   Volume2,
-  ChevronDown,
-  ChevronUp,
-  Clock,
-  HelpCircle,
+  Sparkles,
+  ThumbsUp,
+  FileText,
 } from "lucide-react";
-import { NewHire, DayRecord, DARK_STORE_CAPABILITIES } from "../types";
+import { NewHire, DayRecord } from "../types";
 import { speakMessage, stopSpeaking } from "../utils/speech";
 
 interface LearnerDailyReportCardProps {
   newHire: NewHire;
   currentDay: number;
   isHindi?: boolean;
+  onOpenDashboard?: () => void;
+  onOpenDetailedModal?: () => void;
   onOpenWorkTools?: () => void;
   onOpenBuddy?: () => void;
   onOpenModules?: () => void;
+  isDashboardVariant?: boolean;
 }
 
 export const LearnerDailyReportCard: React.FC<LearnerDailyReportCardProps> = ({
   newHire,
   currentDay,
   isHindi = false,
-  onOpenWorkTools,
-  onOpenBuddy,
-  onOpenModules,
+  onOpenDashboard,
+  onOpenDetailedModal,
+  isDashboardVariant = false,
 }) => {
-  const [isExpanded, setIsExpanded] = useState<boolean>(true);
   const [playingAudio, setPlayingAudio] = useState<boolean>(false);
 
-  const currentRecord = newHire.daysHistory.find((d) => d.dayNumber === currentDay) || {
-    dayNumber: currentDay,
-    date: `Day ${currentDay}`,
-    workSignal: {
-      dayNumber: currentDay,
-      targetPickRate: 50,
-      actualPickRate: 35,
-      accuracyRate: 98,
-      ordersCompleted: 44,
-      targetOrders: 65,
-    },
-    statusAtEnd: newHire.status,
-    statusReason: newHire.statusReason,
-  };
+  // 1. Resolve yesterday's completed day record
+  const yesterdayNumber = Math.max(1, currentDay - 1);
+  const isFirstDay = currentDay === 1;
 
-  const previousRecord = newHire.daysHistory.find((d) => d.dayNumber === currentDay - 1);
+  const yesterdayRecord: DayRecord | undefined = isFirstDay
+    ? undefined
+    : newHire.daysHistory.find((d) => d.dayNumber === yesterdayNumber) ||
+      newHire.daysHistory.filter((d) => d.dayNumber < currentDay).pop();
 
-  const actualPace = currentRecord.workSignal?.actualPickRate ?? 35;
-  const targetPace = currentRecord.workSignal?.targetPickRate ?? 50;
-  const accuracy = currentRecord.workSignal?.accuracyRate ?? 98;
-  const ordersDone = currentRecord.workSignal?.ordersCompleted ?? 44;
-  const buddyName = newHire.buddy.split(" ")[0];
-  const supervisorName = newHire.supervisor.split(" ")[0];
+  // 2. Extract key metrics from yesterday
+  const prevWork = yesterdayRecord?.workSignal;
+  const actualPace = prevWork?.actualPickRate ?? (isFirstDay ? 20 : 32);
+  const targetPace = prevWork?.targetPickRate ?? (isFirstDay ? 25 : 35);
+  const pacePct = Math.min(100, Math.round((actualPace / targetPace) * 100));
 
-  // Derive simple human interpretation without technical jargon
-  const getInterventionContinuity = () => {
-    // 1. Check if previous day had an intervention and its outcome
-    if (previousRecord?.actionOutcome) {
-      if (previousRecord.actionOutcome.improved === "yes") {
-        return {
-          badge: isHindi ? "सपोर्ट का अच्छा असर 👍" : "Prior Support Succeeded 👍",
-          badgeColor: "bg-emerald-100 text-emerald-800 border-emerald-200",
-          textEn: `You practised earlier with ${buddyName}. Your speed improved to ${actualPace}/hr with ${accuracy}% accuracy, so we are reducing support for more independent picking!`,
-          textHi: `आपने पहले ${buddyName} भैया के साथ अभ्यास किया था। आपकी स्पीड बढ़कर ${actualPace}/घंटा हो गई और एक्यूरेसी ${accuracy}% है, इसलिए अब आप अकेले अधिक ऑर्डर पिक कर सकते हैं!`,
-        };
-      }
-      if (previousRecord.actionOutcome.improved === "no") {
-        return {
-          badge: isHindi ? "सपोर्ट में बदलाव 🔄" : "Adjusting Support 🔄",
-          badgeColor: "bg-amber-100 text-amber-800 border-amber-200",
-          textEn: `The earlier practice on shelf locations did not fully resolve the speed delay, so Supervisor ${supervisorName} is giving a direct 10-minute floor demonstration on the fastest pick route.`,
-          textHi: `पहले शेल्फ नंबर के अभ्यास से स्पीड पूरी तरह नहीं बढ़ी, इसलिए सुपरवाइजर ${supervisorName} सीधे 10 मिनट का डेमो देकर सबसे तेज़ रूट दिखाएंगे।`,
-        };
-      }
-    }
+  const accuracy = prevWork?.accuracyRate ?? 99;
+  const ordersCompleted = prevWork?.ordersCompleted ?? (isFirstDay ? 15 : 38);
 
-    // 2. Hardware / Tool issue (Symptom != Root cause)
-    if (
-      currentRecord.dailySignal?.category === "Tool" ||
-      currentRecord.recommendedAction?.decisionType === "tool_remedy" ||
-      (currentRecord.identifiedPattern?.category === "Tool")
-    ) {
-      return {
-        badge: isHindi ? "डिवाइस/टूल स्थिति 🛠️" : "Device/Tool Notice 🛠️",
-        badgeColor: "bg-blue-100 text-blue-800 border-blue-200",
-        textEn: `This is a tool issue, not a training problem. Your barcode scanner optical lens or battery needs maintenance. You do not need to repeat training for a device issue.`,
-        textHi: `यह स्कैनर डिवाइस की समस्या है, आपकी ट्रेनिंग की नहीं। डिस्पैच टेबल पर स्कैनर की जांच करवाएं। डिवाइस की समस्या के लिए दोबारा ट्रेनिंग की जरूरत नहीं है।`,
-      };
-    }
+  const prevDailySignal = yesterdayRecord?.dailySignal;
+  const prevPattern = yesterdayRecord?.identifiedPattern;
+  const prevActionOutcome = yesterdayRecord?.actionOutcome;
 
-    // 3. External store / facility bottleneck
-    if (
-      currentRecord.workSignal?.externalBottleneck ||
-      currentRecord.identifiedPattern?.patternName.includes("Bottleneck") ||
-      currentRecord.recommendedAction?.decisionType === "environment_support"
-    ) {
-      return {
-        badge: isHindi ? "स्टोर वातावरण 🏢" : "Facility Notice 🏢",
-        badgeColor: "bg-purple-100 text-purple-800 border-purple-200",
-        textEn: `A conveyor / store facility delay was logged during this wave. The speed drop was caused by the facility, NOT your diligence or competence.`,
-        textHi: `शिफ्ट के दौरान कन्वेयर/स्टोर में रुकावट दर्ज हुई। गति में कमी स्टोर की समस्या के कारण थी, आपकी क्षमता में कोई कमी नहीं है।`,
-      };
-    }
+  // 3. Evaluate Shift Assessment: GOOD vs ATTENTION / NEEDS WORK (Good/Bad sign)
+  const isPaceBelow = actualPace < targetPace - 3;
+  const hasQuizGap = newHire.quizAverageScore !== undefined && newHire.quizAverageScore < 70;
+  const hasFloorIssue =
+    prevDailySignal?.category === "Environment" ||
+    prevPattern?.category === "Environment" ||
+    (prevDailySignal?.rawText || "").toLowerCase().includes("aisle");
+  const isRecovered = prevActionOutcome?.improved === "yes";
 
-    // 4. Insufficient floor work telemetry
-    if (currentRecord.workSignal?.hasWorkEvidence === false || ordersDone === 0) {
-      return {
-        badge: isHindi ? "अवलोकन जारी 👁️" : "Observing Shift 👁️",
-        badgeColor: "bg-slate-100 text-slate-800 border-slate-200",
-        textEn: `We're still observing your floor work. Continue your scheduled shift orders and we will keep checking.`,
-        textHi: `हम अभी आपके शिफ्ट काम का अवलोकन कर रहे हैं। अपना काम सामान्य रूप से जारी रखें, हम चेक करते रहेंगे।`,
-      };
-    }
+  let isShiftGood = true;
+  let signTitle = isHindi ? "शानदार प्रदर्शन" : "GOOD SHIFT";
+  let signTag = isHindi ? "✓ लक्ष्य पर" : "On Track";
+  let signSub = isHindi ? "सटीक व सुरक्षित कार्य" : "Safe & Accurate Work";
+  let signBg = "bg-gradient-to-br from-emerald-50/90 to-teal-50/40 border-emerald-200 text-emerald-950";
+  let signIconBg = "bg-emerald-600 text-white";
+  let signBadgeBg = "bg-emerald-100 text-emerald-800 border-emerald-300";
 
-    // 5. Steady Ramp
-    return {
-      badge: isHindi ? "स्थिर प्रगति ⭐" : "Steady Ramp ⭐",
-      badgeColor: "bg-emerald-100 text-emerald-800 border-emerald-200",
-      textEn: `Your pick speed (${actualPace}/hr) and accuracy (${accuracy}%) are progressing smoothly along the ramp curve. Keep up the great focus!`,
-      textHi: `आपकी पिकिंग स्पीड (${actualPace}/घंटा) और एक्यूरेसी (${accuracy}%) बहुत अच्छी तरह बढ़ रही है। इसी तरह ध्यान से काम करते रहें!`,
-    };
-  };
+  if (isRecovered || (actualPace >= targetPace && accuracy >= 98)) {
+    isShiftGood = true;
+    signTitle = isHindi ? "शानदार (GOOD)" : "GOOD SHIFT";
+    signTag = isHindi ? "✓ मजबूत गति" : "Target Exceeded";
+    signSub = isHindi ? "सटीक व तेज पिकिंग" : "Fast & Accurate";
+    signBg = "bg-gradient-to-br from-emerald-50/90 to-teal-50/40 border-emerald-200 text-emerald-950";
+    signIconBg = "bg-emerald-600 text-white";
+    signBadgeBg = "bg-emerald-100 text-emerald-800 border-emerald-300";
+  } else if (isPaceBelow || hasFloorIssue || hasQuizGap) {
+    isShiftGood = false;
+    signTitle = isHindi ? "सुधार जरूरी (NEEDS WORK)" : "NEEDS ATTENTION";
+    signTag = hasFloorIssue
+      ? isHindi
+        ? "⚠️ आइसल रूट"
+        : "⚠️ Aisle Route"
+      : isPaceBelow
+      ? isHindi
+        ? "⚠️ गति धीमी"
+        : "⚠️ Below Target"
+      : isHindi
+      ? "⚠️ क्विज़ रिवीजन"
+      : "⚠️ Quiz Review";
+    signSub = hasFloorIssue
+      ? isHindi
+        ? "आइसल 4-8 वॉकथ्रू तय"
+        : "15m Walkthrough Set"
+      : isPaceBelow
+      ? isHindi
+        ? "धीमी गति पर ध्यान दें"
+        : "Speed Support Active"
+      : isHindi
+      ? "नियम दोहराना आवश्यक"
+      : "Reinforcement Needed";
+    signBg = "bg-gradient-to-br from-amber-50/90 to-orange-50/40 border-amber-200 text-amber-950";
+    signIconBg = "bg-amber-500 text-white";
+    signBadgeBg = "bg-amber-100 text-amber-900 border-amber-300";
+  }
 
-  const continuity = getInterventionContinuity();
-
-  const handlePlayAudio = () => {
+  // Audio speech narration
+  const handlePlayAudio = (e: React.MouseEvent) => {
+    e.stopPropagation();
     if (playingAudio) {
       stopSpeaking();
       setPlayingAudio(false);
       return;
     }
+
     const text = isHindi
-      ? `डे ${currentDay} की शिफ्ट रिपोर्ट। एक्यूरेसी ${accuracy} प्रतिशत, स्पीड ${actualPace} सामान प्रति घंटा। ${continuity.textHi}`
-      : `Day ${currentDay} Shift Report. Accuracy ${accuracy} percent, speed ${actualPace} items per hour. ${continuity.textEn}`;
+      ? `कल का स्नैपशॉट। पिकिंग स्पीड ${actualPace} सामान प्रति घंटा, एक्यूरेसी ${accuracy} प्रतिशत, ${ordersCompleted} ऑर्डर पूरे हुए। स्थिति: ${signTitle}।`
+      : `Yesterday's Snapshot. Pick rate ${actualPace} items per hour, ${accuracy} percent accuracy, ${ordersCompleted} orders completed. Status: ${signTitle}.`;
 
     setPlayingAudio(true);
     speakMessage(text, isHindi, () => {
@@ -150,138 +132,182 @@ export const LearnerDailyReportCard: React.FC<LearnerDailyReportCardProps> = ({
     });
   };
 
+  const handleCardClick = () => {
+    if (isDashboardVariant && onOpenDetailedModal) {
+      onOpenDetailedModal();
+    } else if (onOpenDashboard) {
+      onOpenDashboard();
+    }
+  };
+
   return (
     <div
-      id="learner-daily-report-card"
-      className="bg-white rounded-[26px] p-4 border border-slate-200/90 shadow-2xs space-y-3 select-none"
+      id={isDashboardVariant ? "dashboard-yesterday-snapshot-card" : "yesterday-quick-snapshot-card"}
+      onClick={handleCardClick}
+      className={`bg-white rounded-[26px] p-4 border border-slate-200/90 shadow-2xs space-y-3 cursor-pointer select-none transition-all hover:border-purple-300 hover:shadow-md active:scale-[0.995] ${
+        isDashboardVariant ? "ring-2 ring-violet-500/15" : ""
+      }`}
     >
-      {/* HEADER */}
+      {/* 1. HEADER: CLEAN "YESTERDAY SNAPSHOT" WITH NO CLUTTERED TEXT */}
       <div className="flex items-center justify-between">
-        <div className="flex items-center gap-2">
-          <div className="w-8 h-8 rounded-xl bg-slate-900 text-white flex items-center justify-center font-bold text-xs">
-            <Calendar className="w-4 h-4" />
+        <div className="flex items-center gap-2.5">
+          <div className="w-8 h-8 rounded-xl bg-violet-100 text-violet-700 flex items-center justify-center font-bold shadow-2xs">
+            <Calendar className="w-4 h-4 text-violet-600" />
           </div>
-          <div>
-            <span className="text-[10px] font-black uppercase tracking-wider text-slate-500">
-              {isHindi ? "दैनिक शिफ्ट समझ" : "DAILY SHIFT REPORT"}
+          <div className="flex items-center gap-2">
+            <span className="text-xs font-black uppercase tracking-wider text-slate-800">
+              {isHindi ? `कल का स्नैपशॉट (दिन ${yesterdayNumber})` : `YESTERDAY SNAPSHOT (DAY ${yesterdayNumber})`}
             </span>
-            <h3 className="text-sm font-black text-slate-900 leading-tight">
-              {isHindi ? `डे ${currentDay} का समग्र विश्लेषण` : `Day ${currentDay} Summary & Meaning`}
-            </h3>
+            <span
+              className={`text-[9px] font-black px-2 py-0.5 rounded-full border ${signBadgeBg}`}
+            >
+              {signTag}
+            </span>
           </div>
         </div>
 
-        <div className="flex items-center gap-1.5">
+        <div className="flex items-center gap-1 shrink-0 ml-2">
           <button
             type="button"
             onClick={handlePlayAudio}
-            className="p-1.5 rounded-full bg-slate-100 hover:bg-slate-200 text-slate-700 cursor-pointer transition-colors"
+            className="p-1.5 rounded-full text-slate-400 hover:text-purple-600 transition-colors cursor-pointer"
             title="Listen aloud"
           >
-            <Volume2 className={`w-3.5 h-3.5 ${playingAudio ? "animate-bounce text-violet-600" : ""}`} />
-          </button>
-          <button
-            type="button"
-            onClick={() => setIsExpanded(!isExpanded)}
-            className="p-1.5 rounded-full bg-slate-100 hover:bg-slate-200 text-slate-700 cursor-pointer transition-colors"
-          >
-            {isExpanded ? <ChevronUp className="w-3.5 h-3.5" /> : <ChevronDown className="w-3.5 h-3.5" />}
+            <Volume2 className={`w-4 h-4 ${playingAudio ? "animate-bounce text-purple-600" : ""}`} />
           </button>
         </div>
       </div>
 
-      {isExpanded && (
-        <div className="space-y-3 pt-1 animate-in fade-in duration-150">
-          {/* 1. TODAY'S SIGNALS STRIP */}
-          <div className="grid grid-cols-3 gap-2 text-center">
-            <div className="p-2.5 rounded-2xl bg-slate-50 border border-slate-200/70">
-              <span className="text-[10px] font-bold text-slate-400 block uppercase">
-                {isHindi ? "पिक स्पीड" : "Pick Speed"}
-              </span>
-              <span className="text-base font-black text-slate-900 block mt-0.5">
-                {actualPace}
-                <span className="text-[10px] text-slate-400 font-normal"> / {targetPace}</span>
-              </span>
-              <span className="text-[9px] font-bold text-slate-500 block">
-                {ordersDone} {isHindi ? "ऑर्डर" : "orders"}
-              </span>
-            </div>
-
-            <div className="p-2.5 rounded-2xl bg-emerald-50/70 border border-emerald-200/70">
-              <span className="text-[10px] font-bold text-emerald-700 block uppercase">
-                {isHindi ? "एक्यूरेसी" : "Accuracy"}
-              </span>
-              <span className="text-base font-black text-emerald-950 block mt-0.5">
-                {accuracy}%
-              </span>
-              <span className="text-[9px] font-bold text-emerald-600 block">
-                {accuracy >= 98 ? (isHindi ? "✓ बहुत बढ़िया" : "✓ On Target") : (isHindi ? "सुधार आवश्यक" : "Attention")}
-              </span>
-            </div>
-
-            <div className="p-2.5 rounded-2xl bg-purple-50/70 border border-purple-200/70">
-              <span className="text-[10px] font-bold text-purple-700 block uppercase">
-                {isHindi ? "ट्रेनिंग" : "Training"}
-              </span>
-              <span className="text-base font-black text-purple-950 block mt-0.5">
-                {newHire.modulesCompleted ?? 3}
-                <span className="text-[10px] text-purple-400 font-normal"> / 10</span>
-              </span>
-              <span className="text-[9px] font-bold text-purple-600 block">
-                {isHindi ? "मॉड्यूल" : "Modules"}
-              </span>
+      {/* 2. PICTORIAL EVIDENCE CARDS GRID (4 SCANNABLE VISUAL TILES) */}
+      <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5 pt-0.5">
+        {/* Card 1: Pick Pace vs Target */}
+        <div className="p-3 rounded-2xl bg-gradient-to-br from-violet-50/80 to-purple-50/30 border border-purple-100/90 flex flex-col justify-between space-y-2 hover:bg-violet-100/40 transition-colors">
+          <div className="flex items-center justify-between">
+            <span className="text-[10px] font-black uppercase tracking-wider text-purple-700">
+              {isHindi ? "पिकिंग रफ़्तार" : "Pick Speed"}
+            </span>
+            <div className="w-6 h-6 rounded-lg bg-violet-600 text-white flex items-center justify-center shadow-2xs">
+              <TrendingUp className="w-3.5 h-3.5" />
             </div>
           </div>
-
-          {/* 2. INTERVENTION CONTINUITY & WHAT IT MEANS */}
-          <div className="p-3.5 rounded-2xl bg-gradient-to-br from-slate-50 to-purple-50/40 border border-purple-100 space-y-2">
-            <div className="flex items-center justify-between">
-              <span className="text-[10px] font-bold text-slate-500 uppercase tracking-wide">
-                {isHindi ? "💡 इसका क्या अर्थ है?" : "💡 WHAT THIS MEANS"}
-              </span>
-              <span className={`text-[10px] font-black px-2 py-0.5 rounded-full border ${continuity.badgeColor}`}>
-                {continuity.badge}
-              </span>
+          <div>
+            <div className="flex items-baseline gap-1">
+              <span className="text-xl font-black text-slate-900 leading-none">{actualPace}</span>
+              <span className="text-[11px] font-bold text-slate-500">/hr</span>
             </div>
-
-            <p className="text-xs sm:text-[13px] text-slate-800 leading-relaxed font-medium">
-              {isHindi ? continuity.textHi : continuity.textEn}
-            </p>
-          </div>
-
-          {/* 3. WHAT MATTERS MOST */}
-          <div className="p-3 rounded-2xl bg-amber-50/70 border border-amber-200/80 flex items-start gap-2.5 text-xs text-amber-950">
-            <ShieldCheck className="w-4 h-4 text-amber-700 shrink-0 mt-0.5" />
-            <div className="leading-snug">
-              <strong className="font-bold block">
-                {isHindi ? "आज सबसे ज्यादा क्या महत्वपूर्ण है:" : "What Matters Most Today:"}
-              </strong>
-              <span className="text-[11px] text-amber-900 mt-0.5 block">
-                {accuracy < 98
-                  ? isHindi
-                    ? "स्पीड से पहले सही सामान स्कैन करना जरूरी है। हमेशा बारकोड चेक करके ही टोट में रखें।"
-                    : "Accuracy is foundational before speed. Always verify the barcode before placing item into tote."
-                  : isHindi
-                  ? "आपकी एक्यूरेसी मजबूत है (98%)। अब बिना भटके सीधे शेल्फ पर पहुंचने पर ध्यान दें।"
-                  : "Your accuracy is strong (98%). Focus on smooth aisle navigation without backtracking."}
-              </span>
+            {/* Progress bar visual */}
+            <div className="w-full bg-purple-100 rounded-full h-1.5 mt-1.5 overflow-hidden">
+              <div
+                className="bg-violet-600 h-1.5 rounded-full transition-all duration-500"
+                style={{ width: `${pacePct}%` }}
+              />
             </div>
-          </div>
-
-          {/* 4. WHAT HAPPENS NEXT */}
-          <div className="pt-2 border-t border-slate-100 flex items-center justify-between text-xs">
-            <div className="flex items-center gap-1.5 text-slate-600">
-              <Clock className="w-3.5 h-3.5 text-violet-600 shrink-0" />
-              <span className="text-[11px]">
-                <strong className="font-bold text-slate-800">{isHindi ? "आगे क्या होगा: " : "Next Step: "}</strong>
-                {isHindi
-                  ? "अगले 10 ऑर्डरों में गति व सटीकता की जांच होगी।"
-                  : "Pacing and accuracy will be checked across next 10 orders."}
-              </span>
-            </div>
+            <span className="text-[10px] text-slate-500 font-semibold block mt-1">
+              🎯 {isHindi ? `लक्ष्य ${targetPace}/hr (${pacePct}%)` : `Goal ${targetPace}/hr (${pacePct}%)`}
+            </span>
           </div>
         </div>
-      )}
+
+        {/* Card 2: Accuracy Rate */}
+        <div className="p-3 rounded-2xl bg-gradient-to-br from-emerald-50/80 to-teal-50/30 border border-emerald-100/90 flex flex-col justify-between space-y-2 hover:bg-emerald-100/40 transition-colors">
+          <div className="flex items-center justify-between">
+            <span className="text-[10px] font-black uppercase tracking-wider text-emerald-700">
+              {isHindi ? "एक्यूरेसी" : "Accuracy"}
+            </span>
+            <div className="w-6 h-6 rounded-lg bg-emerald-600 text-white flex items-center justify-center shadow-2xs">
+              <ShieldCheck className="w-3.5 h-3.5" />
+            </div>
+          </div>
+          <div>
+            <div className="flex items-baseline gap-1">
+              <span className="text-xl font-black text-slate-900 leading-none">{accuracy}%</span>
+            </div>
+            {/* Accuracy bar visual */}
+            <div className="w-full bg-emerald-100 rounded-full h-1.5 mt-1.5 overflow-hidden">
+              <div
+                className="bg-emerald-600 h-1.5 rounded-full transition-all duration-500"
+                style={{ width: `${accuracy}%` }}
+              />
+            </div>
+            <span className="text-[10px] text-emerald-700 font-bold block mt-1">
+              ✓ {isHindi ? "0 त्रुटियां दर्ज" : "Zero Scan Errors"}
+            </span>
+          </div>
+        </div>
+
+        {/* Card 3: Orders Completed */}
+        <div className="p-3 rounded-2xl bg-gradient-to-br from-blue-50/80 to-sky-50/30 border border-blue-100/90 flex flex-col justify-between space-y-2 hover:bg-blue-100/40 transition-colors">
+          <div className="flex items-center justify-between">
+            <span className="text-[10px] font-black uppercase tracking-wider text-blue-700">
+              {isHindi ? "ऑर्डर पूरे" : "Orders Done"}
+            </span>
+            <div className="w-6 h-6 rounded-lg bg-blue-600 text-white flex items-center justify-center shadow-2xs">
+              <Package className="w-3.5 h-3.5" />
+            </div>
+          </div>
+          <div>
+            <div className="flex items-baseline gap-1">
+              <span className="text-xl font-black text-slate-900 leading-none">{ordersCompleted}</span>
+              <span className="text-[11px] font-bold text-slate-500">{isHindi ? "ऑर्डर" : "orders"}</span>
+            </div>
+            <div className="w-full bg-blue-100 rounded-full h-1.5 mt-1.5 overflow-hidden">
+              <div
+                className="bg-blue-600 h-1.5 rounded-full transition-all duration-500"
+                style={{ width: `${Math.min(100, (ordersCompleted / 40) * 100)}%` }}
+              />
+            </div>
+            <span className="text-[10px] text-blue-700 font-semibold block mt-1">
+              📦 {isHindi ? "समय पर डिस्पैच" : "100% On-Time"}
+            </span>
+          </div>
+        </div>
+
+        {/* Card 4: GOOD / BAD SIGN (OVERALL SHIFT ASSESSMENT) */}
+        <div className={`p-3 rounded-2xl ${signBg} flex flex-col justify-between space-y-2 hover:brightness-98 transition-all`}>
+          <div className="flex items-center justify-between">
+            <span className="text-[10px] font-black uppercase tracking-wider">
+              {isShiftGood ? (isHindi ? "स्थिति: सही" : "STATUS: GOOD") : (isHindi ? "स्थिति: सुधार" : "STATUS: ALERT")}
+            </span>
+            <div className={`w-6 h-6 rounded-lg ${signIconBg} flex items-center justify-center shadow-2xs`}>
+              {isShiftGood ? <ThumbsUp className="w-3.5 h-3.5" /> : <AlertTriangle className="w-3.5 h-3.5" />}
+            </div>
+          </div>
+          <div>
+            <div className="flex items-center gap-1">
+              <span className="text-base font-black leading-tight tracking-tight">
+                {isShiftGood ? (isHindi ? "👍 सही रहा" : "👍 GOOD") : (isHindi ? "⚠️ सुधार चाहिए" : "⚠️ ATTENTION")}
+              </span>
+            </div>
+            <div className={`mt-1.5 px-2 py-0.5 rounded-md text-[9px] font-bold border inline-block ${signBadgeBg}`}>
+              {signTag}
+            </div>
+            <span className="text-[10px] opacity-75 font-medium block mt-1 truncate">
+              {signSub}
+            </span>
+          </div>
+        </div>
+      </div>
+
+      {/* 3. TACTILE ACTION FOOTER */}
+      <div className="pt-2 border-t border-slate-100 flex items-center justify-between text-xs">
+        <span className="text-[11px] font-medium text-slate-500 flex items-center gap-1">
+          {isDashboardVariant ? (
+            <>
+              <FileText className="w-3.5 h-3.5 text-violet-600" />
+              <span>{isHindi ? "टैप करें: पूरा कार्य, ट्रेनिंग व मॉड्यूल विवरण देखें" : "Tap to open full work, training & module summary"}</span>
+            </>
+          ) : (
+            <>
+              <Sparkles className="w-3.5 h-3.5 text-violet-500" />
+              <span>{isHindi ? "विस्तृत रिपोर्ट व आंकड़े देखने के लिए टैप करें" : "Tap to explore full metrics in Dashboard"}</span>
+            </>
+          )}
+        </span>
+        <div className="text-xs font-bold text-violet-700 flex items-center gap-1 group-hover:translate-x-0.5 transition-transform">
+          <span>{isDashboardVariant ? (isHindi ? "विस्तृत विवरण खोलें" : "View Full Summary") : (isHindi ? "डैशबोर्ड खोलें" : "View Dashboard")}</span>
+          <ArrowRight className="w-3.5 h-3.5" />
+        </div>
+      </div>
     </div>
   );
 };

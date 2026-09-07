@@ -9,6 +9,7 @@ import { ModulesView } from "./ModulesView";
 import { FloatingGlassMenu, LearnerSection } from "./FloatingGlassMenu";
 import { LearnerJourneyRoadmap } from "./LearnerJourneyRoadmap";
 import { LearnerDailyReportCard } from "./LearnerDailyReportCard";
+import { YesterdayShiftDetailModal } from "./YesterdayShiftDetailModal";
 import {
   Mic,
   MicOff,
@@ -48,6 +49,8 @@ interface NewHireViewProps {
   isHindi?: boolean;
   onToggleLanguage?: () => void;
   setIsHindi?: (isHindi: boolean) => void;
+  activeSection?: LearnerSection;
+  onSelectSection?: (section: LearnerSection) => void;
 }
 
 export const NewHireView: React.FC<NewHireViewProps> = ({
@@ -58,6 +61,8 @@ export const NewHireView: React.FC<NewHireViewProps> = ({
   onUpdateHire,
   isHindi: propIsHindi,
   setIsHindi: propSetIsHindi,
+  activeSection: propActiveSection,
+  onSelectSection: propOnSelectSection,
 }) => {
   // Current day record from authoritative state
   const currentRecord = newHire.daysHistory.find((d) => d.dayNumber === currentDay) || {
@@ -80,11 +85,13 @@ export const NewHireView: React.FC<NewHireViewProps> = ({
   const isHindi = propIsHindi !== undefined ? propIsHindi : localIsHindi;
   const setIsHindi = propSetIsHindi || setLocalIsHindi;
 
-  // Active learner navigation tab: "home" | "modules" | "buddy" | "dashboard"
-  const [activeSection, setActiveSection] = useState<LearnerSection>("home");
+  // Active learner navigation tab: "home" | "modules" | "dial" | "dashboard" | "buddy"
+  const [localActiveSection, setLocalActiveSection] = useState<LearnerSection>("home");
+  const activeSection = propActiveSection !== undefined ? propActiveSection : localActiveSection;
+  const setActiveSection = propOnSelectSection || setLocalActiveSection;
 
   // Active quick action modal
-  const [activeModal, setActiveModal] = useState<"map" | "buddy" | "scanner" | "target" | "work" | null>(null);
+  const [activeModal, setActiveModal] = useState<"map" | "buddy" | "scanner" | "target" | "work" | "yesterday_detail" | null>(null);
   const [buddyAlertSent, setBuddyAlertSent] = useState<boolean>(false);
 
   // Voice recording & input states
@@ -451,15 +458,7 @@ export const NewHireView: React.FC<NewHireViewProps> = ({
       {/* ========================================================= */}
       {activeSection === "home" && (
         <div className="space-y-4 animate-in fade-in duration-200">
-          {/* 1. WHERE AM I? THE 6-STAGE INTELLIGENT LEARNER ROADMAP */}
-          <LearnerJourneyRoadmap
-            newHire={newHire}
-            currentDay={currentDay}
-            isHindi={isHindi}
-            onSelectStage={() => setActiveSection("dashboard")}
-          />
-
-          {/* 2. WHAT DO I NEED TO DO NOW? (DOMINANT PRESCRIPTION CARD) */}
+          {/* 1. PRIMARY: WHAT DO I NEED TO DO NOW? (DOMINANT PRESCRIPTION CARD) */}
           <div
             id="todays-focus-card"
             className="bg-gradient-to-br from-violet-700 via-purple-700 to-fuchsia-700 rounded-[28px] p-5 text-white shadow-xl shadow-purple-950/15 relative overflow-hidden space-y-3.5"
@@ -470,6 +469,7 @@ export const NewHireView: React.FC<NewHireViewProps> = ({
               </span>
 
               <button
+                type="button"
                 onClick={() =>
                   handlePlayAudio(
                     "status-card",
@@ -557,17 +557,18 @@ export const NewHireView: React.FC<NewHireViewProps> = ({
             </div>
           </div>
 
-          {/* 3. DAILY SHIFT REPORT & WHAT IT MEANS */}
+          {/* 2. YESTERDAY — QUICK SNAPSHOT & WHAT IT MEANS */}
           <LearnerDailyReportCard
             newHire={newHire}
             currentDay={currentDay}
             isHindi={isHindi}
+            onOpenDashboard={() => setActiveSection("dashboard")}
             onOpenWorkTools={() => setActiveModal("work")}
             onOpenBuddy={() => setActiveSection("buddy")}
             onOpenModules={() => setActiveSection("modules")}
           />
 
-          {/* 4. NEED HELP? 1-TAP BUDDY ASSIST */}
+          {/* 3. NEED HELP? 1-TAP BUDDY ASSIST */}
           <div className="bg-white rounded-[24px] p-3.5 border border-slate-200/80 shadow-2xs flex items-center justify-between gap-3">
             <div className="flex items-center gap-2.5 min-w-0">
               <div className="w-10 h-10 rounded-full bg-emerald-100 text-emerald-700 flex items-center justify-center shrink-0 font-bold text-sm">
@@ -590,6 +591,14 @@ export const NewHireView: React.FC<NewHireViewProps> = ({
               {isHindi ? "पूछें 🗣️" : "Ask 🗣️"}
             </button>
           </div>
+
+          {/* 4. MY JOB-READY JOURNEY AT THE BOTTOM */}
+          <LearnerJourneyRoadmap
+            newHire={newHire}
+            currentDay={currentDay}
+            isHindi={isHindi}
+            onSelectStage={() => setActiveSection("dashboard")}
+          />
         </div>
       )}
 
@@ -605,7 +614,44 @@ export const NewHireView: React.FC<NewHireViewProps> = ({
       )}
 
       {/* ========================================================= */}
-      {/* 3. BUDDY: LET ME TALK TO SOMEONE (VOICE-FIRST & NATURAL)  */}
+      {/* 3. DIAL: FLOOR TELEMETRY & SPEED DIAL GAUGE               */}
+      {/* ========================================================= */}
+      {activeSection === "dial" && (
+        <div className="space-y-4 animate-in fade-in duration-200">
+          {/* Main Dial Gauge Widget */}
+          <CircularDialWidget
+            pickRate={currentRecord.workSignal?.actualPickRate ?? 35}
+            targetPickRate={currentRecord.workSignal?.targetPickRate ?? 50}
+            accuracyRate={currentRecord.workSignal?.accuracyRate ?? 98}
+            readinessScore={newHire.readinessScore ?? 74}
+            onCallBuddy={() => setActiveSection("buddy")}
+            onScannerFix={() => setActiveModal("scanner")}
+            onAisleMap={() => setActiveModal("map")}
+            onOpenTarget={() => setActiveModal("target")}
+            isHindi={isHindi}
+          />
+
+          {/* Store Zone Bottlenecks & Route Intelligence */}
+          <StoreZonesGrid
+            currentPickRate={currentRecord.workSignal?.actualPickRate ?? 35}
+            targetPickRate={currentRecord.workSignal?.targetPickRate ?? 50}
+            onSelectZone={(zoneId) => {
+              if (zoneId === "scanner_dock") {
+                setActiveModal("scanner");
+              } else if (zoneId === "buddy_desk") {
+                setActiveSection("buddy");
+              } else {
+                setActiveModal("map");
+              }
+            }}
+            isHindi={isHindi}
+            activeZoneId={currentDay === 3 ? "aisles_4_8" : "aisles_1_3"}
+          />
+        </div>
+      )}
+
+      {/* ========================================================= */}
+      {/* 4. BUDDY: LET ME TALK TO SOMEONE (VOICE-FIRST & NATURAL)  */}
       {/* ========================================================= */}
       {activeSection === "buddy" && (
         <div className="space-y-4 animate-in fade-in duration-200">
@@ -821,11 +867,13 @@ export const NewHireView: React.FC<NewHireViewProps> = ({
             isHindi={isHindi}
           />
 
-          {/* 3. DAILY SHIFT REPORT & CONTINUITY */}
+          {/* 3. DAILY SHIFT REPORT & CONTINUITY (CLICKABLE FOR FULL SUMMARY MODAL) */}
           <LearnerDailyReportCard
             newHire={newHire}
             currentDay={currentDay}
             isHindi={isHindi}
+            isDashboardVariant={true}
+            onOpenDetailedModal={() => setActiveModal("yesterday_detail")}
             onOpenWorkTools={() => setActiveModal("work")}
             onOpenBuddy={() => setActiveSection("buddy")}
             onOpenModules={() => setActiveSection("modules")}
@@ -1293,6 +1341,29 @@ export const NewHireView: React.FC<NewHireViewProps> = ({
             </button>
           </div>
         </div>
+      )}
+
+      {/* ========================================================= */}
+      {/* MODAL 6: YESTERDAY SHIFT FULL DETAIL MODAL               */}
+      {/* ========================================================= */}
+      {activeModal === "yesterday_detail" && (
+        <YesterdayShiftDetailModal
+          newHire={newHire}
+          currentDay={currentDay}
+          isHindi={isHindi}
+          onClose={() => setActiveModal(null)}
+          onOpenWorkTools={() => {
+            setActiveModal("work");
+          }}
+          onOpenModules={() => {
+            setActiveModal(null);
+            setActiveSection("modules");
+          }}
+          onOpenBuddy={() => {
+            setActiveModal(null);
+            setActiveSection("buddy");
+          }}
+        />
       )}
     </div>
   );

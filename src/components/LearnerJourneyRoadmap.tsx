@@ -19,6 +19,7 @@ interface LearnerJourneyRoadmapProps {
   newHire: NewHire;
   currentDay: number;
   isHindi?: boolean;
+  compact?: boolean;
   onNavigateToSection?: (section: "modules" | "buddy" | "dashboard") => void;
   onOpenWorkTools?: () => void;
   onSelectStage?: () => void;
@@ -28,6 +29,7 @@ export const LearnerJourneyRoadmap: React.FC<LearnerJourneyRoadmapProps> = ({
   newHire,
   currentDay,
   isHindi = false,
+  compact = false,
   onNavigateToSection,
   onOpenWorkTools,
   onSelectStage,
@@ -38,6 +40,31 @@ export const LearnerJourneyRoadmap: React.FC<LearnerJourneyRoadmapProps> = ({
   // Pure presentation derived directly from authoritative intelligence pipeline
   const roadmapData = deriveLearnerRoadmap(newHire, currentDay);
   const { currentStageIndex, currentStage, stages, readinessScore, destinationEn, destinationHi } = roadmapData;
+
+  // Evaluate Handover Readiness based on authoritative intelligence & overall job readiness principles
+  const isHandoverReady =
+    readinessScore >= 85 &&
+    (newHire.modulesCompleted ?? 0) >= 8 &&
+    newHire.status === "Doing well" &&
+    currentStageIndex === 5;
+
+  const handoverBlocker = !isHandoverReady
+    ? (newHire.modulesCompleted ?? 0) < 3
+      ? isHindi
+        ? "अनिवार्य सुरक्षा ट्रेनिंग अधूरी है"
+        : "Mandatory training incomplete"
+      : newHire.status === "At risk" || newHire.status === "Needs attention"
+      ? isHindi
+        ? "फ्लोर अभ्यास व सहायता जारी है"
+        : "Floor practice & support active"
+      : currentStageIndex < 5
+      ? isHindi
+        ? `स्टेज ${currentStage.stageNumber}/6 पर प्रगति जारी है`
+        : `Progressing on Stage ${currentStage.stageNumber}/6`
+      : isHindi
+      ? "स्थिरता व प्रमाणन आवश्यक"
+      : "Sustained shift consistency required"
+    : undefined;
 
   const getStageIcon = (key: CanonicalRoadmapStage["key"]) => {
     switch (key) {
@@ -74,6 +101,105 @@ export const LearnerJourneyRoadmap: React.FC<LearnerJourneyRoadmapProps> = ({
       setPlayingAudio(false);
     });
   };
+
+  if (compact) {
+    return (
+      <div
+        id="learner-job-ready-roadmap-compact"
+        className="bg-white rounded-[24px] p-4 border border-slate-200/80 shadow-2xs space-y-3 select-none"
+      >
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-2.5">
+            <div className="w-9 h-9 rounded-xl bg-purple-100 text-purple-700 flex items-center justify-center shrink-0">
+              <Sparkles className="w-4 h-4 text-purple-600" />
+            </div>
+            <div>
+              <span className="text-[10px] font-bold uppercase tracking-wider text-slate-500 block">
+                {isHindi ? "मेरी कार्यकुशलता यात्रा" : "MY JOB-READY JOURNEY"}
+              </span>
+              <h4 className="text-sm font-black text-slate-900 leading-tight">
+                {isHindi
+                  ? `स्टेज ${currentStage.stageNumber}: ${currentStage.titleHi}`
+                  : `Stage ${currentStage.stageNumber}: ${currentStage.titleEn}`}
+              </h4>
+            </div>
+          </div>
+
+          <div className="flex items-center gap-1.5">
+            <button
+              type="button"
+              onClick={handlePlayAudio}
+              className="p-1.5 rounded-full text-slate-400 hover:text-purple-600 transition-colors cursor-pointer"
+              title="Listen aloud"
+            >
+              <Volume2 className={`w-4 h-4 ${playingAudio ? "animate-bounce text-purple-600" : ""}`} />
+            </button>
+            <button
+              type="button"
+              onClick={() => {
+                if (onNavigateToSection) {
+                  onNavigateToSection("dashboard");
+                } else if (onSelectStage) {
+                  onSelectStage();
+                } else {
+                  setShowFullRoadmapModal(true);
+                }
+              }}
+              className="text-xs font-bold text-violet-700 hover:text-violet-900 bg-violet-50 hover:bg-violet-100 px-3 py-1.5 rounded-full flex items-center gap-0.5 cursor-pointer transition-all"
+            >
+              <span>{isHindi ? "डैशबोर्ड" : "Dashboard"}</span>
+              <ChevronRight className="w-3.5 h-3.5" />
+            </button>
+          </div>
+        </div>
+
+        {/* 6-segment progress bar */}
+        <div className="space-y-1.5">
+          <div className="flex items-center justify-between gap-1.5 pt-0.5">
+            {stages.map((stage) => {
+              const isCompleted = stage.status === "completed";
+              const isCurrent = stage.status === "current";
+              return (
+                <div
+                  key={stage.id}
+                  className={`flex-1 h-2 rounded-full transition-all ${
+                    isCompleted
+                      ? "bg-emerald-500"
+                      : isCurrent
+                      ? "bg-violet-600 ring-2 ring-violet-200"
+                      : "bg-slate-200"
+                  }`}
+                  title={`${stage.stageNumber}. ${isHindi ? stage.titleHi : stage.titleEn}`}
+                />
+              );
+            })}
+          </div>
+
+          <div className="flex items-center justify-between text-[11px] text-slate-600 pt-0.5 font-medium">
+            <span className="truncate">
+              <strong className="text-slate-800 font-bold">{isHindi ? "लक्ष्य: " : "Milestone: "}</strong>
+              {isHindi ? currentStage.milestoneHi : currentStage.milestoneEn}
+            </span>
+            <span
+              className={`font-black shrink-0 ml-1.5 px-2 py-0.5 rounded-full text-[10px] border flex items-center gap-1 ${
+                isHandoverReady
+                  ? "bg-emerald-50 text-emerald-800 border-emerald-200"
+                  : "bg-amber-50 text-amber-800 border-amber-200"
+              }`}
+            >
+              {isHandoverReady
+                ? isHindi
+                  ? "✓ हैंडओवर के लिए तैयार"
+                  : "✓ Ready for Handover"
+                : isHindi
+                ? "हैंडओवर तैयारी जारी"
+                : "Building Readiness"}
+            </span>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div
@@ -175,39 +301,6 @@ export const LearnerJourneyRoadmap: React.FC<LearnerJourneyRoadmapProps> = ({
               </button>
             );
           })}
-        </div>
-      </div>
-
-      {/* CURRENT STATUS & NEXT MILESTONE SNAPSHOT */}
-      <div className="bg-slate-50/90 rounded-2xl p-3 border border-slate-200/80 space-y-2">
-        <div className="flex items-start justify-between gap-2">
-          <div>
-            <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wide block">
-              {isHindi ? "📍 वर्तमान स्थिति व फोकस" : "📍 CURRENT FOCUS"}
-            </span>
-            <p className="text-xs font-semibold text-slate-800 leading-snug mt-0.5">
-              {isHindi ? currentStage.shortDescHi : currentStage.shortDescEn}
-            </p>
-          </div>
-          <div className="shrink-0 text-right">
-            <span className="text-[10px] font-bold text-violet-700 bg-violet-100/70 px-2 py-0.5 rounded-full inline-block">
-              {readinessScore}% {isHindi ? "रेडीनेस" : "Ready"}
-            </span>
-          </div>
-        </div>
-
-        <div className="pt-2 border-t border-slate-200/60 flex items-center justify-between text-xs">
-          <div className="flex items-center gap-1.5 text-slate-600 min-w-0">
-            <Target className="w-3.5 h-3.5 text-violet-600 shrink-0" />
-            <span className="truncate text-[11px]">
-              <strong className="font-bold text-slate-800">{isHindi ? "अगला पड़ाव: " : "Next Target: "}</strong>
-              {isHindi ? currentStage.milestoneHi : currentStage.milestoneEn}
-            </span>
-          </div>
-          <div className="shrink-0 flex items-center gap-1 text-[11px] font-bold text-emerald-700">
-            <Award className="w-3.5 h-3.5" />
-            <span>{isHindi ? "मंजिल: सर्टिफाइड" : "Goal: Certified"}</span>
-          </div>
         </div>
       </div>
 

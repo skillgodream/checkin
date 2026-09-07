@@ -3,8 +3,10 @@ import { Header, ActiveTab } from "./components/Header";
 import { NewHireView } from "./components/NewHireView";
 import { ManagerView } from "./components/ManagerView";
 import { OrganizationView } from "./components/OrganizationView";
+import { OnboardingView } from "./components/OnboardingView";
 import { LoopInspectorModal } from "./components/LoopInspectorModal";
 import { TelemetryDialModal } from "./components/TelemetryDialModal";
+import { LearnerSection } from "./components/FloatingGlassMenu";
 import { initialCohort, initialOrgSummary } from "./data/seedData";
 import {
   NewHire,
@@ -64,8 +66,23 @@ export default function App() {
   const [hasApiKey, setHasApiKey] = useState<boolean>(false);
   const [isFramed, setIsFramed] = useState<boolean>(true);
   const [isHindi, setIsHindi] = useState<boolean>(true);
+  const [learnerSection, setLearnerSection] = useState<LearnerSection>("home");
+  const [isOnboarding, setIsOnboarding] = useState<boolean>(() => {
+    try {
+      const saved = localStorage.getItem("checkin_checkout_onboarding_state");
+      if (saved !== null) {
+        return JSON.parse(saved);
+      }
+    } catch (e) {}
+    return true; // Defaults to onboarding on first view
+  });
 
   // Synchronize state changes to localStorage
+  useEffect(() => {
+    try {
+      localStorage.setItem("checkin_checkout_onboarding_state", JSON.stringify(isOnboarding));
+    } catch (e) {}
+  }, [isOnboarding]);
   useEffect(() => {
     try {
       localStorage.setItem(STORAGE_KEY_HIRES, JSON.stringify(newHires));
@@ -263,70 +280,90 @@ export default function App() {
       >
         {/* Subtle phone speaker notch for framed mobile experience on desktop */}
         {isFramed && (
-          <div className="hidden md:flex items-center justify-center pt-2 pb-1 bg-white border-b border-slate-100">
-            <div className="w-16 h-1 rounded-full bg-slate-200"></div>
+          <div className="hidden md:flex items-center justify-center pt-2 pb-1 bg-slate-950 border-b border-white/5">
+            <div className="w-16 h-1 rounded-full bg-white/20"></div>
           </div>
         )}
 
-        {/* Global Mobile Header */}
-        <Header
-          activeTab={activeTab}
-          setActiveTab={setActiveTab}
-          currentDay={currentDay}
-          onSelectDay={handleSelectDay}
-          onResetDemo={handleResetDemo}
-          onOpenLoopModal={() => setIsLoopModalOpen(true)}
-          onOpenTelemetryDial={() => setIsTelemetryModalOpen(true)}
-          hasApiKey={hasApiKey}
-          doingWellCount={doingWellCount}
-          needsAttentionCount={needsAttentionCount}
-          atRiskCount={atRiskCount}
-          isFramed={isFramed}
-          isHindi={isHindi}
-          onToggleLanguage={() => setIsHindi((prev) => !prev)}
-          learnerName={activeHire.name}
-        />
-
-        {/* Main Experience View */}
-        <main className="flex-1 overflow-y-auto">
-          {activeTab === "new_hire" && (
-            <NewHireView
-              newHire={activeHire}
+        {/* 1. ONBOARDING FIRST PAGE (MOBILE UI FIRST PAGE) */}
+        {isOnboarding ? (
+          <OnboardingView
+            onStartDay={() => setIsOnboarding(false)}
+            learnerName={activeHire.name}
+            isHindi={isHindi}
+            onToggleLanguage={() => setIsHindi((prev) => !prev)}
+          />
+        ) : (
+          <>
+            {/* Global Mobile Header (Only during active shift views) */}
+            <Header
+              activeTab={activeTab}
+              setActiveTab={setActiveTab}
               currentDay={currentDay}
-              onDailySignalSubmitted={handleDailySignalSubmitted}
-              onAskHelp={handleAskHelp}
               onSelectDay={handleSelectDay}
-              onUpdateHire={handleUpdateHire}
+              onResetDemo={handleResetDemo}
+              onOpenLoopModal={() => setIsLoopModalOpen(true)}
+              onOpenTelemetryDial={() => setIsTelemetryModalOpen(true)}
+              onOpenBuddy={() => {
+                setActiveTab("new_hire");
+                setLearnerSection("buddy");
+              }}
+              onOpenOnboarding={() => setIsOnboarding(true)}
+              hasApiKey={hasApiKey}
+              doingWellCount={doingWellCount}
+              needsAttentionCount={needsAttentionCount}
+              atRiskCount={atRiskCount}
+              isFramed={isFramed}
               isHindi={isHindi}
               onToggleLanguage={() => setIsHindi((prev) => !prev)}
-              setIsHindi={setIsHindi}
+              learnerName={activeHire.name}
+              buddyName={activeHire.buddy}
             />
-          )}
 
-          {activeTab === "manager" && (
-            <ManagerView
-              newHires={newHires}
-              activeHireId={activeHireId}
-              onSelectHire={(id) => setActiveHireId(id)}
-              currentDay={currentDay}
-              onManagerSignalSubmitted={handleManagerSignalSubmitted}
-              onWorkSignalUpdated={handleWorkSignalUpdated}
-              onActionOutcomeRecorded={handleActionOutcomeRecorded}
-            />
-          )}
+            {/* Main Experience View */}
+            <main className="flex-1 overflow-y-auto">
+              {activeTab === "new_hire" && (
+                <NewHireView
+                  newHire={activeHire}
+                  currentDay={currentDay}
+                  onDailySignalSubmitted={handleDailySignalSubmitted}
+                  onAskHelp={handleAskHelp}
+                  onSelectDay={handleSelectDay}
+                  onUpdateHire={handleUpdateHire}
+                  isHindi={isHindi}
+                  onToggleLanguage={() => setIsHindi((prev) => !prev)}
+                  setIsHindi={setIsHindi}
+                  activeSection={learnerSection}
+                  onSelectSection={setLearnerSection}
+                />
+              )}
 
-          {activeTab === "organization" && (
-            <OrganizationView
-              summary={orgSummary}
-              newHires={newHires}
-              onSelectHireForManager={(hireId) => {
-                setActiveHireId(hireId);
-                setActiveTab("manager");
-              }}
-              onOpenLoopModal={() => setIsLoopModalOpen(true)}
-            />
-          )}
-        </main>
+              {activeTab === "manager" && (
+                <ManagerView
+                  newHires={newHires}
+                  activeHireId={activeHireId}
+                  onSelectHire={(id) => setActiveHireId(id)}
+                  currentDay={currentDay}
+                  onManagerSignalSubmitted={handleManagerSignalSubmitted}
+                  onWorkSignalUpdated={handleWorkSignalUpdated}
+                  onActionOutcomeRecorded={handleActionOutcomeRecorded}
+                />
+              )}
+
+              {activeTab === "organization" && (
+                <OrganizationView
+                  summary={orgSummary}
+                  newHires={newHires}
+                  onSelectHireForManager={(hireId) => {
+                    setActiveHireId(hireId);
+                    setActiveTab("manager");
+                  }}
+                  onOpenLoopModal={() => setIsLoopModalOpen(true)}
+                />
+              )}
+            </main>
+          </>
+        )}
       </div>
 
       {/* Core Loop Inspector Modal */}

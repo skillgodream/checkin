@@ -425,3 +425,44 @@ export interface OrganizationSummary {
   emergingPatterns: { pattern: string; trend: string; impactedCount: number }[];
   urgentAttentionIds: string[];
 }
+
+// ==========================================
+// 19 Evidence Categories for Intelligence Snapshot & Dashboard
+// ==========================================
+export type SnapshotEvidenceCategory =
+  | "required_training_incomplete"
+  | "training_completed"
+  | "assessment_weakness"
+  | "work_performance"
+  | "accuracy"
+  | "productivity"
+  | "independence"
+  | "repeated_help_dependency"
+  | "capability_gap"
+  | "tool_problem"
+  | "environment_problem"
+  | "process_problem"
+  | "safety_issue"
+  | "intervention_performed"
+  | "intervention_succeeded"
+  | "intervention_failed"
+  | "recovery_improvement"
+  | "no_meaningful_problem"
+  | "insufficient_evidence";
+
+export interface SnapshotEvidenceItem {
+  id: string;
+  category: SnapshotEvidenceCategory;
+  titleEn: string;
+  titleHi: string;
+  metricValue?: string;
+  metricUnit?: string;
+  contextTextEn: string;
+  contextTextHi: string;
+  badgeEn?: string;
+  badgeHi?: string;
+  iconName: "TrendingUp" | "ShieldCheck" | "Package" | "AlertTriangle" | "CheckCircle2" | "BookOpen" | "UserCheck" | "Wrench" | "Compass" | "Sparkles" | "ThumbsUp" | "HelpCircle" | "Clock";
+  themeColor: "purple" | "emerald" | "amber" | "blue" | "rose" | "indigo" | "slate";
+  progressPct?: number;
+  priorityWeight: number; // Higher weight = higher priority for Home 4-grid selection
+}

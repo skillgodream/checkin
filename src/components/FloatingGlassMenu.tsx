@@ -2,11 +2,11 @@ import React from "react";
 import {
   Home,
   BookOpen,
-  MessageCircle,
+  Gauge,
   User,
 } from "lucide-react";
 
-export type LearnerSection = "home" | "modules" | "buddy" | "dashboard";
+export type LearnerSection = "home" | "modules" | "dial" | "dashboard" | "buddy";
 
 interface FloatingGlassMenuProps {
   activeSection: LearnerSection;
@@ -44,11 +44,10 @@ export const FloatingGlassMenu: React.FC<FloatingGlassMenuProps> = ({
       icon: <BookOpen className="w-4 h-4 stroke-[2.2]" />,
     },
     {
-      id: "buddy",
-      labelEn: "Buddy",
-      labelHi: "साथी",
-      icon: <MessageCircle className="w-4 h-4 stroke-[2.2]" />,
-      badge: buddyAssigned,
+      id: "dial",
+      labelEn: "Telemetry",
+      labelHi: "डायल",
+      icon: <Gauge className="w-4 h-4 stroke-[2.2]" />,
     },
     {
       id: "dashboard",

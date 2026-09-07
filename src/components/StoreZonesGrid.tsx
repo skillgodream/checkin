@@ -21,13 +21,17 @@ interface StoreZone {
 }
 
 interface StoreZonesGridProps {
-  onSelectZone: (zoneId: string, zoneName: string) => void;
+  onSelectZone?: (zoneId: string, zoneName: string) => void;
+  onAisleSelect?: (zoneId?: string) => void;
   isHindi?: boolean;
   activeZoneId?: string;
+  currentPickRate?: number;
+  targetPickRate?: number;
 }
 
 export const StoreZonesGrid: React.FC<StoreZonesGridProps> = ({
   onSelectZone,
+  onAisleSelect,
   isHindi = false,
   activeZoneId = "aisles_4_8",
 }) => {
@@ -87,7 +91,12 @@ export const StoreZonesGrid: React.FC<StoreZonesGridProps> = ({
 
   const handleCardClick = (zone: StoreZone) => {
     setSelectedId(zone.id);
-    onSelectZone(zone.id, isHindi ? zone.nameHindi : zone.name);
+    if (onSelectZone) {
+      onSelectZone(zone.id, isHindi ? zone.nameHindi : zone.name);
+    }
+    if (onAisleSelect) {
+      onAisleSelect(zone.id);
+    }
   };
 
   return (
