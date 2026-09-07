@@ -65,7 +65,7 @@ export const FloatingGlassMenu: React.FC<FloatingGlassMenuProps> = ({
       <nav
         id="floating-apple-glass-menu"
         aria-label="Learner Bottom Navigation"
-        className="pointer-events-auto max-w-sm w-full bg-white/85 backdrop-blur-2xl border border-white/70 shadow-[0_12px_36px_rgba(30,10,60,0.18)] rounded-full p-1.5 flex items-center justify-between ring-1 ring-black/5 transition-all"
+        className="pointer-events-auto max-w-sm w-full bg-white/90 backdrop-blur-2xl border border-white/80 shadow-[0_12px_36px_rgba(30,10,60,0.18)] rounded-full p-1.5 flex items-center justify-between ring-1 ring-black/5 transition-all"
       >
         {items.map((item) => {
           const isActive = activeSection === item.id;
@@ -75,7 +75,7 @@ export const FloatingGlassMenu: React.FC<FloatingGlassMenuProps> = ({
               id={`nav-btn-${item.id}`}
               type="button"
               onClick={() => onSelectSection(item.id)}
-              className={`relative flex-1 flex flex-col items-center justify-center py-1.5 px-2 rounded-full text-xs font-bold transition-all cursor-pointer select-none active:scale-95 ${
+              className={`relative flex-1 flex flex-col items-center justify-center py-2 px-2 rounded-full font-bold transition-all cursor-pointer select-none active:scale-95 ${
                 isActive
                   ? "bg-gradient-to-r from-violet-600 via-purple-600 to-fuchsia-600 text-white shadow-md shadow-violet-500/25"
                   : "text-slate-600 hover:text-slate-950 hover:bg-slate-100/60"
@@ -87,7 +87,7 @@ export const FloatingGlassMenu: React.FC<FloatingGlassMenuProps> = ({
                   <span className="absolute -top-1 -right-1 w-2 h-2 rounded-full bg-fuchsia-500 ring-2 ring-white animate-pulse" />
                 )}
               </div>
-              <span className="text-[10px] leading-tight mt-0.5 whitespace-nowrap">
+              <span className="text-xs font-bold leading-tight mt-0.5 whitespace-nowrap">
                 {isHindi ? item.labelHi : item.labelEn}
               </span>
             </button>

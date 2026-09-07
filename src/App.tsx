@@ -6,6 +6,8 @@ import { OrganizationView } from "./components/OrganizationView";
 import { OnboardingView } from "./components/OnboardingView";
 import { LoopInspectorModal } from "./components/LoopInspectorModal";
 import { TelemetryDialModal } from "./components/TelemetryDialModal";
+import { GoogleFormFeedModal } from "./components/GoogleFormFeedModal";
+import { ClientDemoModal } from "./components/ClientDemoModal";
 import { LearnerSection } from "./components/FloatingGlassMenu";
 import { initialCohort, initialOrgSummary } from "./data/seedData";
 import {
@@ -17,6 +19,10 @@ import {
   DayRecord,
 } from "./types";
 import { executeCoordinationLoop, askCompanion } from "./services/intelligence";
+import {
+  GoogleFormFeedPayload,
+  adaptGoogleFormFeedRow,
+} from "./services/googleFormFeedAdapter";
 
 const STORAGE_KEY_HIRES = "checkin_checkout_cohort_v2";
 const STORAGE_KEY_DAY = "checkin_checkout_day_v2";
@@ -63,6 +69,8 @@ export default function App() {
   const [orgSummary, setOrgSummary] = useState(initialOrgSummary);
   const [isLoopModalOpen, setIsLoopModalOpen] = useState<boolean>(false);
   const [isTelemetryModalOpen, setIsTelemetryModalOpen] = useState<boolean>(false);
+  const [isFeedModalOpen, setIsFeedModalOpen] = useState<boolean>(false);
+  const [isClientDemoModalOpen, setIsClientDemoModalOpen] = useState<boolean>(false);
   const [hasApiKey, setHasApiKey] = useState<boolean>(false);
   const [isFramed, setIsFramed] = useState<boolean>(true);
   const [isHindi, setIsHindi] = useState<boolean>(true);
@@ -239,6 +247,39 @@ export default function App() {
     });
   };
 
+  // 5. Client Demo Work-Signal Feed Ingested (Google Form / Sheet adapter)
+  const handleGoogleFormFeedIngested = (payload: GoogleFormFeedPayload) => {
+    const knownHires = newHires.map((h) => ({ id: h.id, name: h.name }));
+    const result = adaptGoogleFormFeedRow(payload, knownHires);
+
+    if (result.modulesCompleted !== undefined) {
+      setNewHires((prev) =>
+        prev.map((h) =>
+          h.id === result.newHireId
+            ? { ...h, modulesCompleted: result.modulesCompleted }
+            : h
+        )
+      );
+    }
+
+    // Switch view to the target hire & day
+    setActiveHireId(result.newHireId);
+    setCurrentDay(result.dayNumber);
+
+    // Pass signals through authoritative updateHireAndRecalculate pipeline
+    updateHireAndRecalculate(result.newHireId, result.dayNumber, () => {
+      const partial: Partial<DayRecord> = {
+        workSignal: result.workSignal,
+        dailySignal: result.dailySignal,
+        managerSignal: result.managerSignal,
+      };
+      if (result.actionOutcome) {
+        partial.actionOutcome = result.actionOutcome;
+      }
+      return partial;
+    });
+  };
+
   // Select day in scenario
   const handleSelectDay = (day: number) => {
     setCurrentDay(day);
@@ -309,6 +350,8 @@ export default function App() {
                 setLearnerSection("buddy");
               }}
               onOpenOnboarding={() => setIsOnboarding(true)}
+              onOpenFeedModal={() => setIsFeedModalOpen(true)}
+              onOpenClientDemo={() => setIsClientDemoModalOpen(true)}
               hasApiKey={hasApiKey}
               doingWellCount={doingWellCount}
               needsAttentionCount={needsAttentionCount}
@@ -380,6 +423,28 @@ export default function App() {
         onClose={() => setIsTelemetryModalOpen(false)}
         newHire={activeHire}
         currentDay={currentDay}
+      />
+
+      {/* Client Demo Work-Signal Feed (Google Form / Sheet Ingestor) Modal */}
+      <GoogleFormFeedModal
+        isOpen={isFeedModalOpen}
+        onClose={() => setIsFeedModalOpen(false)}
+        newHires={newHires}
+        onIngestFeed={handleGoogleFormFeedIngested}
+        isHindi={isHindi}
+      />
+
+      {/* Interactive Client Demo Experience Hub */}
+      <ClientDemoModal
+        isOpen={isClientDemoModalOpen}
+        onClose={() => setIsClientDemoModalOpen(false)}
+        onRunScenario={handleGoogleFormFeedIngested}
+        currentHire={activeHire}
+        currentDay={currentDay}
+        onOpenLoopInspector={() => setIsLoopModalOpen(true)}
+        onSelectTab={setActiveTab}
+        onResetDemo={handleResetDemo}
+        isHindi={isHindi}
       />
     </div>
   );

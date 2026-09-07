@@ -268,11 +268,11 @@ export const CircularDialWidget: React.FC<CircularDialWidgetProps> = ({
           {/* Center Text (Value & Unit) */}
           <text
             x="100"
-            y="96"
+            y="94"
             textAnchor="middle"
             dominantBaseline="central"
             fill="#ffffff"
-            className="font-black text-2xl tracking-tight"
+            className="font-black text-3xl tracking-tight"
             style={{ fontWeight: 900 }}
           >
             {currentValue}
@@ -284,34 +284,34 @@ export const CircularDialWidget: React.FC<CircularDialWidgetProps> = ({
             textAnchor="middle"
             dominantBaseline="central"
             fill="#fae8ff"
-            className="text-[10px] font-bold tracking-wider uppercase"
+            className="text-xs font-bold tracking-wider uppercase"
           >
             {unit}
           </text>
         </svg>
 
         {/* Floating Indicator Pill at Bottom */}
-        <div className="absolute bottom-1 bg-white/95 backdrop-blur-md px-3 py-1 rounded-full border border-purple-200/80 shadow-xs flex items-center gap-1.5 text-xs font-bold text-purple-900">
+        <div className="absolute bottom-1 bg-white/95 backdrop-blur-md px-3.5 py-1.5 rounded-full border border-purple-200/80 shadow-xs flex items-center gap-1.5 text-xs font-bold text-purple-900">
           <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
           <span>{statusBadge}</span>
         </div>
       </div>
 
       {/* 4. Terminal / Station Connection Row with Purple Toggle (Matching Bosch AC from reference) */}
-      <div className="bg-slate-50/90 rounded-2xl p-3 border border-slate-200/80 flex items-center justify-between">
+      <div className="bg-slate-50/90 rounded-2xl p-3.5 border border-slate-200/80 flex items-center justify-between">
         <div className="flex items-center gap-2.5 min-w-0">
-          <div className="w-8 h-8 rounded-xl bg-purple-100 text-purple-700 flex items-center justify-center shrink-0">
+          <div className="w-9 h-9 rounded-xl bg-purple-100 text-purple-700 flex items-center justify-center shrink-0">
             <Radio className="w-4 h-4" />
           </div>
           <div className="min-w-0">
-            <h4 className="text-xs font-bold text-slate-900 truncate leading-tight">
+            <h4 className="text-xs sm:text-sm font-bold text-slate-900 truncate leading-tight">
               {isHindi ? "हैंडहेल्ड टर्मिनल #104" : "Zebra Terminal #104"}
             </h4>
-            <p className="text-[10px] text-slate-500 font-medium">
+            <p className="text-xs text-slate-500 font-medium mt-0.5">
               {terminalConnected
                 ? isHindi
-                  ? "फ्लोर वाई-फाई से कनेक्टेड • 5 GHz"
-                  : "Floor Wi-Fi Synced • 5 GHz"
+                  ? "फ्लोर वाई-फाई कनेक्टेड"
+                  : "Floor Wi-Fi Synced"
                 : isHindi
                 ? "डिस्कनेक्टेड"
                 : "Disconnected"}

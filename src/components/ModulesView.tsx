@@ -134,28 +134,28 @@ export const ModulesView: React.FC<ModulesViewProps> = ({
       {/* 1. TRAINING JOURNEY HEADER CARD                           */}
       {/* ========================================================= */}
       <div className="bg-white rounded-[28px] p-4 sm:p-5 border border-purple-100 shadow-sm space-y-3.5">
-        <div className="flex items-start justify-between gap-2">
+        <div className="flex items-start justify-between gap-3">
           <div>
-            <div className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-violet-100 text-violet-800 text-[11px] font-bold">
+            <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-violet-100 text-violet-800 text-xs font-bold">
               <BookOpen className="w-3.5 h-3.5" />
-              <span>{isHindi ? "अनिवार्य एलएमएस पाठ्यक्रम" : "Mandatory LMS Training"}</span>
+              <span>{isHindi ? "अनिवार्य ट्रेनिंग" : "Mandatory LMS Training"}</span>
             </div>
-            <h2 className="text-lg sm:text-xl font-black text-slate-900 tracking-tight mt-1">
-              {isHindi ? "10-दिवसीय ट्रेनिंग यात्रा" : "10-Day Training Journey"}
+            <h2 className="text-xl font-black text-slate-900 tracking-tight mt-1">
+              {isHindi ? "10-दिवसीय ट्रेनिंग" : "10-Day Training"}
             </h2>
-            <p className="text-xs text-slate-500 font-medium">
+            <p className="text-xs sm:text-sm text-slate-600 font-medium mt-0.5">
               {isHindi
-                ? "सभी 10 मॉड्यूल पूरे करना अनिवार्य है। प्रत्येक मॉड्यूल में वीडियो, क्विज, सिमुलेशन और प्रैक्टिस शामिल हैं।"
-                : "Completion of all 10 modules is mandatory. Each module includes video, quiz, simulation, and floor drill."}
+                ? "10 अनिवार्य मॉड्यूल और फ्लोर प्रैक्टिस अभ्यास।"
+                : "10 core modules with hands-on floor practice."}
             </p>
           </div>
 
-          <div className="text-right shrink-0 bg-slate-50 border border-slate-200 px-3 py-2 rounded-2xl">
-            <div className="text-xs font-black text-violet-700">
+          <div className="text-right shrink-0 bg-slate-50 border border-slate-200 px-3.5 py-2 rounded-2xl">
+            <div className="text-sm font-black text-violet-700">
               {modulesCompletedCount} / 10
             </div>
-            <div className="text-[10px] text-slate-400 font-semibold">
-              {isHindi ? "मॉड्यूल पूर्ण" : "Modules Done"}
+            <div className="text-xs text-slate-500 font-semibold">
+              {isHindi ? "पूर्ण" : "Done"}
             </div>
           </div>
         </div>
@@ -163,8 +163,8 @@ export const ModulesView: React.FC<ModulesViewProps> = ({
         {/* Progress bar */}
         <div className="space-y-1.5">
           <div className="flex items-center justify-between text-xs font-bold text-slate-700">
-            <span>{isHindi ? "एलएमएस पूर्णता दर" : "LMS Curriculum Completion"}</span>
-            <span className="text-violet-700">{Math.round((modulesCompletedCount / 10) * 100)}%</span>
+            <span>{isHindi ? "पाठ्यक्रम प्रगति" : "Course Progress"}</span>
+            <span className="text-violet-700 font-black">{Math.round((modulesCompletedCount / 10) * 100)}%</span>
           </div>
           <div className="w-full h-2.5 bg-slate-100 rounded-full overflow-hidden">
             <div
@@ -175,16 +175,16 @@ export const ModulesView: React.FC<ModulesViewProps> = ({
         </div>
 
         {/* Core Product Principle Callout */}
-        <div className="p-3 bg-amber-50/80 rounded-2xl border border-amber-200/80 flex items-start gap-2.5 text-xs text-amber-950">
+        <div className="p-3 bg-amber-50/90 rounded-2xl border border-amber-200/80 flex items-start gap-2.5 text-xs text-amber-950">
           <AlertCircle className="w-4 h-4 text-amber-600 shrink-0 mt-0.5" />
-          <div className="leading-snug">
-            <strong className="font-bold block">
-              {isHindi ? "महत्वपूर्ण सिद्धांत: मॉड्यूल पूरा होना ≠ जॉब रेडी होना" : "Core Rule: Module Completion ≠ Job Readiness"}
+          <div className="leading-snug font-medium">
+            <strong className="font-bold text-slate-900 block">
+              {isHindi ? "नियम: मॉड्यूल पूरा होना ≠ जॉब रेडी होना" : "Rule: Module Completion ≠ Job Readiness"}
             </strong>
-            <span className="text-[11px] text-amber-900 mt-0.5 block">
+            <span className="text-xs text-amber-900 mt-0.5 block">
               {isHindi
-                ? "मॉड्यूल पूरा करना ट्रेनिंग की अनिवार्यता है। लेकिन आपकी वास्तविक 'जॉब रेडीनेस' शिफ्ट के दौरान की गई एक्यूरेसी और स्पीड से तय होती है।"
-                : "Module completion is a training requirement. Job readiness is evaluated separately by the intelligence engine based on verified floor performance."}
+                ? "मॉड्यूल पूरा करना अनिवार्य है। वास्तविक जॉब रेडीनेस फ्लोर पर की गई एक्यूरेसी और स्पीड से तय होती है।"
+                : "Modules build foundation. True Job Readiness is proven by accuracy and speed on the floor."}
             </span>
           </div>
         </div>
@@ -193,9 +193,9 @@ export const ModulesView: React.FC<ModulesViewProps> = ({
       {/* ========================================================= */}
       {/* 2. 10-DAY MODULE LIST                                      */}
       {/* ========================================================= */}
-      <div className="space-y-2.5">
+      <div className="space-y-3">
         <h3 className="text-xs font-black text-slate-700 uppercase tracking-wide px-1">
-          {isHindi ? "डे 1 से डे 10 मॉड्यूल सूची:" : "Day 1 to Day 10 LMS Modules:"}
+          {isHindi ? "डे 1 से डे 10 मॉड्यूल:" : "Day 1 to Day 10 LMS Modules:"}
         </h3>
 
         {MANDATORY_TRAINING_MODULES.map((mod) => {
@@ -225,12 +225,12 @@ export const ModulesView: React.FC<ModulesViewProps> = ({
               {/* Module Header Bar */}
               <div
                 onClick={() => setSelectedModuleId(isExpanded ? null : mod.id)}
-                className="p-3.5 sm:p-4 flex items-center justify-between cursor-pointer hover:bg-slate-50/60 transition-colors"
+                className="p-4 flex items-center justify-between cursor-pointer hover:bg-slate-50/60 transition-colors gap-3"
               >
-                <div className="flex items-center gap-3">
+                <div className="flex items-center gap-3 min-w-0">
                   {/* Status Circle Icon */}
                   <div
-                    className={`w-9 h-9 rounded-2xl flex items-center justify-center shrink-0 font-black text-xs ${
+                    className={`w-10 h-10 rounded-2xl flex items-center justify-center shrink-0 font-black text-sm ${
                       isCompleted
                         ? "bg-emerald-500 text-white"
                         : isCurrent
@@ -247,38 +247,32 @@ export const ModulesView: React.FC<ModulesViewProps> = ({
                     )}
                   </div>
 
-                  <div>
+                  <div className="min-w-0">
                     <div className="flex items-center gap-2">
-                      <span className="text-[10px] font-black uppercase tracking-wider text-slate-400">
-                        {isHindi ? `दिन ${mod.dayNumber}` : `Day ${mod.dayNumber}`} • {mod.code}
+                      <span className="text-xs font-black uppercase tracking-wider text-slate-400 truncate">
+                        {isHindi ? `मॉड्यूल ${mod.dayNumber}` : `MODULE ${mod.dayNumber}`} • {mod.durationMinutes} min
                       </span>
-                      {isCompleted && (
-                        <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-200">
-                          ✓ {isHindi ? "पूर्ण" : "Completed"}
-                        </span>
-                      )}
-                      {isCurrent && (
-                        <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-purple-100 text-purple-800 animate-pulse">
-                          ● {isHindi ? "चालू मॉड्यूल" : "In Progress"}
-                        </span>
-                      )}
-                      {isLocked && (
-                        <span className="text-[10px] font-medium px-2 py-0.5 rounded-full bg-slate-100 text-slate-500">
-                          {isHindi ? "लॉक" : "Locked"}
-                        </span>
-                      )}
                     </div>
-                    <h4 className="text-xs sm:text-sm font-bold text-slate-900 mt-0.5">
+                    <h4 className="text-sm sm:text-base font-black text-slate-900 mt-0.5 truncate">
                       {isHindi && mod.titleHi ? mod.titleHi : mod.title}
                     </h4>
                   </div>
                 </div>
 
-                <div className="flex items-center gap-2 text-slate-400">
-                  <div className="hidden sm:flex items-center gap-1 text-[11px] text-slate-500">
-                    <Clock className="w-3.5 h-3.5 text-slate-400" />
-                    <span>{mod.durationMinutes}m</span>
-                  </div>
+                <div className="flex items-center gap-2 shrink-0">
+                  {isCompleted ? (
+                    <span className="text-xs font-bold px-3 py-1 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-200">
+                      ✓ {isHindi ? "पूर्ण" : "Completed"}
+                    </span>
+                  ) : isCurrent ? (
+                    <span className="text-xs font-black px-3.5 py-1.5 rounded-full bg-gradient-to-r from-violet-600 to-purple-600 text-white shadow-xs animate-pulse">
+                      {isHindi ? "शुरू करें" : "START"}
+                    </span>
+                  ) : (
+                    <span className="text-xs font-semibold px-2.5 py-1 rounded-full bg-slate-100 text-slate-500">
+                      {isHindi ? "लॉक" : "Locked"}
+                    </span>
+                  )}
                   {isExpanded ? (
                     <ChevronUp className="w-4 h-4 text-slate-600" />
                   ) : (
@@ -289,22 +283,22 @@ export const ModulesView: React.FC<ModulesViewProps> = ({
 
               {/* Expandable Module Detail & Activities */}
               {isExpanded && (
-                <div className="px-3.5 pb-4 pt-1 border-t border-slate-100 space-y-3 bg-slate-50/40">
-                  <p className="text-xs text-slate-600 leading-relaxed">
+                <div className="px-4 pb-4 pt-2 border-t border-slate-100 space-y-3 bg-slate-50/40">
+                  <p className="text-xs sm:text-sm text-slate-700 leading-relaxed font-medium">
                     {isHindi && mod.descriptionHi ? mod.descriptionHi : mod.description}
                   </p>
 
-                  <div className="flex items-center gap-1.5 text-[11px] text-violet-700 bg-violet-50/80 px-2.5 py-1.5 rounded-xl border border-violet-100">
+                  <div className="flex items-center gap-1.5 text-xs text-violet-700 bg-violet-50/80 px-3 py-2 rounded-xl border border-violet-100">
                     <Zap className="w-3.5 h-3.5 shrink-0" />
                     <span>
-                      <strong>{isHindi ? "हुनर संबंध:" : "Maps to Capability:"}</strong> {mappedCapNames}
+                      <strong className="font-bold">{isHindi ? "हुनर संबंध:" : "Maps to Capability:"}</strong> {mappedCapNames}
                     </span>
                   </div>
 
                   {/* 5 Mandatory Activities in this Module */}
-                  <div className="space-y-1.5 pt-1">
-                    <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400 block px-1">
-                      {isHindi ? "मॉड्यूल गतिविधियां (5 गतिविधियां):" : "Module Activities (5 Mandatory Steps):"}
+                  <div className="space-y-2 pt-1">
+                    <span className="text-xs font-bold uppercase tracking-wider text-slate-400 block px-1">
+                      {isHindi ? "मॉड्यूल गतिविधियां:" : "Module Activities:"}
                     </span>
 
                     {mod.activities.map((act) => {
@@ -321,7 +315,7 @@ export const ModulesView: React.FC<ModulesViewProps> = ({
                               setActiveActivityModal({ module: mod, activity: act });
                             }
                           }}
-                          className={`p-2.5 rounded-2xl flex items-center justify-between transition-all cursor-pointer ${
+                          className={`p-3 rounded-2xl flex items-center justify-between transition-all cursor-pointer ${
                             isLocked
                               ? "bg-slate-100/50 opacity-60 cursor-not-allowed"
                               : isActCompleted
@@ -329,32 +323,32 @@ export const ModulesView: React.FC<ModulesViewProps> = ({
                               : "bg-white border border-purple-200 hover:border-purple-400 shadow-xs"
                           }`}
                         >
-                          <div className="flex items-center gap-2.5">
-                            <div className="p-1.5 rounded-xl bg-slate-50 border border-slate-100">
+                          <div className="flex items-center gap-3 min-w-0">
+                            <div className="p-2 rounded-xl bg-slate-50 border border-slate-100 shrink-0">
                               {getActivityIcon(act.type)}
                             </div>
-                            <div>
-                              <span className="text-[10px] font-bold text-slate-400 block uppercase">
+                            <div className="min-w-0">
+                              <span className="text-xs font-bold text-slate-400 block uppercase">
                                 {getActivityTypeName(act.type)}
                               </span>
-                              <span className="text-xs font-semibold text-slate-900 leading-tight">
+                              <span className="text-xs sm:text-sm font-bold text-slate-900 leading-tight block truncate">
                                 {isHindi && act.titleHi ? act.titleHi : act.title}
                               </span>
                             </div>
                           </div>
 
-                          <div className="flex items-center gap-2 shrink-0">
+                          <div className="flex items-center gap-2 shrink-0 ml-2">
                             {act.score !== undefined && (
-                              <span className="text-[10px] font-black text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded-full border border-emerald-200">
+                              <span className="text-xs font-black text-emerald-700 bg-emerald-50 px-2.5 py-0.5 rounded-full border border-emerald-200">
                                 {act.score}%
                               </span>
                             )}
                             {isActCompleted ? (
-                              <span className="text-[10px] font-bold text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded-full">
+                              <span className="text-xs font-bold text-emerald-600 bg-emerald-50 px-2.5 py-1 rounded-full">
                                 ✓ {isHindi ? "पूर्ण" : "Done"}
                               </span>
                             ) : (
-                              <span className="text-[10px] font-bold text-purple-700 bg-purple-50 px-2.5 py-1 rounded-full hover:bg-purple-100">
+                              <span className="text-xs font-bold text-purple-700 bg-purple-50 px-3 py-1 rounded-full hover:bg-purple-100">
                                 {isHindi ? "शुरू करें →" : "Start →"}
                               </span>
                             )}

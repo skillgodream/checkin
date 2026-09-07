@@ -155,11 +155,11 @@ export const LearnerDailyReportCard: React.FC<LearnerDailyReportCardProps> = ({
             <Calendar className="w-4 h-4 text-violet-600" />
           </div>
           <div className="flex items-center gap-2">
-            <span className="text-xs font-black uppercase tracking-wider text-slate-800">
+            <span className="text-xs sm:text-sm font-black uppercase tracking-wider text-slate-800">
               {isHindi ? `कल का स्नैपशॉट (दिन ${yesterdayNumber})` : `YESTERDAY SNAPSHOT (DAY ${yesterdayNumber})`}
             </span>
             <span
-              className={`text-[9px] font-black px-2 py-0.5 rounded-full border ${signBadgeBg}`}
+              className={`text-xs font-black px-2.5 py-0.5 rounded-full border ${signBadgeBg}`}
             >
               {signTag}
             </span>
@@ -183,7 +183,7 @@ export const LearnerDailyReportCard: React.FC<LearnerDailyReportCardProps> = ({
         {/* Card 1: Pick Pace vs Target */}
         <div className="p-3 rounded-2xl bg-gradient-to-br from-violet-50/80 to-purple-50/30 border border-purple-100/90 flex flex-col justify-between space-y-2 hover:bg-violet-100/40 transition-colors">
           <div className="flex items-center justify-between">
-            <span className="text-[10px] font-black uppercase tracking-wider text-purple-700">
+            <span className="text-xs font-black uppercase tracking-wider text-purple-700">
               {isHindi ? "पिकिंग रफ़्तार" : "Pick Speed"}
             </span>
             <div className="w-6 h-6 rounded-lg bg-violet-600 text-white flex items-center justify-center shadow-2xs">
@@ -192,18 +192,18 @@ export const LearnerDailyReportCard: React.FC<LearnerDailyReportCardProps> = ({
           </div>
           <div>
             <div className="flex items-baseline gap-1">
-              <span className="text-xl font-black text-slate-900 leading-none">{actualPace}</span>
-              <span className="text-[11px] font-bold text-slate-500">/hr</span>
+              <span className="text-2xl font-black text-slate-900 leading-none">{actualPace}</span>
+              <span className="text-xs font-bold text-slate-500">/hr</span>
             </div>
             {/* Progress bar visual */}
-            <div className="w-full bg-purple-100 rounded-full h-1.5 mt-1.5 overflow-hidden">
+            <div className="w-full bg-purple-100 rounded-full h-2 mt-1.5 overflow-hidden">
               <div
-                className="bg-violet-600 h-1.5 rounded-full transition-all duration-500"
+                className="bg-violet-600 h-2 rounded-full transition-all duration-500"
                 style={{ width: `${pacePct}%` }}
               />
             </div>
-            <span className="text-[10px] text-slate-500 font-semibold block mt-1">
-              🎯 {isHindi ? `लक्ष्य ${targetPace}/hr (${pacePct}%)` : `Goal ${targetPace}/hr (${pacePct}%)`}
+            <span className="text-xs text-slate-600 font-bold block mt-1.5">
+              🎯 {isHindi ? `लक्ष्य ${targetPace}/hr` : `Goal ${targetPace}/hr`}
             </span>
           </div>
         </div>
@@ -211,7 +211,7 @@ export const LearnerDailyReportCard: React.FC<LearnerDailyReportCardProps> = ({
         {/* Card 2: Accuracy Rate */}
         <div className="p-3 rounded-2xl bg-gradient-to-br from-emerald-50/80 to-teal-50/30 border border-emerald-100/90 flex flex-col justify-between space-y-2 hover:bg-emerald-100/40 transition-colors">
           <div className="flex items-center justify-between">
-            <span className="text-[10px] font-black uppercase tracking-wider text-emerald-700">
+            <span className="text-xs font-black uppercase tracking-wider text-emerald-700">
               {isHindi ? "एक्यूरेसी" : "Accuracy"}
             </span>
             <div className="w-6 h-6 rounded-lg bg-emerald-600 text-white flex items-center justify-center shadow-2xs">
@@ -220,17 +220,17 @@ export const LearnerDailyReportCard: React.FC<LearnerDailyReportCardProps> = ({
           </div>
           <div>
             <div className="flex items-baseline gap-1">
-              <span className="text-xl font-black text-slate-900 leading-none">{accuracy}%</span>
+              <span className="text-2xl font-black text-slate-900 leading-none">{accuracy}%</span>
             </div>
             {/* Accuracy bar visual */}
-            <div className="w-full bg-emerald-100 rounded-full h-1.5 mt-1.5 overflow-hidden">
+            <div className="w-full bg-emerald-100 rounded-full h-2 mt-1.5 overflow-hidden">
               <div
-                className="bg-emerald-600 h-1.5 rounded-full transition-all duration-500"
+                className="bg-emerald-600 h-2 rounded-full transition-all duration-500"
                 style={{ width: `${accuracy}%` }}
               />
             </div>
-            <span className="text-[10px] text-emerald-700 font-bold block mt-1">
-              ✓ {isHindi ? "0 त्रुटियां दर्ज" : "Zero Scan Errors"}
+            <span className="text-xs text-emerald-700 font-bold block mt-1.5">
+              ✓ {isHindi ? "0 त्रुटियां" : "Zero Errors"}
             </span>
           </div>
         </div>
@@ -238,8 +238,8 @@ export const LearnerDailyReportCard: React.FC<LearnerDailyReportCardProps> = ({
         {/* Card 3: Orders Completed */}
         <div className="p-3 rounded-2xl bg-gradient-to-br from-blue-50/80 to-sky-50/30 border border-blue-100/90 flex flex-col justify-between space-y-2 hover:bg-blue-100/40 transition-colors">
           <div className="flex items-center justify-between">
-            <span className="text-[10px] font-black uppercase tracking-wider text-blue-700">
-              {isHindi ? "ऑर्डर पूरे" : "Orders Done"}
+            <span className="text-xs font-black uppercase tracking-wider text-blue-700">
+              {isHindi ? "ऑर्डर" : "Orders"}
             </span>
             <div className="w-6 h-6 rounded-lg bg-blue-600 text-white flex items-center justify-center shadow-2xs">
               <Package className="w-3.5 h-3.5" />
@@ -247,17 +247,17 @@ export const LearnerDailyReportCard: React.FC<LearnerDailyReportCardProps> = ({
           </div>
           <div>
             <div className="flex items-baseline gap-1">
-              <span className="text-xl font-black text-slate-900 leading-none">{ordersCompleted}</span>
-              <span className="text-[11px] font-bold text-slate-500">{isHindi ? "ऑर्डर" : "orders"}</span>
+              <span className="text-2xl font-black text-slate-900 leading-none">{ordersCompleted}</span>
+              <span className="text-xs font-bold text-slate-500">{isHindi ? "पूरे" : "done"}</span>
             </div>
-            <div className="w-full bg-blue-100 rounded-full h-1.5 mt-1.5 overflow-hidden">
+            <div className="w-full bg-blue-100 rounded-full h-2 mt-1.5 overflow-hidden">
               <div
-                className="bg-blue-600 h-1.5 rounded-full transition-all duration-500"
+                className="bg-blue-600 h-2 rounded-full transition-all duration-500"
                 style={{ width: `${Math.min(100, (ordersCompleted / 40) * 100)}%` }}
               />
             </div>
-            <span className="text-[10px] text-blue-700 font-semibold block mt-1">
-              📦 {isHindi ? "समय पर डिस्पैच" : "100% On-Time"}
+            <span className="text-xs text-blue-700 font-bold block mt-1.5">
+              📦 {isHindi ? "समय पर" : "On-Time"}
             </span>
           </div>
         </div>
@@ -265,8 +265,8 @@ export const LearnerDailyReportCard: React.FC<LearnerDailyReportCardProps> = ({
         {/* Card 4: GOOD / BAD SIGN (OVERALL SHIFT ASSESSMENT) */}
         <div className={`p-3 rounded-2xl ${signBg} flex flex-col justify-between space-y-2 hover:brightness-98 transition-all`}>
           <div className="flex items-center justify-between">
-            <span className="text-[10px] font-black uppercase tracking-wider">
-              {isShiftGood ? (isHindi ? "स्थिति: सही" : "STATUS: GOOD") : (isHindi ? "स्थिति: सुधार" : "STATUS: ALERT")}
+            <span className="text-xs font-black uppercase tracking-wider">
+              {isShiftGood ? (isHindi ? "स्थिति" : "STATUS") : (isHindi ? "स्थिति" : "STATUS")}
             </span>
             <div className={`w-6 h-6 rounded-lg ${signIconBg} flex items-center justify-center shadow-2xs`}>
               {isShiftGood ? <ThumbsUp className="w-3.5 h-3.5" /> : <AlertTriangle className="w-3.5 h-3.5" />}
@@ -274,14 +274,14 @@ export const LearnerDailyReportCard: React.FC<LearnerDailyReportCardProps> = ({
           </div>
           <div>
             <div className="flex items-center gap-1">
-              <span className="text-base font-black leading-tight tracking-tight">
-                {isShiftGood ? (isHindi ? "👍 सही रहा" : "👍 GOOD") : (isHindi ? "⚠️ सुधार चाहिए" : "⚠️ ATTENTION")}
+              <span className="text-lg sm:text-xl font-black leading-tight tracking-tight">
+                {isShiftGood ? (isHindi ? "👍 सही रहा" : "👍 GOOD") : (isHindi ? "⚠️ ध्यान दें" : "⚠️ ATTENTION")}
               </span>
             </div>
-            <div className={`mt-1.5 px-2 py-0.5 rounded-md text-[9px] font-bold border inline-block ${signBadgeBg}`}>
+            <div className={`mt-1.5 px-2 py-0.5 rounded-md text-xs font-bold border inline-block ${signBadgeBg}`}>
               {signTag}
             </div>
-            <span className="text-[10px] opacity-75 font-medium block mt-1 truncate">
+            <span className="text-xs opacity-85 font-semibold block mt-1 truncate">
               {signSub}
             </span>
           </div>
@@ -290,22 +290,21 @@ export const LearnerDailyReportCard: React.FC<LearnerDailyReportCardProps> = ({
 
       {/* 3. TACTILE ACTION FOOTER */}
       <div className="pt-2 border-t border-slate-100 flex items-center justify-between text-xs">
-        <span className="text-[11px] font-medium text-slate-500 flex items-center gap-1">
+        <span className="text-xs font-medium text-slate-500 flex items-center gap-1.5">
           {isDashboardVariant ? (
             <>
-              <FileText className="w-3.5 h-3.5 text-violet-600" />
-              <span>{isHindi ? "टैप करें: पूरा कार्य, ट्रेनिंग व मॉड्यूल विवरण देखें" : "Tap to open full work, training & module summary"}</span>
+              <FileText className="w-4 h-4 text-violet-600" />
+              <span>{isHindi ? "पूरा विवरण देखें" : "Tap for full shift details"}</span>
             </>
           ) : (
             <>
-              <Sparkles className="w-3.5 h-3.5 text-violet-500" />
-              <span>{isHindi ? "विस्तृत रिपोर्ट व आंकड़े देखने के लिए टैप करें" : "Tap to explore full metrics in Dashboard"}</span>
+              <Sparkles className="w-4 h-4 text-violet-500" />
+              <span>{isHindi ? "डैशबोर्ड रिपोर्ट देखें" : "Tap for full details"}</span>
             </>
           )}
         </span>
         <div className="text-xs font-bold text-violet-700 flex items-center gap-1 group-hover:translate-x-0.5 transition-transform">
-          <span>{isDashboardVariant ? (isHindi ? "विस्तृत विवरण खोलें" : "View Full Summary") : (isHindi ? "डैशबोर्ड खोलें" : "View Dashboard")}</span>
-          <ArrowRight className="w-3.5 h-3.5" />
+          <span>{isHindi ? "विवरण →" : "Details →"}</span>
         </div>
       </div>
     </div>

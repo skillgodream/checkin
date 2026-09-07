@@ -1,5 +1,8 @@
 // Browser-native Text-to-Speech utility for frontline workers
 
+// Keep module-level reference to active utterance to prevent Chrome V8 garbage collection bug
+let activeUtterance: SpeechSynthesisUtterance | null = null;
+
 export function speakMessage(
   text: string,
   isHindi: boolean = false,
@@ -24,8 +27,14 @@ export function speakMessage(
       return;
     }
 
+    // Chrome workaround: resume if synth is paused or stuck
+    if (window.speechSynthesis.paused) {
+      window.speechSynthesis.resume();
+    }
+
     const utterance = new SpeechSynthesisUtterance(cleanText);
-    utterance.rate = 0.92; // Slightly slower pacing for warehouse clarity
+    activeUtterance = utterance; // Retain reference
+    utterance.rate = 0.95; // Slightly slower pacing for warehouse clarity
     utterance.pitch = 1.0;
 
     const voices = window.speechSynthesis.getVoices();
@@ -47,15 +56,18 @@ export function speakMessage(
     }
 
     utterance.onend = () => {
+      activeUtterance = null;
       if (onEnd) onEnd();
     };
     utterance.onerror = () => {
+      activeUtterance = null;
       if (onEnd) onEnd();
     };
 
     window.speechSynthesis.speak(utterance);
   } catch (err) {
     console.warn("Speech synthesis unavailable:", err);
+    activeUtterance = null;
     if (onEnd) onEnd();
   }
 }
@@ -63,5 +75,6 @@ export function speakMessage(
 export function stopSpeaking() {
   if (typeof window !== "undefined" && "speechSynthesis" in window) {
     window.speechSynthesis.cancel();
+    activeUtterance = null;
   }
 }

@@ -20,11 +20,6 @@ function getGenAI(): GoogleGenAI | null {
   if (!genAIClient) {
     genAIClient = new GoogleGenAI({
       apiKey: process.env.GEMINI_API_KEY,
-      httpOptions: {
-        headers: {
-          "User-Agent": "aistudio-build",
-        },
-      },
     });
   }
   return genAIClient;
@@ -113,7 +108,7 @@ Respond ONLY with valid JSON in this exact structure:
 }`;
 
         const response = await ai.models.generateContent({
-          model: "gemini-3.8-flash",
+          model: "gemini-3.1-flash-lite",
           contents: prompt,
           config: {
             responseMimeType: "application/json",
@@ -171,7 +166,7 @@ app.post("/api/companion/ask", async (req, res) => {
     if (ai) {
       try {
         const response = await ai.models.generateContent({
-          model: "gemini-3.8-flash",
+          model: "gemini-3.1-flash-lite",
           contents: `You are a helpful, respectful, friendly peer work companion for a blue-collar ${role} in a high-speed quick-commerce dark store (Day ${dayNumber} on the job).
 The worker asked: "${question}"
 Answer in 2-3 simple, very practical sentences.

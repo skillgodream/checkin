@@ -337,6 +337,7 @@ export interface RecommendedAction {
   decisionType?: AdaptiveGearDecision;
   targetCapabilityId?: number; // Target capability 1..20 if capability-related
   rationale?: string;          // Why this intervention was chosen over a curriculum step
+  whyThisAction?: string;      // Explanatory rationale
 }
 
 export interface ActionOutcome {
@@ -349,6 +350,7 @@ export interface ActionOutcome {
   notes: string;
   subsequentPickRate?: number;
   subsequentAccuracy?: number;
+  evaluatedAt?: string;
 }
 
 export interface DayRecord {

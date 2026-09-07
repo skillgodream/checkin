@@ -22,6 +22,15 @@ import {
 } from "../types";
 import { createDefaultCapabilitiesLedger } from "../data/seedData";
 
+export interface Day10EvaluationResult {
+  isReady: boolean;
+  status: "Job Ready" | "Not Ready";
+  summary: string;
+  verifiedCriteria: Array<{ name: string; met: boolean; detail: string }>;
+  unresolvedBlockers: string[];
+  recommendedAction: string;
+}
+
 export interface PatternSynthesisResult {
   pattern: IdentifiedPattern;
   action: RecommendedAction;
@@ -31,6 +40,7 @@ export interface PatternSynthesisResult {
   overallReadinessScore: number;
   currentCapabilityId: number;
   adaptiveDecision: AdaptiveGearDecision;
+  day10Evaluation?: Day10EvaluationResult;
 }
 
 export interface LoopExecutionInput {
@@ -198,7 +208,10 @@ export async function askCompanion(
  * IMPORTANT: This score is an informational summary, NOT the decision engine.
  * The intelligence makes all decisions from underlying multi-signal evidence.
  */
-export function assessReadiness(capabilities: Record<number, CapabilityState>): number {
+export function assessReadiness(
+  capabilities: Record<number, CapabilityState>,
+  hire?: Partial<NewHire>
+): number {
   if (!capabilities) return 0;
   let scoreSum = 0;
   const totalCaps = DARK_STORE_CAPABILITIES.length; // 20 capabilities
@@ -220,7 +233,15 @@ export function assessReadiness(capabilities: Record<number, CapabilityState>): 
     }
   }
 
-  return Math.min(100, Math.round((scoreSum / totalCaps) * 100));
+  let baseScore = Math.min(100, Math.round((scoreSum / totalCaps) * 100));
+
+  // If mandatory training is incomplete, strong floor performance cannot override mandatory requirements
+  if (hire && typeof hire.modulesCompleted === "number" && hire.modulesCompleted < 10) {
+    const trainingFactor = hire.modulesCompleted / 10;
+    baseScore = Math.min(baseScore, Math.round(50 + trainingFactor * 35)); // Max 85% if modules < 10
+  }
+
+  return baseScore;
 }
 
 // Backward-compatible alias for assessReadiness
@@ -270,7 +291,7 @@ export function deriveLearnerRoadmap(
   const modulesCompleted = hire.modulesCompleted ?? Math.min(10, currentDay);
   const readinessScore = typeof hire.overallReadinessScore === "number"
     ? (hire.overallReadinessScore <= 1 ? Math.round(hire.overallReadinessScore * 100) : Math.round(hire.overallReadinessScore))
-    : assessReadiness(capabilities);
+    : assessReadiness(capabilities, hire);
 
   const demonstratedCount = (Object.values(capabilities) as CapabilityState[]).filter(
     (c) => c && (c.evidence === "demonstrated" || c.mastery === "proficient" || c.mastery === "mastered")
@@ -281,7 +302,10 @@ export function deriveLearnerRoadmap(
 
   // Authoritative stage calculation
   let currentStageIndex = 0;
-  if (readinessScore >= 85 || demonstratedCount >= 18 || (currentPickRate >= 50 && accuracy >= 98 && demonstratedCount >= 16)) {
+  if (
+    modulesCompleted >= 10 &&
+    (readinessScore >= 85 || demonstratedCount >= 18 || (currentPickRate >= 50 && accuracy >= 98 && demonstratedCount >= 16))
+  ) {
     currentStageIndex = 5; // 6. Job Ready
   } else if ((currentPickRate >= 45 && accuracy >= 98 && demonstratedCount >= 12) || (readinessScore >= 70 && demonstratedCount >= 12)) {
     currentStageIndex = 4; // 5. Reliability
@@ -512,9 +536,9 @@ export function extractAndSelectPreviousDaySnapshot(
   // 2. Safety Issue
   const isSafetyIssue =
     prevPattern?.diagnosis?.toLowerCase().includes("safety") ||
-    prevDaily?.category === "Process" && (prevDaily?.rawText || "").toLowerCase().includes("safety") ||
+    (prevDaily?.category === "Process" && (prevDaily?.rawText || "").toLowerCase().includes("safety")) ||
     (prevManager?.notes || "").toLowerCase().includes("safety") ||
-    (prevManager?.notes || "").toLowerCase().includes("ppe");
+    /\bppe\b/i.test(prevManager?.notes || "");
 
   if (isSafetyIssue) {
     pool.push({
@@ -1088,17 +1112,23 @@ function observe(input: LoopExecutionInput): ObservedSignals {
     !(workSignal?.ordersCompleted === 0 && (workSignal?.gapIdentified === "No shift orders logged" || (workSignal?.actualPickRate === 0 && workSignal?.accuracyRate === 0)));
 
   const helpRequestsCount = workSignal?.helpRequestsCount ?? dailySignal?.helpRequestsCount ?? 0;
-  const workerChronicHelpDependency =
-    helpRequestsCount >= 4 ||
+  const isExplicitDependency =
     textContent.includes("called buddy 6 times") ||
     textContent.includes("couldn't pick without buddy") ||
     textContent.includes("high help dependency") ||
     textContent.includes("unable to pick solo") ||
     textContent.includes("cannot pick solo") ||
     textContent.includes("need buddy with me on every single order") ||
+    textContent.includes("stay with me while i pick") ||
+    textContent.includes("stay with me") ||
+    managerNotes.includes("continuous buddy support") ||
     managerNotes.includes("help dependency") ||
     managerNotes.includes("unable to pick solo") ||
     managerNotes.includes("needs independent picking");
+
+  const workerChronicHelpDependency =
+    isExplicitDependency ||
+    (helpRequestsCount >= 5 && (managerSignal?.issueCategory === "Confidence" || managerSignal?.state === "Struggling"));
 
   const workerReportsConfusion =
     !workerChronicHelpDependency &&
@@ -1110,18 +1140,25 @@ function observe(input: LoopExecutionInput): ObservedSignals {
       textContent.includes("shelf") ||
       textContent.includes("rack"));
 
+  const isToolResolved =
+    textContent.includes("working perfectly") ||
+    textContent.includes("hardware resolved") ||
+    managerNotes.includes("hardware resolved") ||
+    managerNotes.includes("terminal hardware resolved");
+
   const workerReportsTool =
-    dailySignal?.category === "Tool" ||
-    textContent.includes("bluetooth") ||
-    textContent.includes("battery") ||
-    textContent.includes("hardware") ||
-    (textContent.includes("scanner") &&
-      (textContent.includes("disconnect") ||
-        textContent.includes("died") ||
-        textContent.includes("won't scan") ||
-        textContent.includes("broken") ||
-        textContent.includes("lens"))) ||
-    managerSignal?.issueCategory === "Tool";
+    !isToolResolved &&
+    (dailySignal?.category === "Tool" ||
+      textContent.includes("bluetooth") ||
+      textContent.includes("battery") ||
+      textContent.includes("hardware") ||
+      (textContent.includes("scanner") &&
+        (textContent.includes("disconnect") ||
+          textContent.includes("died") ||
+          textContent.includes("won't scan") ||
+          textContent.includes("broken") ||
+          textContent.includes("lens"))) ||
+      managerSignal?.issueCategory === "Tool");
 
   const workerReportsVariant =
     textContent.includes("variant") ||
@@ -1215,12 +1252,14 @@ function understand(
     };
   }
 
-  // 3. Critical safety blocker (explicit safety hazard signal)
+  // 3. Critical safety blocker (explicit safety hazard signal or PPE violation)
   const textRaw = `${observed.dailySignal?.rawText || ""} ${observed.dailySignal?.issue || ""}`.toLowerCase();
   const mgrNotes = (observed.managerSignal?.notes || "").toLowerCase();
   const isSafetyRiskReported =
-    (textRaw.includes("safety") && (textRaw.includes("hazard") || textRaw.includes("injury") || textRaw.includes("blocked exit"))) ||
-    (mgrNotes.includes("safety") && (mgrNotes.includes("hazard") || mgrNotes.includes("ppe violation") || mgrNotes.includes("critical safety risk")));
+    /\bppe\b/i.test(textRaw) ||
+    /\bppe\b/i.test(mgrNotes) ||
+    (textRaw.includes("safety") && (textRaw.includes("hazard") || textRaw.includes("injury") || textRaw.includes("blocked exit") || textRaw.includes("violation") || textRaw.includes("without"))) ||
+    (mgrNotes.includes("safety") && (mgrNotes.includes("hazard") || /\bppe\b/i.test(mgrNotes) || mgrNotes.includes("violation") || mgrNotes.includes("critical safety risk") || mgrNotes.includes("compliance issue")));
 
   if (isSafetyRiskReported) {
     return {
@@ -1229,12 +1268,12 @@ function understand(
       patternCategory: "Process",
       patternName: "Critical Floor Safety Protocol Blocker",
       diagnosisText:
-        `Critical safety hazard reported on floor. Floor safety protocols (Capability 1: Store Safety & PPE) must be immediately verified with supervisor before independent fulfillment can proceed.`,
+        `Critical safety hazard / PPE compliance issue reported on floor. Floor safety protocols (Capability 1: Store Safety & PPE) must be immediately verified with supervisor before independent fulfillment can proceed.`,
     };
   }
 
   // 4. Critical accuracy failure takes precedence (quality floor is paramount)
-  if (observed.accuracy < 90 || observed.managerObservesAccuracy || observed.workerReportsVariant) {
+  if (observed.accuracy < 95 || observed.managerObservesAccuracy || observed.workerReportsVariant) {
     return {
       rootCause: "variant_quality",
       targetCapId: 6, // DSP-06-VARIANT-CHECK
@@ -1246,7 +1285,13 @@ function understand(
   }
 
   // 5. Hardware / Tool issue (Symptom != Root Cause)
-  if (observed.workerReportsTool) {
+  if (
+    observed.workerReportsTool &&
+    (observed.speedGap > 5 ||
+      observed.managerObservesSupport ||
+      observed.managerObservesStruggle ||
+      observed.managerSignal?.issueCategory === "Tool")
+  ) {
     return {
       rootCause: "tool_hardware",
       targetCapId: 2, // DSP-02-SCANNER-BASICS
@@ -1334,7 +1379,7 @@ function understand(
   // 8. General pacing / floor route practice
   if (
     isPacingIssue ||
-    (observed.speedGap > 10 && (observed.managerObservesSupport || observed.managerObservesSpeed || hire.modulesCompleted === 10))
+    (observed.speedGap >= 5 && (observed.managerObservesSupport || observed.managerObservesSpeed || hire.modulesCompleted === 10))
   ) {
     const modulePrefix = hire.modulesCompleted === 10
       ? "Training modules (10/10) are 100% complete, but real-world floor readiness is not yet demonstrated. "
@@ -1608,7 +1653,8 @@ function chooseNextAction(
     };
   }
 
-  if (currentPickRate >= targetPickRate + 10 && accuracy >= 98 && (hire.currentCapabilityId || 1) < 8) {
+  const isTrainingFoundationComplete = (hire.modulesCompleted ?? 10) >= 3;
+  if (isTrainingFoundationComplete && currentPickRate >= targetPickRate + 10 && accuracy >= 98 && (hire.currentCapabilityId || 1) < 8) {
     const advancedCap = DARK_STORE_CAPABILITIES.find((c) => c.id === 8) || DARK_STORE_CAPABILITIES[7];
     return {
       decisionType: "jump_ahead",
@@ -1724,6 +1770,7 @@ function act(
     decisionType: decided.decisionType,
     targetCapabilityId: decided.targetCapId,
     rationale: decided.decisionRationale,
+    whyThisAction: decided.decisionRationale,
   };
 
   return { pattern, action };
@@ -1932,7 +1979,18 @@ export function executeCoordinationLoop(input: LoopExecutionInput): PatternSynth
     understoodRootCause: understood.rootCause,
   });
 
-  const overallReadinessScore = assessReadiness(checkResult.updatedCapabilities);
+  const overallReadinessScore = assessReadiness(checkResult.updatedCapabilities, input.hire);
+
+  const day10Evaluation = evaluateDay10Outcome(
+    {
+      ...input.hire,
+      status: checkResult.finalStatus,
+      capabilities: checkResult.updatedCapabilities,
+    },
+    input.workSignal,
+    input.dailySignal,
+    input.managerSignal
+  );
 
   return {
     pattern: actionPackage.pattern,
@@ -1943,6 +2001,112 @@ export function executeCoordinationLoop(input: LoopExecutionInput): PatternSynth
     overallReadinessScore,
     currentCapabilityId: decided.targetCapId,
     adaptiveDecision: decided.decisionType,
+    day10Evaluation,
+  };
+}
+
+/**
+ * Authoritative Commercial Model Evaluation: Day 0 -> Day 10
+ * Assesses whether worker is certified Job Ready or Not Ready across all 7 criteria.
+ * Does NOT reduce readiness to a single metric.
+ */
+export function evaluateDay10Outcome(
+  hire: NewHire,
+  latestWorkSignal?: WorkSignal,
+  latestDailySignal?: DailySignal,
+  latestManagerSignal?: ManagerSignal
+): Day10EvaluationResult {
+  const capabilities = hire.capabilities || {};
+  const currentWork = latestWorkSignal || hire.daysHistory[hire.daysHistory.length - 1]?.workSignal || {
+    dayNumber: 10,
+    targetPickRate: 50,
+    actualPickRate: 50,
+    accuracyRate: 98,
+    ordersCompleted: 60,
+    targetOrders: 60,
+  };
+
+  const capStates = Object.values(capabilities) as CapabilityState[];
+  const demonstratedCount = capStates.filter(
+    (c) => c && (c.evidence === "demonstrated" || c.mastery === "proficient" || c.mastery === "mastered")
+  ).length;
+
+  const modulesCompleted = hire.modulesCompleted ?? 10;
+  const pickRate = currentWork.actualPickRate;
+  const targetPickRate = currentWork.targetPickRate || 50;
+  const accuracy = currentWork.accuracyRate;
+  const helpRequests = currentWork.helpRequestsCount ?? 0;
+
+  const safetyCap = capabilities[1];
+  const textRaw = `${latestDailySignal?.rawText || ""} ${latestDailySignal?.issue || ""}`.toLowerCase();
+  const mgrNotes = (latestManagerSignal?.notes || "").toLowerCase();
+  const isSafetyClear = Boolean(
+    safetyCap &&
+    safetyCap.mastery !== "locked" &&
+    safetyCap.evidence !== "inconsistent" &&
+    !/\bppe\b/i.test(textRaw) &&
+    !/\bppe\b/i.test(mgrNotes)
+  );
+
+  const isTrainingComplete = modulesCompleted >= 10;
+  const isCapabilitiesDemonstrated = demonstratedCount >= 14;
+  const isPerformanceAdequate = pickRate >= targetPickRate;
+  const isAccuracyAcceptable = accuracy >= 98;
+  const isIndependent = helpRequests <= 1 && latestManagerSignal?.issueCategory !== "Confidence" && latestManagerSignal?.state !== "Struggling";
+  const hasNoCriticalBlockers = hire.status !== "At risk" && latestDailySignal?.category !== "Tool";
+
+  const verifiedCriteria = [
+    {
+      name: "Mandatory Training Completed",
+      met: isTrainingComplete,
+      detail: `${modulesCompleted}/10 foundation modules completed`,
+    },
+    {
+      name: "Required Capabilities Demonstrated",
+      met: isCapabilitiesDemonstrated,
+      detail: `${demonstratedCount}/20 capabilities demonstrated on floor`,
+    },
+    {
+      name: "Floor Productivity Target",
+      met: isPerformanceAdequate,
+      detail: `${pickRate} picks/hr (target ${targetPickRate}/hr)`,
+    },
+    {
+      name: "Scanning Accuracy Floor",
+      met: isAccuracyAcceptable,
+      detail: `${accuracy}% accuracy (threshold 98%)`,
+    },
+    {
+      name: "Independent Solo Execution",
+      met: isIndependent,
+      detail: `${helpRequests} help requests logged; working autonomously`,
+    },
+    {
+      name: "Safety & Zone Compliance Clear",
+      met: isSafetyClear,
+      detail: isSafetyClear ? "Capability 1 verified; zero safety violations" : "Safety protocol or PPE issue pending",
+    },
+    {
+      name: "No Unresolved Critical Blockers",
+      met: hasNoCriticalBlockers,
+      detail: hasNoCriticalBlockers ? "Floor friction cleared" : "Active floor blocker pending",
+    },
+  ];
+
+  const unresolvedBlockers = verifiedCriteria.filter((c) => !c.met).map((c) => c.name);
+  const isReady = unresolvedBlockers.length === 0;
+
+  return {
+    isReady,
+    status: isReady ? "Job Ready" : "Not Ready",
+    summary: isReady
+      ? `${(hire.name || "Worker").split(" ")[0]} has met all 7 commercial readiness criteria across training, capabilities, speed, accuracy, independence, and safety.`
+      : `${(hire.name || "Worker").split(" ")[0]} is NOT yet ready for autonomous certification due to ${unresolvedBlockers.length} active blocker(s): ${unresolvedBlockers.join(", ")}.`,
+    verifiedCriteria,
+    unresolvedBlockers,
+    recommendedAction: isReady
+      ? "Certify as Autonomous Dark Store Picker for standard floor shift assignment."
+      : `Address ${unresolvedBlockers[0]} before approving autonomous certification.`,
   };
 }
 

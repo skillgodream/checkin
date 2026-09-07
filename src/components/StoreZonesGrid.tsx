@@ -100,12 +100,12 @@ export const StoreZonesGrid: React.FC<StoreZonesGridProps> = ({
   };
 
   return (
-    <div className="space-y-2.5 select-none">
+    <div className="space-y-3 select-none">
       <div className="flex items-center justify-between px-1">
-        <span className="text-xs font-bold uppercase tracking-wider text-slate-400">
-          {isHindi ? "डार्क स्टोर फ्लोर ज़ोन" : "Dark Store Zones"}
+        <span className="text-xs font-bold uppercase tracking-wider text-slate-500">
+          {isHindi ? "डार्क स्टोर ज़ोन" : "Dark Store Zones"}
         </span>
-        <span className="text-[11px] text-purple-600 font-bold">
+        <span className="text-xs text-purple-700 font-bold">
           {isHindi ? "टैप करके दिशा देखें" : "Tap for guidance"}
         </span>
       </div>
@@ -131,7 +131,7 @@ export const StoreZonesGrid: React.FC<StoreZonesGridProps> = ({
 
               {/* Icon */}
               <div
-                className={`mb-2.5 transition-transform ${
+                className={`mb-2 transition-transform ${
                   isActive ? "text-white scale-105" : "text-violet-600"
                 }`}
               >
@@ -149,7 +149,7 @@ export const StoreZonesGrid: React.FC<StoreZonesGridProps> = ({
 
               {/* Subtitle */}
               <span
-                className={`text-[10px] mt-1 font-medium block truncate max-w-[130px] ${
+                className={`text-xs mt-1 font-medium block truncate max-w-[140px] ${
                   isActive ? "text-purple-100 font-bold" : "text-slate-500"
                 }`}
               >

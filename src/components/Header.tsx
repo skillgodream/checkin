@@ -11,6 +11,7 @@ import {
   Gauge,
   Languages,
   UserCheck,
+  FileSpreadsheet,
 } from "lucide-react";
 import { Logo } from "./Logo";
 export type ActiveTab = "new_hire" | "manager" | "organization";
@@ -25,6 +26,8 @@ interface HeaderProps {
   onOpenTelemetryDial?: () => void;
   onOpenBuddy?: () => void;
   onOpenOnboarding?: () => void;
+  onOpenFeedModal?: () => void;
+  onOpenClientDemo?: () => void;
   hasApiKey: boolean;
   doingWellCount?: number;
   needsAttentionCount?: number;
@@ -46,6 +49,8 @@ export const Header: React.FC<HeaderProps> = ({
   onOpenTelemetryDial,
   onOpenBuddy,
   onOpenOnboarding,
+  onOpenFeedModal,
+  onOpenClientDemo,
   hasApiKey,
   doingWellCount = 8,
   needsAttentionCount = 3,
@@ -158,6 +163,20 @@ export const Header: React.FC<HeaderProps> = ({
                 <span className="text-[11px] font-black uppercase text-violet-700">
                   {isHindi ? "हिंदी" : "EN"}
                 </span>
+              </button>
+            )}
+
+            {/* Client Demo Story Quick Launcher */}
+            {onOpenClientDemo && (
+              <button
+                id="header-client-demo-btn"
+                onClick={onOpenClientDemo}
+                title="Client Demo Story & Closed-Loop Scenarios"
+                aria-label="Client Demo Story"
+                className="px-2.5 py-1.5 rounded-2xl transition-all cursor-pointer flex items-center justify-center gap-1 active:scale-95 bg-gradient-to-r from-violet-600 to-fuchsia-600 hover:from-violet-500 hover:to-fuchsia-500 text-white shadow-xs font-black text-xs"
+              >
+                <span className="text-xs">🎯</span>
+                <span className="text-[11px] font-black tracking-tight hidden sm:inline">Demo</span>
               </button>
             )}
 
@@ -307,6 +326,60 @@ export const Header: React.FC<HeaderProps> = ({
                         </div>
                         <span className="text-[10px] font-bold text-rose-600 bg-rose-50 px-1.5 py-0.5 rounded-md">
                           Intro
+                        </span>
+                      </button>
+                    )}
+
+                    {/* Item 5: Client Demo Story */}
+                    {onOpenClientDemo && (
+                      <button
+                        id="eye-menu-client-demo"
+                        onClick={() => {
+                          onOpenClientDemo();
+                          setIsEyeMenuOpen(false);
+                        }}
+                        className="w-full flex items-center justify-between px-3 py-2 rounded-xl text-xs font-bold text-slate-700 hover:bg-slate-100 hover:text-slate-900 transition-all cursor-pointer"
+                      >
+                        <div className="flex items-center gap-2.5">
+                          <div className="p-1.5 rounded-lg bg-violet-50 text-violet-600">
+                            <Sparkles className="w-3.5 h-3.5 stroke-[2.2]" />
+                          </div>
+                          <div className="text-left">
+                            <div className="leading-tight">Client Demo Story</div>
+                            <div className="text-[10px] text-slate-400 font-normal">
+                              Demos 1–8 & 6-stage closed loop
+                            </div>
+                          </div>
+                        </div>
+                        <span className="text-[10px] font-bold text-violet-700 bg-violet-50 px-1.5 py-0.5 rounded-md">
+                          Story
+                        </span>
+                      </button>
+                    )}
+
+                    {/* Item 6: Client Demo Work-Signal Feed (Google Sheet / Form Ingestor) */}
+                    {onOpenFeedModal && (
+                      <button
+                        id="eye-menu-feed-ingestor"
+                        onClick={() => {
+                          onOpenFeedModal();
+                          setIsEyeMenuOpen(false);
+                        }}
+                        className="w-full flex items-center justify-between px-3 py-2 rounded-xl text-xs font-bold text-slate-700 hover:bg-slate-100 hover:text-slate-900 transition-all cursor-pointer"
+                      >
+                        <div className="flex items-center gap-2.5">
+                          <div className="p-1.5 rounded-lg bg-emerald-50 text-emerald-600">
+                            <FileSpreadsheet className="w-3.5 h-3.5 stroke-[2.2]" />
+                          </div>
+                          <div className="text-left">
+                            <div className="leading-tight">Demo Signal Feed</div>
+                            <div className="text-[10px] text-slate-400 font-normal">
+                              Form / Sheet 12-field live test
+                            </div>
+                          </div>
+                        </div>
+                        <span className="text-[10px] font-bold text-emerald-700 bg-emerald-50 px-1.5 py-0.5 rounded-md">
+                          Feed
                         </span>
                       </button>
                     )}

@@ -106,7 +106,7 @@ export const LearnerJourneyRoadmap: React.FC<LearnerJourneyRoadmapProps> = ({
     return (
       <div
         id="learner-job-ready-roadmap-compact"
-        className="bg-white rounded-[24px] p-4 border border-slate-200/80 shadow-2xs space-y-3 select-none"
+        className="bg-white rounded-[24px] p-4 border border-slate-200/90 shadow-2xs space-y-3 select-none"
       >
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2.5">
@@ -114,8 +114,8 @@ export const LearnerJourneyRoadmap: React.FC<LearnerJourneyRoadmapProps> = ({
               <Sparkles className="w-4 h-4 text-purple-600" />
             </div>
             <div>
-              <span className="text-[10px] font-bold uppercase tracking-wider text-slate-500 block">
-                {isHindi ? "मेरी कार्यकुशलता यात्रा" : "MY JOB-READY JOURNEY"}
+              <span className="text-xs font-bold uppercase tracking-wider text-slate-500 block">
+                {isHindi ? "कार्यकुशलता यात्रा" : "Job-Ready Journey"}
               </span>
               <h4 className="text-sm font-black text-slate-900 leading-tight">
                 {isHindi
@@ -154,7 +154,7 @@ export const LearnerJourneyRoadmap: React.FC<LearnerJourneyRoadmapProps> = ({
         </div>
 
         {/* 6-segment progress bar */}
-        <div className="space-y-1.5">
+        <div className="space-y-2">
           <div className="flex items-center justify-between gap-1.5 pt-0.5">
             {stages.map((stage) => {
               const isCompleted = stage.status === "completed";
@@ -162,7 +162,7 @@ export const LearnerJourneyRoadmap: React.FC<LearnerJourneyRoadmapProps> = ({
               return (
                 <div
                   key={stage.id}
-                  className={`flex-1 h-2 rounded-full transition-all ${
+                  className={`flex-1 h-2.5 rounded-full transition-all ${
                     isCompleted
                       ? "bg-emerald-500"
                       : isCurrent
@@ -175,13 +175,13 @@ export const LearnerJourneyRoadmap: React.FC<LearnerJourneyRoadmapProps> = ({
             })}
           </div>
 
-          <div className="flex items-center justify-between text-[11px] text-slate-600 pt-0.5 font-medium">
+          <div className="flex items-center justify-between text-xs text-slate-600 pt-0.5 font-medium">
             <span className="truncate">
-              <strong className="text-slate-800 font-bold">{isHindi ? "लक्ष्य: " : "Milestone: "}</strong>
+              <strong className="text-slate-900 font-bold">{isHindi ? "लक्ष्य: " : "Milestone: "}</strong>
               {isHindi ? currentStage.milestoneHi : currentStage.milestoneEn}
             </span>
             <span
-              className={`font-black shrink-0 ml-1.5 px-2 py-0.5 rounded-full text-[10px] border flex items-center gap-1 ${
+              className={`font-black shrink-0 ml-2 px-2.5 py-0.5 rounded-full text-xs border flex items-center gap-1 ${
                 isHandoverReady
                   ? "bg-emerald-50 text-emerald-800 border-emerald-200"
                   : "bg-amber-50 text-amber-800 border-amber-200"
@@ -189,10 +189,10 @@ export const LearnerJourneyRoadmap: React.FC<LearnerJourneyRoadmapProps> = ({
             >
               {isHandoverReady
                 ? isHindi
-                  ? "✓ हैंडओवर के लिए तैयार"
+                  ? "✓ हैंडओवर तैयार"
                   : "✓ Ready for Handover"
                 : isHindi
-                ? "हैंडओवर तैयारी जारी"
+                ? "प्रगति पर"
                 : "Building Readiness"}
             </span>
           </div>
@@ -201,27 +201,31 @@ export const LearnerJourneyRoadmap: React.FC<LearnerJourneyRoadmapProps> = ({
     );
   }
 
+  // Short stage labels for mobile display
+  const shortStageLabelEn = ["Learning", "Practice", "Ready", "Solo", "Speed", "Certified"];
+  const shortStageLabelHi = ["सीखना", "अभ्यास", "तैयार", "अकेले", "स्पीड", "सर्टिफाइड"];
+
   return (
     <div
       id="learner-job-ready-roadmap-card"
-      className="bg-white rounded-[26px] p-4 border border-purple-100 shadow-2xs space-y-3 select-none"
+      className="bg-white rounded-[26px] p-4 sm:p-5 border border-purple-100 shadow-2xs space-y-3.5 select-none"
     >
       {/* CARD HEADER: WHERE AM I? */}
       <div className="flex items-center justify-between">
-        <div className="flex items-center gap-2">
-          <div className="w-8 h-8 rounded-xl bg-gradient-to-br from-violet-600 to-fuchsia-600 text-white flex items-center justify-center shadow-xs">
+        <div className="flex items-center gap-2.5">
+          <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-violet-600 to-fuchsia-600 text-white flex items-center justify-center shadow-xs">
             <Sparkles className="w-4 h-4" />
           </div>
           <div>
-            <div className="flex items-center gap-1.5">
-              <span className="text-[10px] font-black uppercase tracking-wider text-violet-700 bg-violet-50 px-2 py-0.5 rounded-full border border-violet-100">
-                {isHindi ? "मेरी कार्यकुशलता यात्रा" : "MY JOB-READY JOURNEY"}
+            <div className="flex items-center gap-2">
+              <span className="text-xs font-black uppercase tracking-wider text-violet-700 bg-violet-50 px-2.5 py-0.5 rounded-full border border-violet-100">
+                {isHindi ? "जॉब-रेडी सफर" : "Job-Ready Journey"}
               </span>
-              <span className="text-[10px] font-bold text-slate-400">
+              <span className="text-xs font-bold text-slate-400">
                 {currentStage.stageNumber}/6
               </span>
             </div>
-            <h3 className="text-sm font-black text-slate-900 leading-tight mt-0.5">
+            <h3 className="text-base font-black text-slate-900 leading-tight mt-1">
               {isHindi ? currentStage.titleHi : currentStage.titleEn}
             </h3>
           </div>
@@ -231,26 +235,26 @@ export const LearnerJourneyRoadmap: React.FC<LearnerJourneyRoadmapProps> = ({
           <button
             type="button"
             onClick={handlePlayAudio}
-            className="p-1.5 rounded-full bg-purple-50 hover:bg-purple-100 text-purple-700 transition-colors cursor-pointer"
+            className="p-2 rounded-full bg-purple-50 hover:bg-purple-100 text-purple-700 transition-colors cursor-pointer"
             title="Listen aloud"
           >
-            <Volume2 className={`w-3.5 h-3.5 ${playingAudio ? "animate-bounce text-purple-600" : ""}`} />
+            <Volume2 className={`w-4 h-4 ${playingAudio ? "animate-bounce text-purple-600" : ""}`} />
           </button>
           <button
             type="button"
             onClick={() => setShowFullRoadmapModal(true)}
-            className="text-[11px] font-bold text-violet-700 hover:text-violet-900 bg-violet-50 hover:bg-violet-100 px-2.5 py-1 rounded-full border border-violet-200/80 transition-all flex items-center gap-1 cursor-pointer"
+            className="text-xs font-bold text-violet-700 hover:text-violet-900 bg-violet-50 hover:bg-violet-100 px-3 py-1.5 rounded-full border border-violet-200/80 transition-all flex items-center gap-1 cursor-pointer"
           >
             <span>{isHindi ? "पूरा मैप" : "View Map"}</span>
-            <ChevronRight className="w-3 h-3" />
+            <ChevronRight className="w-3.5 h-3.5" />
           </button>
         </div>
       </div>
 
       {/* 6-STAGE VISUAL PROGRESSION TRACK */}
-      <div className="relative pt-1 pb-1">
+      <div className="relative pt-2 pb-1">
         {/* Connection line */}
-        <div className="absolute top-4 left-3 right-3 h-1 bg-slate-100 rounded-full z-0">
+        <div className="absolute top-6 left-4 right-4 h-1 bg-slate-100 rounded-full z-0">
           <div
             className="h-full bg-gradient-to-r from-violet-600 via-purple-600 to-fuchsia-600 rounded-full transition-all duration-700"
             style={{
@@ -261,9 +265,11 @@ export const LearnerJourneyRoadmap: React.FC<LearnerJourneyRoadmapProps> = ({
 
         {/* Stage Nodes */}
         <div className="relative z-10 flex items-center justify-between">
-          {stages.map((stage) => {
+          {stages.map((stage, idx) => {
             const isCompleted = stage.status === "completed";
             const isCurrent = stage.status === "current";
+            const label = isHindi ? shortStageLabelHi[idx] : shortStageLabelEn[idx];
+
             return (
               <button
                 key={stage.id}
@@ -273,7 +279,7 @@ export const LearnerJourneyRoadmap: React.FC<LearnerJourneyRoadmapProps> = ({
                 title={isHindi ? stage.titleHi : stage.titleEn}
               >
                 <div
-                  className={`w-7 h-7 rounded-full flex items-center justify-center transition-all ${
+                  className={`w-8 h-8 rounded-full flex items-center justify-center transition-all ${
                     isCompleted
                       ? "bg-emerald-600 text-white shadow-xs"
                       : isCurrent
@@ -286,17 +292,15 @@ export const LearnerJourneyRoadmap: React.FC<LearnerJourneyRoadmapProps> = ({
                   ) : isCurrent ? (
                     <div className="w-2.5 h-2.5 rounded-full bg-white animate-pulse" />
                   ) : (
-                    <span className="text-[10px] font-bold">{stage.stageNumber}</span>
+                    <span className="text-xs font-black">{stage.stageNumber}</span>
                   )}
                 </div>
                 <span
-                  className={`text-[9px] mt-1 font-bold truncate max-w-[50px] text-center hidden sm:block ${
-                    isCurrent ? "text-violet-900" : isCompleted ? "text-emerald-800" : "text-slate-400"
+                  className={`text-[11px] sm:text-xs mt-1.5 font-bold truncate max-w-[56px] text-center ${
+                    isCurrent ? "text-violet-950 font-black" : isCompleted ? "text-emerald-800" : "text-slate-400"
                   }`}
                 >
-                  {isHindi
-                    ? stage.titleHi.split(". ")[1] || stage.titleHi
-                    : stage.titleEn.split(". ")[1] || stage.titleEn}
+                  {label}
                 </span>
               </button>
             );
@@ -361,11 +365,11 @@ export const LearnerJourneyRoadmap: React.FC<LearnerJourneyRoadmapProps> = ({
                           {isCompleted ? <CheckCircle2 className="w-4 h-4" /> : getStageIcon(stage.key)}
                         </div>
                         <div>
-                          <h4 className="text-xs font-black text-slate-900">
+                          <h4 className="text-sm font-black text-slate-900">
                             {isHindi ? stage.titleHi : stage.titleEn}
                           </h4>
                           <span
-                            className={`text-[10px] font-bold px-2 py-0.5 rounded-full inline-block mt-0.5 ${
+                            className={`text-xs font-bold px-2.5 py-0.5 rounded-full inline-block mt-0.5 ${
                               isCompleted
                                 ? "bg-emerald-100 text-emerald-800"
                                 : isCurrent
@@ -383,14 +387,14 @@ export const LearnerJourneyRoadmap: React.FC<LearnerJourneyRoadmapProps> = ({
                       </div>
                     </div>
 
-                    <p className="text-xs text-slate-600 mt-2 leading-relaxed">
+                    <p className="text-xs sm:text-sm text-slate-600 mt-2 leading-relaxed">
                       {isHindi ? stage.shortDescHi : stage.shortDescEn}
                     </p>
 
-                    <div className="mt-2 pt-2 border-t border-slate-200/60 flex items-center gap-1.5 text-[11px] text-slate-700">
+                    <div className="mt-2 pt-2 border-t border-slate-200/60 flex items-center gap-1.5 text-xs text-slate-700 font-medium">
                       <Target className="w-3.5 h-3.5 text-violet-600 shrink-0" />
                       <span>
-                        <strong className="font-bold">{isHindi ? "लक्ष्य: " : "Milestone: "}</strong>
+                        <strong className="font-bold text-slate-900">{isHindi ? "लक्ष्य: " : "Milestone: "}</strong>
                         {isHindi ? stage.milestoneHi : stage.milestoneEn}
                       </span>
                     </div>

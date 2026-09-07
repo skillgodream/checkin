@@ -15,12 +15,14 @@ import {
   Building2,
   PackageCheck,
   Volume2,
+  AlertTriangle,
 } from "lucide-react";
 import {
   NewHire,
   CapabilityState,
   DARK_STORE_CAPABILITIES,
 } from "../types";
+import { evaluateDay10Outcome } from "../services/intelligence";
 
 interface JobReadyHumanFigureProps {
   newHire: NewHire;
@@ -1002,6 +1004,84 @@ export const JobReadyHumanFigure: React.FC<JobReadyHumanFigureProps> = ({
           </div>
         </div>
       </div>
+
+      {/* ------------------------------------------------------------- */}
+      {/* DAY 10 COMMERCIAL CERTIFICATION AUDIT (7 CRITERIA)            */}
+      {/* ------------------------------------------------------------- */}
+      {(() => {
+        const day10Audit = evaluateDay10Outcome(newHire);
+        return (
+          <div className="bg-white rounded-3xl p-4 sm:p-5 border border-slate-200/90 shadow-2xs space-y-3">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <div className="p-1.5 rounded-xl bg-violet-100 text-violet-700">
+                  <Award className="w-4 h-4" />
+                </div>
+                <div>
+                  <h3 className="text-xs sm:text-sm font-black text-slate-900 tracking-tight">
+                    {isHindi ? "डे 10 जॉब रेडी सर्टिफिकेशन (7 क्राइटेरिया)" : "Day 10 Commercial Certification (7 Criteria)"}
+                  </h3>
+                  <p className="text-[10px] text-slate-500 font-medium">
+                    {isHindi
+                      ? "केवल प्रतिशत नहीं — 7 आवश्यक व्यावसायिक मानदंडों का वास्तविक मूल्यांकन"
+                      : "Not reduced to one percentage — 7 non-negotiable operational conditions"}
+                  </p>
+                </div>
+              </div>
+              <span
+                className={`px-3 py-1 rounded-full text-xs font-black uppercase tracking-wider ${
+                  day10Audit.isReady
+                    ? "bg-emerald-100 text-emerald-800 border border-emerald-300"
+                    : "bg-rose-100 text-rose-800 border border-rose-300"
+                }`}
+              >
+                {day10Audit.isReady ? (isHindi ? "जॉब रेडी ✓" : "JOB READY ✓") : (isHindi ? "नॉट रेडी ⚠️" : "NOT READY ⚠️")}
+              </span>
+            </div>
+
+            <p className="text-xs text-slate-600 leading-relaxed font-medium">
+              {day10Audit.summary}
+            </p>
+
+            {/* 7 Criteria Checklist */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-xs">
+              {day10Audit.verifiedCriteria.map((crit, idx) => (
+                <div
+                  key={idx}
+                  className={`p-2.5 rounded-2xl border flex items-start gap-2 ${
+                    crit.met
+                      ? "bg-slate-50/80 border-slate-200/80 text-slate-800"
+                      : "bg-rose-50/80 border-rose-200/90 text-rose-950"
+                  }`}
+                >
+                  <div className="mt-0.5 shrink-0">
+                    {crit.met ? (
+                      <CheckCircle2 className="w-4 h-4 text-emerald-600 fill-emerald-50" />
+                    ) : (
+                      <AlertTriangle className="w-4 h-4 text-rose-600" />
+                    )}
+                  </div>
+                  <div className="min-w-0">
+                    <div className="font-bold text-xs">{crit.name}</div>
+                    <div className="text-[11px] text-slate-500 font-medium">{crit.detail}</div>
+                  </div>
+                </div>
+              ))}
+            </div>
+
+            {!day10Audit.isReady && day10Audit.unresolvedBlockers.length > 0 && (
+              <div className="p-3 bg-amber-50/90 border border-amber-200/90 rounded-2xl text-xs text-amber-900 font-medium">
+                <div className="font-black text-amber-950 mb-0.5">
+                  {isHindi ? "मुख्य रुकावट → आवश्यक अगला कदम:" : "Main blocker → Required next action:"}
+                </div>
+                <div>
+                  {day10Audit.unresolvedBlockers[0]} • {day10Audit.recommendedAction}
+                </div>
+              </div>
+            )}
+          </div>
+        );
+      })()}
 
       {/* ------------------------------------------------------------- */}
       {/* BOTTOM SECTION: "Your Learning Journey" (7 STAGE PROGRESSION) */}

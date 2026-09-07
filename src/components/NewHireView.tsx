@@ -304,22 +304,14 @@ export const NewHireView: React.FC<NewHireViewProps> = ({
       currentRecord.identifiedPattern?.category === "Tool"
     ) {
       return {
-        badge: isHindi ? "डिवाइस सूचना 🛠️" : "Device Action 🛠️",
-        whatTitle: isHindi
-          ? "स्कैनर लेंस साफ करें या डिस्पैच टेबल पर डिवाइस बदलें"
-          : "Clean scanner lens or swap handheld unit at dispatch desk",
-        why: isHindi
-          ? "यह स्कैनर हार्डवेयर की समस्या है, आपकी ट्रेनिंग की नहीं। बारकोड पढ़ने में देरी दर्ज हुई है। किसी अतिरिक्त ट्रेनिंग की जरूरत नहीं है।"
-          : "This is a scanner tool issue, not a training problem. Handheld read latency was detected on the floor. No extra training is required.",
-        successTarget: isHindi
-          ? "डिस्पैच टेबल पर टेस्ट बारकोड तुरंत बीप के साथ स्कैन होना चाहिए।"
-          : "Test barcode scans instantly with clean beep at dispatch desk.",
-        howWhere: isHindi ? "डार्क स्टोर डिस्पैच टेबल" : "Dispatch Desk & Tool Station",
-        whoCanHelp: isHindi ? "स्टोर ऑपरेशन्स / टूल सपोर्ट" : "Floor Ops / Tool Support",
-        whereHeading: isHindi ? "सामान्य सोलो पिकिंग जारी रखना" : "Resume uninterrupted solo order picking",
-        primaryBtnText: isHindi ? "🛠️ 2-मिनट स्कैनर गाइड खोलें" : "🛠️ Open 2-Min Scanner Guide",
+        badge: isHindi ? "डिवाइस 🛠️" : "EQUIPMENT 🛠️",
+        duration: "2 min",
+        action: isHindi ? "स्कैनर लेंस साफ करें या बदलें" : "Clean scanner or swap at desk",
+        shortWhy: isHindi ? "बारकोड पढ़ने में देरी सुधारें" : "Fix barcode read delay",
+        target: isHindi ? "बीप के साथ तुरंत स्कैन होना चाहिए" : "Quick beep on every scan",
+        primaryBtnText: isHindi ? "शुरू करें" : "START",
         primaryAction: () => setActiveModal("scanner"),
-        secondaryBtnText: isHindi ? `${buddyName} भैया को बताएं` : `Notify Buddy ${buddyName}`,
+        secondaryBtnText: isHindi ? `${buddyName} को बताएं` : `Tell ${buddyName}`,
         secondaryAction: () => setActiveSection("buddy"),
       };
     }
@@ -331,22 +323,14 @@ export const NewHireView: React.FC<NewHireViewProps> = ({
       currentRecord.recommendedAction?.decisionType === "environment_support"
     ) {
       return {
-        badge: isHindi ? "स्टोर वातावरण 🏢" : "Facility Notice 🏢",
-        whatTitle: isHindi
-          ? "सावधानीपूर्वक सही सामान स्कैन करना जारी रखें"
-          : "Continue steady, safe order picking (facility notice active)",
-        why: isHindi
-          ? "कन्वेयर या स्टोर बाधा के कारण शिफ्ट गति धीमी हुई थी। आपकी क्षमता व लगन में कोई कमी नहीं है।"
-          : "A store conveyor bottleneck slowed the wave pace, not your skill or effort. Core capability remains strong.",
-        successTarget: isHindi
-          ? "सुरक्षित व सही बारकोड स्कैनिंग बनाए रखें।"
-          : "Maintain 98%+ accurate scans while wave clears.",
-        howWhere: isHindi ? "डार्क स्टोर फ्लोर" : "Dark Store Floor (All Aisles)",
-        whoCanHelp: isHindi ? "सुपरवाइजर व स्टोर ऑपरेशन्स" : `Supervisor ${supervisorName} & Ops`,
-        whereHeading: isHindi ? "स्टोर बाधा हटने पर सामान्य गति" : "Full pace when facility clears",
-        primaryBtnText: isHindi ? "📦 शिफ्ट टूल्स खोलें" : "📦 Open Floor Tools & Pick",
+        badge: isHindi ? "फ्लोर सूचना 🏢" : "FLOOR NOTICE 🏢",
+        duration: isHindi ? "शिफ्ट लक्ष्य" : "This wave",
+        action: isHindi ? "सावधानी से पिकिंग जारी रखें" : "Keep picking steady & safe",
+        shortWhy: isHindi ? "कन्वेयर पर थोड़ा जाम है" : "Conveyor is moving slow",
+        target: isHindi ? "98%+ सही स्कैन रखें" : "Keep 98%+ accuracy",
+        primaryBtnText: isHindi ? "शुरू करें" : "START",
         primaryAction: () => setActiveModal("work"),
-        secondaryBtnText: isHindi ? "स्टोर मैप देखें" : "View Store Map",
+        secondaryBtnText: isHindi ? "स्टोर मैप" : "Store Map",
         secondaryAction: () => setActiveModal("map"),
       };
     }
@@ -354,52 +338,36 @@ export const NewHireView: React.FC<NewHireViewProps> = ({
     // 3. Support Completed / Intervention Succeeded (Intervention Memory)
     if (isSupportCompleted) {
       return {
-        badge: isHindi ? "सपोर्ट पूरा हुआ 👍" : "Support Complete 👍",
-        whatTitle: isHindi
-          ? "स्वतंत्र रूप से अकेले सोलो ऑर्डर पिकिंग शुरू करें"
-          : "Start independent solo order picking across assigned zones",
-        why: isHindi
-          ? `${buddyName} भैया के साथ अभ्यास के बाद आपकी स्पीड ${actualPace} सामान/घंटा हो गई और 0 गलती है। अब आप अकेले पिक कर सकते हैं!`
-          : `After practicing with ${buddyName}, your speed reached ${actualPace}/hr with ${accuracy}% accuracy. Support is reduced so you can work solo!`,
-        successTarget: isHindi
-          ? "लगातार 5 ऑर्डर बिना साथी को बुलाए समय पर पूरे करें।"
-          : "Complete 5 consecutive pick orders solo within target cycle time.",
-        howWhere: isHindi ? "डार्क स्टोर फ्लोर (आइसल 1 से 8)" : "Dark Store Floor (Aisles 1–8)",
-        whoCanHelp: isHindi ? "स्वयं (साथी जरूरत पड़ने पर उपलब्ध)" : `Self (${buddyName} on standby)`,
-        whereHeading: isHindi ? "स्टेज 3: पूरी तरह स्वतंत्र कार्य" : "Stage 3: Autonomous Independent Work",
-        primaryBtnText: isHindi ? "📦 सोलो पिकिंग शुरू करें" : "📦 Start Solo Order Picking",
+        badge: isHindi ? "शाबाश 👍" : "SOLO READY 👍",
+        duration: isHindi ? "सोलो शिफ्ट" : "Solo shift",
+        action: isHindi ? "अकेले सोलो पिकिंग शुरू करें" : "Start solo order picking",
+        shortWhy: isHindi ? "आपकी स्पीड अच्छी हो गई है" : "Pace is up with zero errors",
+        target: isHindi ? "5 ऑर्डर अकेले पूरे करें" : "Pick 5 orders solo",
+        primaryBtnText: isHindi ? "शुरू करें" : "START",
         primaryAction: () => setActiveModal("work"),
-        secondaryBtnText: isHindi ? "साथी से बात करें" : "Talk to Buddy",
+        secondaryBtnText: isHindi ? "साथी से बात करें" : `Talk to ${buddyName}`,
         secondaryAction: () => setActiveSection("buddy"),
       };
     }
 
     const targetCapId = currentRecord?.recommendedAction?.targetCapabilityId || newHire.currentCapabilityId || 3;
     const targetCapDef = DARK_STORE_CAPABILITIES.find((c) => c.id === targetCapId);
-    const targetCapName = targetCapDef ? targetCapDef.name : "Rack & bin navigation";
+    const targetCapName = targetCapDef ? (targetCapDef.id === 3 ? "Finding locations" : targetCapDef.name) : "Finding locations";
 
     // 4. Support Assigned / Prescribed Walkthrough
     if (isSupportAssigned) {
       return {
-        badge: isHindi ? "आज का मुख्य कदम 🤝" : "Today's Focus 🤝",
-        whatTitle: isHindi
-          ? `${buddyName} भैया के साथ 15 मिनट का फ्लोर वॉकथ्रू (${targetCapName})`
-          : `15-minute floor walkthrough with Buddy ${buddyName} (${targetCapName})`,
-        why: isHindi
-          ? `आपकी एक्यूरेसी ${accuracy}% (बहुत अच्छी) है। ${targetCapName} में कुशलता बढ़ाने के लिए ${buddyName} भैया 15 मिनट साथ चलेंगे ताकि समय बर्बाद न हो।`
-          : `Your scanning accuracy is ${accuracy}% (great job). ${buddyName} will guide you on ${targetCapName} so you don't lose time.`,
-        successTarget: isHindi
-          ? "5 सामान बिना भटके 3 मिनट के अंदर सही पिक करें।"
-          : "Pick 5 items under 3 minutes without backtracking.",
-        howWhere: isHindi ? "डार्क स्टोर फ्लोर व शेल्फ" : "Dark Store Floor & Picking Aisles",
-        whoCanHelp: isHindi ? `${buddyName} भैया (सीनियर पिकर)` : `Buddy ${buddyName} (Senior Floor Picker)`,
-        whereHeading: isHindi ? "स्वतंत्र 45+ पिक स्पीड व जीरो एरर" : "Autonomous 45+ items/hr pacing",
-        primaryBtnText: isHindi ? `📞 ${buddyName} भैया को बुलाएं` : `📞 Call ${buddyName} to My Rack`,
+        badge: isHindi ? "आज का मुख्य कदम 🤝" : "TODAY'S MAIN STEP 🤝",
+        duration: "15 min",
+        action: isHindi ? `${buddyName} भैया के साथ फ्लोर वॉक` : "Floor walk with Buddy",
+        shortWhy: isHindi ? "सामान ढूंढने में सुधार करें" : "Improve location finding",
+        target: isHindi ? "5 सामान बिना भटके पिक करें" : "Pick 5 items without backtracking",
+        primaryBtnText: isHindi ? "शुरू करें" : "START",
         primaryAction: () => {
           setBuddyAlertSent(true);
           setActiveModal("buddy");
         },
-        secondaryBtnText: isHindi ? "स्टोर मैप देखें" : "View Store Map",
+        secondaryBtnText: isHindi ? "स्टोर मैप" : "Store Map",
         secondaryAction: () => setActiveModal("map"),
       };
     }
@@ -407,44 +375,28 @@ export const NewHireView: React.FC<NewHireViewProps> = ({
     // 5. Needs Help / Early Foundation
     if (isNeedsHelp) {
       return {
-        badge: isHindi ? "मदद उपलब्ध है 🤝" : "Help Available 🤝",
-        whatTitle: isHindi
-          ? `${targetCapName} का अभ्यास करें`
-          : `Practice ${targetCapName}`,
-        why: isHindi
-          ? `आपकी एक्यूरेसी ${accuracy}% है जो बेहतरीन है। ${targetCapName} में ${buddyName} भैया से 2 मिनट का टिप लें।`
-          : `Your accuracy is ${accuracy}% (strong). Ask ${buddyName} for a quick 2-minute tip on ${targetCapName}.`,
-        successTarget: isHindi
-          ? "अगले 3 ऑर्डरों में शेल्फ कोड सही पहचानें।"
-          : "Identify shelf coordinates correctly on next 3 orders.",
-        howWhere: isHindi ? "स्टोर फ्लोर / साथी चैट" : "Floor / Buddy Chat",
-        whoCanHelp: isHindi ? `${buddyName} भैया` : `Buddy ${buddyName}`,
-        whereHeading: isHindi ? "स्वतंत्र पिकिंग की ओर" : "Towards Solo Work",
-        primaryBtnText: isHindi ? `🗣️ ${buddyName} से पूछें` : `🗣️ Ask ${buddyName}`,
+        badge: isHindi ? "अभ्यास 🤝" : "PRACTICE 🤝",
+        duration: "10 min",
+        action: isHindi ? "सामान ढूंढने का अभ्यास" : "Practice finding items",
+        shortWhy: isHindi ? "शेल्फ कोड समझने में मदद लें" : "Learn shelf codes faster",
+        target: isHindi ? "अगले 3 ऑर्डर सही पहचानें" : "Get next 3 shelf codes right",
+        primaryBtnText: isHindi ? "शुरू करें" : "START",
         primaryAction: () => setActiveSection("buddy"),
-        secondaryBtnText: isHindi ? "शिफ्ट टूल्स खोलें" : "Open Floor Tools",
+        secondaryBtnText: isHindi ? "शिफ्ट टूल्स" : "Floor Tools",
         secondaryAction: () => setActiveModal("work"),
       };
     }
 
     // 6. Default Steady Ramp
     return {
-      badge: isHindi ? "आज का मुख्य काम 👍" : "Today's Task 👍",
-      whatTitle: isHindi
-        ? "आराम से सही सामान स्कैन और पिक करें"
-        : "Pick and scan items accurately across shift",
-      why: isHindi
-        ? `आपकी एक्यूरेसी ${accuracy}% है। सही बारकोड स्कैन करें, स्पीड अपने आप बढ़ जाएगी।`
-        : `Your accuracy is ${accuracy}%. Always check the barcode before placing in the tote.`,
-      successTarget: isHindi
-        ? "पूरी शिफ्ट में 98%+ एक्यूरेसी बनाए रखें।"
-        : "Maintain 98%+ scanning accuracy across shift.",
-      howWhere: isHindi ? "डार्क स्टोर फ्लोर" : "Dark Store Floor (Assigned Waves)",
-      whoCanHelp: isHindi ? "स्वयं (मार्गदर्शन उपलब्ध)" : "Self (Buddy on standby)",
-      whereHeading: isHindi ? "स्टेज 4: 45+ सामान/घंटा की रफ़्तार" : "Stage 4: 45+ items/hr pacing",
-      primaryBtnText: isHindi ? "📦 काम शुरू करें (टूल्स)" : "📦 Open Floor Tools & Pick",
+      badge: isHindi ? "आज का मुख्य काम 👍" : "TODAY'S FOCUS 👍",
+      duration: isHindi ? "आज की शिफ्ट" : "Shift goal",
+      action: isHindi ? "सही सामान पिक और स्कैन करें" : "Pick & scan orders accurately",
+      shortWhy: isHindi ? "स्पीड अपने आप बढ़ जाएगी" : "Accuracy builds good speed",
+      target: isHindi ? "98%+ सही स्कैन रखें" : "Keep 98%+ accuracy",
+      primaryBtnText: isHindi ? "शुरू करें" : "START",
       primaryAction: () => setActiveModal("work"),
-      secondaryBtnText: isHindi ? "ट्रेनिंग मॉड्यूल" : "Training Modules",
+      secondaryBtnText: isHindi ? "मॉड्यूल" : "Modules",
       secondaryAction: () => setActiveSection("modules"),
     };
   };
@@ -461,19 +413,25 @@ export const NewHireView: React.FC<NewHireViewProps> = ({
           {/* 1. PRIMARY: WHAT DO I NEED TO DO NOW? (DOMINANT PRESCRIPTION CARD) */}
           <div
             id="todays-focus-card"
-            className="bg-gradient-to-br from-violet-700 via-purple-700 to-fuchsia-700 rounded-[28px] p-5 text-white shadow-xl shadow-purple-950/15 relative overflow-hidden space-y-3.5"
+            className="bg-gradient-to-br from-violet-700 via-purple-700 to-fuchsia-700 rounded-[28px] p-5 sm:p-6 text-white shadow-xl shadow-purple-950/15 relative overflow-hidden space-y-4"
           >
+            {/* Top Bar: Badge, Duration, Listen */}
             <div className="flex items-center justify-between">
-              <span className="px-3 py-1 rounded-full text-xs font-black tracking-wide uppercase bg-white/20 text-white backdrop-blur-xs">
-                {status.badge}
-              </span>
+              <div className="flex items-center gap-2">
+                <span className="px-3 py-1 rounded-full text-xs font-black tracking-wider uppercase bg-white/20 text-white backdrop-blur-xs">
+                  {status.badge}
+                </span>
+                <span className="px-2.5 py-0.5 rounded-full text-xs font-bold bg-white/15 text-purple-100 backdrop-blur-xs">
+                  ⏱️ {status.duration}
+                </span>
+              </div>
 
               <button
                 type="button"
                 onClick={() =>
                   handlePlayAudio(
                     "status-card",
-                    `${status.whatTitle}. ${status.why}. Target: ${status.successTarget}`
+                    `${status.action}. ${status.duration}. ${status.shortWhy}. ${status.target || ""}`
                   )
                 }
                 className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-white text-slate-950 text-xs font-black shadow-xs cursor-pointer active:scale-95 transition-all"
@@ -488,72 +446,46 @@ export const NewHireView: React.FC<NewHireViewProps> = ({
               </button>
             </div>
 
-            {/* WHAT TO DO NOW */}
-            <div className="space-y-1.5">
-              <span className="text-[11px] font-extrabold uppercase tracking-wider text-purple-200 block">
-                {isHindi ? "🎯 आज क्या करना है?" : "🎯 TODAY'S FOCUS: WHAT TO DO NOW"}
-              </span>
-              <h2 className="text-xl sm:text-2xl font-black leading-snug tracking-tight">
-                {status.whatTitle}
+            {/* MAIN ACTION: Largest / strongest text */}
+            <div className="space-y-1.5 pt-0.5">
+              <h2 className="text-2xl sm:text-3xl font-black leading-tight tracking-tight text-white">
+                {status.action}
               </h2>
-            </div>
-
-            {/* WHY AM I DOING THIS? (NO JARGON) */}
-            <div className="p-3 rounded-2xl bg-white/10 backdrop-blur-xs border border-white/15 space-y-1">
-              <span className="text-[10px] font-black uppercase tracking-wider text-purple-200 block">
-                {isHindi ? "💡 यह क्यों जरूरी है?" : "💡 WHY AM I DOING THIS?"}
-              </span>
-              <p className="text-xs sm:text-[13px] text-white/95 leading-relaxed font-medium">
-                {status.why}
+              {/* SHORT REASON: Medium text */}
+              <p className="text-base sm:text-lg font-semibold text-purple-100 leading-snug">
+                {status.shortWhy}
               </p>
+              {/* TARGET: Supporting info */}
+              {status.target && (
+                <p className="text-xs sm:text-sm font-medium text-purple-200/90 pt-0.5">
+                  🎯 {status.target}
+                </p>
+              )}
             </div>
 
-            {/* SUCCESS TARGET & WHO/WHERE */}
-            <div className="grid grid-cols-2 gap-2 text-xs">
-              <div className="p-2.5 rounded-xl bg-white/10 backdrop-blur-xs border border-white/10">
-                <span className="text-[10px] font-bold text-purple-200 block uppercase">
-                  {isHindi ? "🏁 सफलता का लक्ष्य" : "🏁 Success Target"}
-                </span>
-                <span className="text-[11px] font-bold text-white block mt-0.5 leading-tight">
-                  {status.successTarget}
-                </span>
-              </div>
-
-              <div className="p-2.5 rounded-xl bg-white/10 backdrop-blur-xs border border-white/10">
-                <span className="text-[10px] font-bold text-purple-200 block uppercase">
-                  {isHindi ? "🤝 कौन मदद करेगा?" : "🤝 Who Can Help?"}
-                </span>
-                <span className="text-[11px] font-bold text-white block mt-0.5 leading-tight">
-                  {status.whoCanHelp}
-                </span>
-              </div>
-            </div>
-
-            {/* DOMINANT PRIMARY ACTION BUTTON */}
-            <div className="pt-1 space-y-2">
+            {/* START BUTTON: Large, prominent, and clear */}
+            <div className="pt-1 space-y-2.5">
               <button
                 id="home-primary-cta-btn"
                 type="button"
                 onClick={status.primaryAction}
-                className="w-full py-4 px-5 rounded-2xl bg-white text-slate-950 hover:bg-slate-50 font-black text-sm sm:text-base shadow-lg shadow-black/10 active:scale-98 transition-all flex items-center justify-center gap-2 cursor-pointer border-2 border-white"
+                className="w-full py-4 px-6 rounded-2xl bg-white text-slate-950 hover:bg-slate-50 font-black text-base sm:text-lg shadow-lg shadow-black/15 active:scale-98 transition-all flex items-center justify-center gap-2.5 cursor-pointer border-2 border-white"
               >
                 <span>{status.primaryBtnText}</span>
-                <ArrowRight className="w-4 h-4" />
+                <ArrowRight className="w-5 h-5 stroke-[2.5]" />
               </button>
 
-              <div className="flex items-center justify-between pt-1 px-1 text-xs">
-                <button
-                  type="button"
-                  onClick={status.secondaryAction}
-                  className="font-bold text-white/80 hover:text-white underline underline-offset-4 cursor-pointer"
-                >
-                  {status.secondaryBtnText} →
-                </button>
-                <span className="text-[11px] font-medium text-white/80 flex items-center gap-1">
-                  <Compass className="w-3 h-3" />
-                  <span className="truncate max-w-[170px]">{status.whereHeading}</span>
-                </span>
-              </div>
+              {status.secondaryBtnText && (
+                <div className="flex justify-center pt-0.5">
+                  <button
+                    type="button"
+                    onClick={status.secondaryAction}
+                    className="text-xs sm:text-sm font-bold text-white/80 hover:text-white underline underline-offset-4 cursor-pointer"
+                  >
+                    {status.secondaryBtnText} →
+                  </button>
+                </div>
+              )}
             </div>
           </div>
 
@@ -569,24 +501,24 @@ export const NewHireView: React.FC<NewHireViewProps> = ({
           />
 
           {/* 3. NEED HELP? 1-TAP BUDDY ASSIST */}
-          <div className="bg-white rounded-[24px] p-3.5 border border-slate-200/80 shadow-2xs flex items-center justify-between gap-3">
-            <div className="flex items-center gap-2.5 min-w-0">
-              <div className="w-10 h-10 rounded-full bg-emerald-100 text-emerald-700 flex items-center justify-center shrink-0 font-bold text-sm">
+          <div className="bg-white rounded-[24px] p-4 border border-slate-200/90 shadow-2xs flex items-center justify-between gap-3">
+            <div className="flex items-center gap-3 min-w-0">
+              <div className="w-11 h-11 rounded-2xl bg-emerald-100 text-emerald-700 flex items-center justify-center shrink-0 font-bold text-base">
                 🤝
               </div>
               <div className="min-w-0">
-                <h4 className="text-xs font-bold text-slate-900 truncate">
+                <h4 className="text-sm font-black text-slate-900 truncate">
                   {isHindi ? `साथी ${newHire.buddy.split(" ")[0]} फ्लोर पर हैं` : `Buddy ${newHire.buddy.split(" ")[0]} is on floor`}
                 </h4>
-                <p className="text-[11px] text-slate-500 truncate">
-                  {isHindi ? "कोई सवाल हो तो तुरंत पूछें" : "Ask questions or call to your rack"}
+                <p className="text-xs text-slate-500 truncate font-medium mt-0.5">
+                  {isHindi ? "कोई सवाल हो तो तुरंत पूछें" : "Need help? Tap to talk or call to rack"}
                 </p>
               </div>
             </div>
 
             <button
               onClick={() => setActiveSection("buddy")}
-              className="px-3 py-2 rounded-xl bg-slate-900 hover:bg-slate-800 text-white text-xs font-bold shrink-0 cursor-pointer shadow-xs active:scale-95 transition-all"
+              className="px-4 py-2.5 rounded-xl bg-slate-900 hover:bg-slate-800 text-white text-xs font-black shrink-0 cursor-pointer shadow-xs active:scale-95 transition-all"
             >
               {isHindi ? "पूछें 🗣️" : "Ask 🗣️"}
             </button>
@@ -664,10 +596,10 @@ export const NewHireView: React.FC<NewHireViewProps> = ({
                 className="w-12 h-12 rounded-full object-cover border-2 border-emerald-500 shadow-xs"
               />
               <div>
-                <h3 className="text-sm font-bold text-slate-900">{newHire.buddy}</h3>
-                <p className="text-[11px] text-slate-500 font-medium">Senior Floor Buddy</p>
-                <span className="text-[10px] text-emerald-700 font-bold bg-emerald-50 px-2 py-0.5 rounded-full inline-block mt-0.5">
-                  🟢 {isHindi ? "फ्लोर पर हैं (Aisles 4-8)" : "On Duty on Floor (Aisles 4-8)"}
+                <h3 className="text-base font-black text-slate-900">{newHire.buddy}</h3>
+                <p className="text-xs text-slate-500 font-medium">Senior Floor Buddy</p>
+                <span className="text-xs text-emerald-700 font-bold bg-emerald-50 px-2.5 py-0.5 rounded-full inline-block mt-0.5 border border-emerald-200">
+                  🟢 {isHindi ? "फ्लोर पर हैं (Aisles 4-8)" : "On Floor (Aisles 4-8)"}
                 </span>
               </div>
             </div>
@@ -677,23 +609,23 @@ export const NewHireView: React.FC<NewHireViewProps> = ({
                 setBuddyAlertSent(true);
                 setActiveModal("buddy");
               }}
-              className="px-3 py-1.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-full text-xs font-bold shadow-2xs cursor-pointer active:scale-95 transition-all flex items-center gap-1.5 shrink-0"
+              className="px-3.5 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-full text-xs font-bold shadow-2xs cursor-pointer active:scale-95 transition-all flex items-center gap-1.5 shrink-0"
             >
-              <Phone className="w-3.5 h-3.5" />
+              <Phone className="w-4 h-4" />
               <span>{isHindi ? "बुलाएं" : "Call to Rack"}</span>
             </button>
           </div>
 
           {/* Voice-First Push-to-Talk Action Bar */}
-          <div className="bg-gradient-to-br from-violet-50 via-purple-50 to-white rounded-[28px] p-4 border border-purple-100/90 shadow-2xs space-y-3">
+          <div className="bg-gradient-to-br from-violet-50 via-purple-50 to-white rounded-[28px] p-4 sm:p-5 border border-purple-100/90 shadow-2xs space-y-3.5">
             <div className="text-center space-y-1">
-              <h3 className="text-xs font-black text-slate-900 uppercase tracking-wide">
-                {isHindi ? "विक्रम भैया से पूछें (Voice First)" : "Ask Buddy Vikram (Voice-First)"}
+              <h3 className="text-sm font-black text-slate-900 uppercase tracking-wide">
+                {isHindi ? "विक्रम भैया से पूछें" : "Talk to Buddy Vikram"}
               </h3>
-              <p className="text-xs text-slate-500">
+              <p className="text-xs text-slate-600 font-medium">
                 {isHindi
-                  ? "माइक दबाकर सवाल पूछें, साथी तुरंत जवाब देगा:"
-                  : "Tap the mic and speak naturally. Your buddy answers right back:"}
+                  ? "माइक दबाकर सवाल बोलें, विक्रम भैया जवाब देंगे:"
+                  : "Tap the mic and speak naturally. Vikram answers aloud:"}
               </p>
             </div>
 
@@ -702,7 +634,7 @@ export const NewHireView: React.FC<NewHireViewProps> = ({
               type="button"
               onClick={handleToggleVoice}
               disabled={isProcessing}
-              className={`w-full py-4 px-4 rounded-[26px] font-black text-sm flex items-center justify-center gap-2.5 shadow-lg active:scale-98 transition-all cursor-pointer ${
+              className={`w-full py-4 px-4 rounded-[26px] font-black text-base flex items-center justify-center gap-2.5 shadow-lg active:scale-98 transition-all cursor-pointer ${
                 isListening
                   ? "bg-rose-600 text-white ring-4 ring-rose-200 animate-pulse"
                   : "bg-gradient-to-r from-violet-600 via-purple-600 to-fuchsia-600 hover:opacity-95 text-white shadow-purple-500/25"
@@ -715,13 +647,13 @@ export const NewHireView: React.FC<NewHireViewProps> = ({
                 </>
               ) : isProcessing ? (
                 <>
-                  <span className="w-4 h-4 rounded-full border-2 border-white border-t-transparent animate-spin" />
+                  <span className="w-5 h-5 rounded-full border-2 border-white border-t-transparent animate-spin" />
                   <span>{isHindi ? "समझ रहा हूं..." : "Understanding question..."}</span>
                 </>
               ) : (
                 <>
                   <Mic className="w-5 h-5" />
-                  <span>{isHindi ? "बोल कर पूछें (Tap to Speak)" : "Tap to Speak (Ask Question)"}</span>
+                  <span>{isHindi ? "बोल कर पूछें (Tap to Speak)" : "Tap to Speak"}</span>
                 </>
               )}
             </button>
@@ -731,11 +663,11 @@ export const NewHireView: React.FC<NewHireViewProps> = ({
               <button
                 type="button"
                 onClick={() => setShowTextInput(!showTextInput)}
-                className="text-[11px] text-slate-500 hover:text-purple-700 font-medium underline underline-offset-2 cursor-pointer"
+                className="text-xs text-slate-500 hover:text-purple-700 font-semibold underline underline-offset-2 cursor-pointer"
               >
                 {showTextInput
                   ? isHindi ? "टाइपिंग छुपाएं" : "Hide typing"
-                  : isHindi ? "या लिख कर पूछें" : "Or type text question"}
+                  : isHindi ? "या लिख कर पूछें" : "Or type question"}
               </button>
             </div>
 
@@ -749,12 +681,12 @@ export const NewHireView: React.FC<NewHireViewProps> = ({
                   onKeyDown={(e) => e.key === "Enter" && handleSendMessage()}
                   placeholder={isHindi ? "सवाल लिखें..." : "Type your question..."}
                   disabled={isProcessing}
-                  className="flex-1 text-xs sm:text-sm px-3.5 py-2.5 rounded-2xl border border-slate-200 bg-white focus:outline-none focus:ring-2 focus:ring-purple-500 shadow-2xs"
+                  className="flex-1 text-sm px-4 py-2.5 rounded-2xl border border-slate-200 bg-white focus:outline-none focus:ring-2 focus:ring-purple-500 shadow-2xs font-medium"
                 />
                 <button
                   onClick={() => handleSendMessage()}
                   disabled={isProcessing || !inputText.trim()}
-                  className="p-2.5 rounded-2xl bg-gradient-to-r from-violet-600 to-fuchsia-600 text-white disabled:opacity-30 cursor-pointer transition-all active:scale-95 shrink-0"
+                  className="p-3 rounded-2xl bg-gradient-to-r from-violet-600 to-fuchsia-600 text-white disabled:opacity-30 cursor-pointer transition-all active:scale-95 shrink-0"
                   title="Send"
                 >
                   <Send className="w-4 h-4" />
@@ -765,49 +697,49 @@ export const NewHireView: React.FC<NewHireViewProps> = ({
 
           {/* Conversation Exchange Card */}
           {latestInteraction ? (
-            <div className="bg-white rounded-[28px] p-4 border border-purple-100/90 shadow-md space-y-2.5 animate-in fade-in duration-150">
+            <div className="bg-white rounded-[28px] p-4 sm:p-5 border border-purple-100/90 shadow-md space-y-3 animate-in fade-in duration-150">
               <div className="flex items-center justify-between">
-                <span className="text-xs font-bold text-slate-800 flex items-center gap-1.5">
-                  <span className="w-2 h-2 rounded-full bg-emerald-600 animate-pulse"></span>
-                  {isHindi ? "विक्रम भैया का जवाब" : "Buddy Vikram's Response"}
+                <span className="text-xs font-black text-slate-800 flex items-center gap-1.5 uppercase tracking-wide">
+                  <span className="w-2.5 h-2.5 rounded-full bg-emerald-600 animate-pulse"></span>
+                  {isHindi ? "विक्रम भैया का जवाब" : "Vikram's Answer"}
                 </span>
                 <button
                   onClick={() => handlePlayAudio("latest-interaction", latestInteraction.replyText)}
-                  className="flex items-center gap-1 text-[11px] font-bold text-violet-700 hover:text-violet-900 bg-purple-50 px-2.5 py-0.5 rounded-full cursor-pointer"
+                  className="flex items-center gap-1 text-xs font-bold text-violet-700 hover:text-violet-900 bg-purple-50 px-3 py-1 rounded-full cursor-pointer"
                 >
                   <Volume2 className="w-3.5 h-3.5" />
                   <span>{isHindi ? "दोबारा सुनें" : "Replay"}</span>
                 </button>
               </div>
 
-              <div className="p-2.5 rounded-2xl bg-slate-50 border border-slate-100 text-xs text-slate-600 italic">
+              <div className="p-3 rounded-2xl bg-slate-50 border border-slate-100 text-xs sm:text-sm text-slate-700 italic">
                 🗣️ "{latestInteraction.userText}"
               </div>
 
-              <p className="text-xs sm:text-sm font-medium text-slate-900 leading-relaxed">
+              <p className="text-sm sm:text-base font-semibold text-slate-900 leading-relaxed">
                 {latestInteraction.replyText}
               </p>
 
               <div className="pt-2 border-t border-slate-100 flex items-center justify-between">
                 <button
                   onClick={handleToggleVoice}
-                  className="text-[11px] font-bold text-violet-600 hover:text-violet-800 flex items-center gap-1 cursor-pointer"
+                  className="text-xs font-bold text-violet-600 hover:text-violet-800 flex items-center gap-1.5 cursor-pointer"
                 >
                   <RotateCcw className="w-3.5 h-3.5" />
                   <span>{isHindi ? "दूसरा सवाल पूछें" : "Ask follow-up question"}</span>
                 </button>
-                <span className="text-[10px] text-slate-400">{latestInteraction.timestamp}</span>
+                <span className="text-xs text-slate-400 font-medium">{latestInteraction.timestamp}</span>
               </div>
             </div>
           ) : (
-            <div className="bg-white rounded-[24px] p-3.5 border border-purple-100/80 text-xs text-slate-600 flex items-center gap-3 shadow-xs">
-              <div className="w-9 h-9 rounded-2xl bg-gradient-to-br from-violet-600 to-fuchsia-600 text-white flex items-center justify-center shrink-0 shadow-xs">
-                <Sparkles className="w-4 h-4" />
+            <div className="bg-white rounded-[24px] p-4 border border-purple-100/80 text-xs sm:text-sm text-slate-700 flex items-center gap-3 shadow-xs">
+              <div className="w-10 h-10 rounded-2xl bg-gradient-to-br from-violet-600 to-fuchsia-600 text-white flex items-center justify-center shrink-0 shadow-xs">
+                <Sparkles className="w-5 h-5" />
               </div>
-              <p className="leading-snug text-slate-700">
+              <p className="leading-snug font-medium">
                 {isHindi
                   ? "माइक दबाकर बोलें या नीचे दिए गए आम सवालों में से एक चुनें।"
-                  : "Tap the mic above or tap any common question below to practice."}
+                  : "Tap the mic above or tap any quick question below."}
               </p>
             </div>
           )}
@@ -815,32 +747,32 @@ export const NewHireView: React.FC<NewHireViewProps> = ({
           {/* Voice Practice Situation Chips */}
           <div className="space-y-2 pt-1">
             <h4 className="text-xs font-bold text-slate-700 px-1">
-              {isHindi ? "आम वर्कप्लेस सवाल (टैप करें):" : "Common Floor Questions (Tap to Ask):"}
+              {isHindi ? "आम सवाल (टैप करें):" : "Quick Questions (Tap to Ask):"}
             </h4>
-            <div className="flex gap-1.5 overflow-x-auto pb-1 scrollbar-none">
+            <div className="flex gap-2 overflow-x-auto pb-1 scrollbar-none">
               {(isHindi
                 ? [
-                    "आइसल 4 से 8 में सामान नहीं मिल रहा",
-                    "दही और दूध का कोल्ड रूम कहां है?",
+                    "आइसल 4 से 8 में सामान ढूंढना",
+                    "दूध और दही का कोल्ड रूम कहां है?",
                     "स्कैनर बारकोड नहीं पढ़ रहा",
-                    "सामान का पैकेट फटा हुआ है, क्या करूं?",
+                    "सामान का पैकेट फटा हुआ है",
                     "भारी सामान टोट में कैसे रखें?",
                   ]
                 : [
-                    "Aisles 4 to 8 taking too long",
-                    "Where is the cold dairy room?",
-                    "Barcode scanner disconnected",
-                    "Item package is damaged, what should I do?",
-                    "How to balance heavy items in tote?",
+                    "Finding Aisles 4 to 8 items",
+                    "Where is cold dairy?",
+                    "Scanner not reading barcode",
+                    "Damaged package check",
+                    "Heavy items tote packing",
                   ]
               ).map((chip, idx) => (
                 <button
                   key={idx}
-                  type="button"
                   onClick={() => handleSendMessage(chip)}
-                  className="text-[11px] font-medium bg-white hover:bg-purple-50 hover:border-purple-300 text-slate-700 border border-purple-100/90 px-3 py-1.5 rounded-full shrink-0 transition-all cursor-pointer shadow-2xs active:scale-95 whitespace-nowrap"
+                  disabled={isProcessing}
+                  className="px-3.5 py-2 rounded-full bg-white hover:bg-violet-50 text-slate-800 hover:text-violet-900 border border-slate-200 text-xs font-semibold whitespace-nowrap shadow-2xs transition-all active:scale-95 cursor-pointer shrink-0"
                 >
-                  🗣️ "{chip}"
+                  {chip}
                 </button>
               ))}
             </div>
@@ -880,38 +812,38 @@ export const NewHireView: React.FC<NewHireViewProps> = ({
           />
 
           {/* Quick Bridge Card to Floor Shift & Training Modules */}
-          <div className="grid grid-cols-2 gap-2">
-            <div className="bg-slate-900 rounded-[28px] p-3.5 text-white shadow-md border border-slate-800 space-y-1.5 flex flex-col justify-between">
+          <div className="grid grid-cols-2 gap-3">
+            <div className="bg-slate-900 rounded-[26px] p-4 text-white shadow-md border border-slate-800 space-y-2 flex flex-col justify-between">
               <div>
                 <div className="flex items-center gap-1.5 text-blue-400 text-xs font-bold">
                   <Briefcase className="w-3.5 h-3.5" />
                   <span>{isHindi ? "शिफ्ट टूल्स" : "Floor Shift"}</span>
                 </div>
-                <p className="text-[10px] text-slate-300 mt-1">
+                <p className="text-xs text-slate-300 mt-1 font-medium leading-tight">
                   {isHindi ? "पिक रेट डायल, स्टोर मैप व गाइड" : "Pick dial, store zone map & guides"}
                 </p>
               </div>
               <button
                 onClick={() => setActiveModal("work")}
-                className="w-full py-1.5 rounded-xl bg-white text-slate-900 text-xs font-bold cursor-pointer shadow-xs active:scale-95 transition-transform hover:bg-slate-100"
+                className="w-full py-2 rounded-xl bg-white text-slate-900 text-xs font-bold cursor-pointer shadow-xs active:scale-95 transition-transform hover:bg-slate-100"
               >
                 {isHindi ? "टूल्स खोलें 🛠️" : "Floor Tools 🛠️"}
               </button>
             </div>
 
-            <div className="bg-violet-900 rounded-[28px] p-3.5 text-white shadow-md border border-violet-800 space-y-1.5 flex flex-col justify-between">
+            <div className="bg-violet-900 rounded-[26px] p-4 text-white shadow-md border border-violet-800 space-y-2 flex flex-col justify-between">
               <div>
                 <div className="flex items-center gap-1.5 text-violet-300 text-xs font-bold">
                   <BookOpen className="w-3.5 h-3.5" />
                   <span>{isHindi ? "एलएमएस मॉड्यूल" : "LMS Training"}</span>
                 </div>
-                <p className="text-[10px] text-violet-200 mt-1">
-                  {newHire.modulesCompleted ?? 3}/10 {isHindi ? "मॉड्यूल पूरे हुए" : "Modules completed"}
+                <p className="text-xs text-violet-200 mt-1 font-medium leading-tight">
+                  {newHire.modulesCompleted ?? 3}/10 {isHindi ? "मॉड्यूल पूरे" : "Modules done"}
                 </p>
               </div>
               <button
                 onClick={() => setActiveSection("modules")}
-                className="w-full py-1.5 rounded-xl bg-white text-violet-950 text-xs font-bold cursor-pointer shadow-xs active:scale-95 transition-transform hover:bg-violet-50"
+                className="w-full py-2 rounded-xl bg-white text-violet-950 text-xs font-bold cursor-pointer shadow-xs active:scale-95 transition-transform hover:bg-violet-50"
               >
                 {isHindi ? "मॉड्यूल देखें 📚" : "View Modules 📚"}
               </button>
