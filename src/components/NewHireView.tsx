@@ -1,7 +1,12 @@
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect } from "react";
 import { NewHire, DailySignal } from "../types";
 import { analyzeDailyReport } from "../services/intelligence";
 import { speakMessage, stopSpeaking } from "../utils/speech";
+import { CircularDialWidget } from "./CircularDialWidget";
+import { StoreZonesGrid } from "./StoreZonesGrid";
+import { JobReadyHumanFigure } from "./JobReadyHumanFigure";
+import { ModulesView } from "./ModulesView";
+import { FloatingGlassMenu, LearnerSection } from "./FloatingGlassMenu";
 import {
   Mic,
   MicOff,
@@ -17,8 +22,15 @@ import {
   X,
   Sparkles,
   Target,
-  ChevronRight,
-  HelpCircle,
+  Zap,
+  Home,
+  BookOpen,
+  Briefcase,
+  MessageCircle,
+  User,
+  ArrowRight,
+  ShieldCheck,
+  PackageCheck,
   RotateCcw,
 } from "lucide-react";
 
@@ -28,6 +40,10 @@ interface NewHireViewProps {
   onDailySignalSubmitted: (signal: DailySignal) => void;
   onAskHelp: (question: string) => Promise<string>;
   onSelectDay: (day: number) => void;
+  onUpdateHire?: (updatedHire: NewHire) => void;
+  isHindi?: boolean;
+  onToggleLanguage?: () => void;
+  setIsHindi?: (isHindi: boolean) => void;
 }
 
 export const NewHireView: React.FC<NewHireViewProps> = ({
@@ -35,6 +51,9 @@ export const NewHireView: React.FC<NewHireViewProps> = ({
   currentDay,
   onDailySignalSubmitted,
   onAskHelp,
+  onUpdateHire,
+  isHindi: propIsHindi,
+  setIsHindi: propSetIsHindi,
 }) => {
   // Current day record from authoritative state
   const currentRecord = newHire.daysHistory.find((d) => d.dayNumber === currentDay) || {
@@ -53,10 +72,15 @@ export const NewHireView: React.FC<NewHireViewProps> = ({
   };
 
   // Language state: true = Hindi / Hinglish, false = Simple English
-  const [isHindi, setIsHindi] = useState<boolean>(true);
+  const [localIsHindi, setLocalIsHindi] = useState<boolean>(true);
+  const isHindi = propIsHindi !== undefined ? propIsHindi : localIsHindi;
+  const setIsHindi = propSetIsHindi || setLocalIsHindi;
+
+  // Active learner navigation tab: "home" | "modules" | "buddy" | "dashboard"
+  const [activeSection, setActiveSection] = useState<LearnerSection>("home");
 
   // Active quick action modal
-  const [activeModal, setActiveModal] = useState<"map" | "buddy" | "scanner" | "target" | null>(null);
+  const [activeModal, setActiveModal] = useState<"map" | "buddy" | "scanner" | "target" | "work" | null>(null);
   const [buddyAlertSent, setBuddyAlertSent] = useState<boolean>(false);
 
   // Voice recording & input states
@@ -73,7 +97,7 @@ export const NewHireView: React.FC<NewHireViewProps> = ({
     timestamp: string;
   } | null>(null);
 
-  // Derive simple human state
+  // Derive simple human state from existing intelligence ledger
   const isSupportCompleted = Boolean(
     currentRecord.actionOutcome && currentRecord.actionOutcome.improved
   );
@@ -256,63 +280,65 @@ export const NewHireView: React.FC<NewHireViewProps> = ({
 
   // Status card content based on state & language
   const getStatusContent = () => {
+    const accuracy = currentRecord.workSignal?.accuracyRate ?? 98;
+    const actualPace = currentRecord.workSignal?.actualPickRate ?? 35;
+    const targetPace = currentRecord.workSignal?.targetPickRate ?? 50;
+    const buddyName = newHire.buddy.split(" ")[0];
+
     if (isSupportCompleted) {
       return {
-        badge: isHindi ? "बहुत बढ़िया! 👍" : "Great Recovery! 👍",
-        title: isHindi
-          ? "वॉकथ्रू पूरा हो गया!"
-          : "Walkthrough Completed!",
-        desc: isHindi
-          ? "विक्रम भैया के साथ प्रैक्टिस के बाद आपकी स्पीड 48 सामान/घंटा हो गई। अब आप आराम से अकेले ऑर्डर ले सकते हैं।"
-          : "After practicing with Vikram, your speed jumped to 48 items/hr with zero missing items. You're ready for solo picking!",
-        bgGradient: "from-emerald-500 to-teal-600 text-white shadow-emerald-500/20",
-        badgeBg: "bg-white/20 text-white backdrop-blur-xs",
-        icon: <CheckCircle2 className="w-6 h-6 text-white shrink-0" />,
-        stat: isHindi ? "स्पीड: 48/घंटा • 0 गलती" : "Speed: 48/hr • 0 Errors",
+        badge: isHindi ? "सपोर्ट पूरा हुआ 👍" : "Support Complete 👍",
+        title: isHindi ? "अकेले ऑर्डर पिक करना शुरू करें" : "Start solo order picking",
+        why: isHindi
+          ? `${buddyName} भैया के साथ अभ्यास के बाद आपकी स्पीड ${actualPace} सामान/घंटा हो गई और 0 गलती है।`
+          : `After practicing with ${buddyName}, your speed is ${actualPace}/hr with zero errors. You are ready!`,
+        primaryBtnText: isHindi ? "📦 ऑर्डर पिकिंग शुरू करें" : "📦 Start Solo Order Picking",
+        primaryAction: () => setActiveModal("work"),
+        secondaryBtnText: isHindi ? "साथी से बात करें" : "Talk to Buddy",
+        secondaryAction: () => setActiveSection("buddy"),
       };
     }
     if (isSupportAssigned) {
       return {
-        badge: isHindi ? "मदद तय हो गई 🤝" : "Support Planned 🤝",
+        badge: isHindi ? "आज का मुख्य कदम 🤝" : "Today's Main Action 🤝",
         title: isHindi
-          ? "विक्रम भैया मदद करेंगे"
-          : "Vikram will guide you",
-        desc: isHindi
-          ? "सुबह 8:30 बजे आइसल 4 से 8 का 15 मिनट का वॉकथ्रू होगा। स्पीड की चिंता मत करो, सही सामान उठाना सबसे जरूरी है।"
-          : "15-min walkthrough before peak shift. Your scanning accuracy is 98% (great job) — speed will follow naturally!",
-        bgGradient: "from-blue-600 to-indigo-600 text-white shadow-blue-500/20",
-        badgeBg: "bg-white/20 text-white backdrop-blur-xs",
-        icon: <UserCheck className="w-6 h-6 text-white shrink-0" />,
-        stat: isHindi ? "8:30 AM • 15 मिनट वॉकथ्रू" : "8:30 AM • 15-min walk",
+          ? `${buddyName} भैया के साथ 15 मिनट का वॉकथ्रू`
+          : `15-minute floor walkthrough with ${buddyName}`,
+        why: isHindi
+          ? `आपकी एक्यूरेसी ${accuracy}% (बहुत अच्छी) है। आइसल 4 से 8 में रैक के नंबर याद करने के लिए ${buddyName} भैया मदद करेंगे।`
+          : `Your scanning accuracy is ${accuracy}% (great job). ${buddyName} will guide you to find bins faster in Aisles 4–8.`,
+        primaryBtnText: isHindi ? `📞 ${buddyName} भैया को बुलाएं` : `📞 Call ${buddyName} to My Rack`,
+        primaryAction: () => {
+          setBuddyAlertSent(true);
+          setActiveModal("buddy");
+        },
+        secondaryBtnText: isHindi ? "स्टोर मैप देखें" : "View Store Map",
+        secondaryAction: () => setActiveModal("map"),
       };
     }
     if (isNeedsHelp) {
       return {
-        badge: isHindi ? "चिंता मत करो 🤝" : "Don't Panic 🤝",
-        title: isHindi
-          ? "आइसल 4 से 8 में देर लग रही है?"
-          : "Taking longer in Aisles 4-8?",
-        desc: isHindi
-          ? "शुरुआत में हर नए साथी को टाइम लगता है। आपकी एक्यूरेसी 98% है जो बेहतरीन है! विक्रम भैया आपकी मदद करेंगे।"
-          : "Every new picker takes time in dark stores. Your scanning accuracy is 98% (great job!). Vikram is ready to help.",
-        bgGradient: "from-amber-500 to-orange-600 text-white shadow-amber-500/20",
-        badgeBg: "bg-white/20 text-white backdrop-blur-xs",
-        icon: <AlertCircle className="w-6 h-6 text-white shrink-0" />,
-        stat: isHindi ? "एक्यूरेसी: 98% (बहुत अच्छी)" : "Accuracy: 98% (Great)",
+        badge: isHindi ? "मदद उपलब्ध है 🤝" : "Help Available 🤝",
+        title: isHindi ? "आइसल में सामान ढूंढने का अभ्यास करें" : "Practice finding items in aisles",
+        why: isHindi
+          ? `आपकी एक्यूरेसी ${accuracy}% है जो बेहतरीन है। रैक नंबर याद करने में ${buddyName} भैया से 2 मिनट पूछें।`
+          : `Your accuracy is ${accuracy}% (strong). Ask ${buddyName} for a quick 2-minute tip on shelf locations.`,
+        primaryBtnText: isHindi ? `🗣️ ${buddyName} से पूछें` : `🗣️ Ask ${buddyName}`,
+        primaryAction: () => setActiveSection("buddy"),
+        secondaryBtnText: isHindi ? "शिफ्ट टूल्स खोलें" : "Open Floor Tools",
+        secondaryAction: () => setActiveModal("work"),
       };
     }
     return {
-      badge: isHindi ? "सब ठीक चल रहा है 👍" : "On Track 👍",
-      title: isHindi
-        ? "आराम से सही सामान स्कैन करें"
-        : "Steady picking & scanning",
-      desc: isHindi
-        ? "आपकी एक्यूरेसी 98% है। जल्दबाजी में गलत सामान मत उठाना। कोई भी परेशानी हो तो नीचे बटन दबाएं।"
-        : "Your item scanning accuracy is 98%. Always check barcode before placing in tote. We are here to support you!",
-      bgGradient: "from-emerald-600 to-teal-700 text-white shadow-emerald-500/20",
-      badgeBg: "bg-white/20 text-white backdrop-blur-xs",
-      icon: <ThumbsUp className="w-6 h-6 text-white shrink-0" />,
-      stat: isHindi ? "एक्यूरेसी: 98% • 0 गलत सामान" : "Accuracy: 98% • 0 wrong items",
+      badge: isHindi ? "आज का मुख्य काम 👍" : "Today's Task 👍",
+      title: isHindi ? "आराम से सही सामान स्कैन और पिक करें" : "Pick and scan items accurately",
+      why: isHindi
+        ? `आपकी एक्यूरेसी ${accuracy}% है। सही बारकोड स्कैन करें, स्पीड अपने आप बढ़ जाएगी।`
+        : `Your accuracy is ${accuracy}%. Always check the barcode before placing in the tote.`,
+      primaryBtnText: isHindi ? "📦 काम शुरू करें (टूल्स)" : "📦 Open Floor Tools & Pick",
+      primaryAction: () => setActiveModal("work"),
+      secondaryBtnText: isHindi ? "ट्रेनिंग मॉड्यूल" : "Training Modules",
+      secondaryAction: () => setActiveSection("modules"),
     };
   };
 
@@ -361,286 +387,480 @@ export const NewHireView: React.FC<NewHireViewProps> = ({
       </div>
 
       {/* ========================================================= */}
-      {/* 2. HERO STATUS CARD (Vibrant, Bold & Reassuring)          */}
+      {/* 4-TAB NAVIGATION BAR: HOME | MODULES | BUDDY | DASHBOARD */}
       {/* ========================================================= */}
-      <div
-        className={`bg-gradient-to-br ${status.bgGradient} rounded-3xl p-4 sm:p-5 shadow-lg relative overflow-hidden transition-all`}
-      >
-        {/* Subtle decorative circles for depth */}
-        <div className="absolute -right-6 -bottom-6 w-28 h-28 bg-white/10 rounded-full blur-xl pointer-events-none" />
-        <div className="absolute -left-6 -top-6 w-24 h-24 bg-white/10 rounded-full blur-lg pointer-events-none" />
-
-        <div className="relative z-10 space-y-3">
-          {/* Header Row with Badge and Audio Listen Pill */}
-          <div className="flex items-center justify-between">
-            <span
-              className={`px-3 py-1 rounded-full text-xs font-bold tracking-wide uppercase ${status.badgeBg}`}
-            >
-              {status.badge}
-            </span>
-
-            {/* Tap to Listen Audio Pill */}
-            <button
-              onClick={() => handlePlayAudio("status-card", `${status.title}. ${status.desc}`)}
-              className="flex items-center gap-1.5 px-3 py-1 rounded-full bg-white/95 hover:bg-white text-slate-900 text-xs font-bold shadow-xs cursor-pointer active:scale-95 transition-all"
-              title="Listen aloud"
-            >
-              <Volume2
-                className={`w-4 h-4 ${
-                  playingAudioId === "status-card" ? "text-emerald-600 animate-bounce" : "text-slate-700"
-                }`}
-              />
-              <span>{isHindi ? "सुनिए" : "Listen"}</span>
-            </button>
-          </div>
-
-          {/* Title & Human Description */}
-          <div>
-            <h2 className="text-lg sm:text-xl font-black leading-snug tracking-tight">
-              {status.title}
-            </h2>
-            <p className="text-xs sm:text-sm font-normal text-white/90 leading-relaxed mt-1">
-              {status.desc}
-            </p>
-          </div>
-
-          {/* Key Stat / Reassurance Pill */}
-          <div className="pt-2 border-t border-white/15 flex items-center justify-between text-xs font-bold text-white/95">
-            <span>{status.stat}</span>
-            <span className="text-[11px] font-medium text-white/80">
-              Buddy: {newHire.buddy.split(" ")[0]}
-            </span>
-          </div>
-        </div>
+      <div className="flex p-1 bg-slate-100/90 rounded-2xl border border-slate-200/80 shadow-2xs">
+        <button
+          id="tab-home-btn"
+          type="button"
+          onClick={() => setActiveSection("home")}
+          className={`flex-1 flex items-center justify-center gap-1 py-2 px-1.5 rounded-xl text-xs font-bold transition-all cursor-pointer ${
+            activeSection === "home"
+              ? "bg-white text-slate-950 shadow-xs"
+              : "text-slate-500 hover:text-slate-900"
+          }`}
+        >
+          <Home className="w-3.5 h-3.5 text-violet-600" />
+          <span>{isHindi ? "होम" : "Home"}</span>
+        </button>
+        <button
+          id="tab-modules-btn"
+          type="button"
+          onClick={() => setActiveSection("modules")}
+          className={`flex-1 flex items-center justify-center gap-1 py-2 px-1.5 rounded-xl text-xs font-bold transition-all cursor-pointer ${
+            activeSection === "modules"
+              ? "bg-white text-slate-950 shadow-xs"
+              : "text-slate-500 hover:text-slate-900"
+          }`}
+        >
+          <BookOpen className="w-3.5 h-3.5 text-blue-600" />
+          <span>{isHindi ? "पाठ्यक्रम" : "Modules"}</span>
+        </button>
+        <button
+          id="tab-buddy-btn"
+          type="button"
+          onClick={() => setActiveSection("buddy")}
+          className={`flex-1 flex items-center justify-center gap-1 py-2 px-1.5 rounded-xl text-xs font-bold transition-all cursor-pointer ${
+            activeSection === "buddy"
+              ? "bg-white text-slate-950 shadow-xs"
+              : "text-slate-500 hover:text-slate-900"
+          }`}
+        >
+          <MessageCircle className="w-3.5 h-3.5 text-emerald-600" />
+          <span>{isHindi ? "साथी" : "Buddy"}</span>
+        </button>
+        <button
+          id="tab-dashboard-btn"
+          type="button"
+          onClick={() => setActiveSection("dashboard")}
+          className={`flex-1 flex items-center justify-center gap-1 py-2 px-1.5 rounded-xl text-xs font-bold transition-all cursor-pointer ${
+            activeSection === "dashboard"
+              ? "bg-white text-slate-950 shadow-xs"
+              : "text-slate-500 hover:text-slate-900"
+          }`}
+        >
+          <User className="w-3.5 h-3.5 text-purple-600" />
+          <span>{isHindi ? "हुनर" : "Dashboard"}</span>
+        </button>
       </div>
 
       {/* ========================================================= */}
-      {/* 3. QUICK ACTION TILES (2x2 Chunky Squircle Grid)          */}
-      {/* Reference: Smart Home & SpaceApp 2x2 Squircle Cards       */}
+      {/* 1. HOME: WHAT DO I NEED TO KNOW OR DO RIGHT NOW?          */}
       {/* ========================================================= */}
-      <div>
-        <div className="flex items-center justify-between mb-2 px-0.5">
-          <span className="text-xs font-bold uppercase tracking-wider text-slate-400">
-            {isHindi ? "त्वरित सहायता" : "Quick Help"}
-          </span>
-          <span className="text-[11px] text-slate-400">
-            {isHindi ? "1-टच सहायता" : "1-touch actions"}
-          </span>
-        </div>
+      {activeSection === "home" && (
+        <div className="space-y-4 animate-in fade-in duration-200">
+          {/* DOMINANT PRIMARY ACTION CARD: WHAT TO DO NOW */}
+          <div className="bg-gradient-to-br from-violet-700 via-purple-700 to-fuchsia-700 rounded-[28px] p-5 text-white shadow-xl shadow-purple-950/15 relative overflow-hidden space-y-4">
+            <div className="flex items-center justify-between">
+              <span className="px-3 py-1 rounded-full text-xs font-black tracking-wide uppercase bg-white/20 text-white backdrop-blur-xs">
+                {status.badge}
+              </span>
 
-        <div className="grid grid-cols-2 gap-2.5 sm:gap-3">
-          {/* Tile 1: Item & Aisle Map (Blue) */}
-          <button
-            onClick={() => setActiveModal("map")}
-            className="flex flex-col items-start justify-between p-3.5 sm:p-4 rounded-3xl bg-white border border-slate-200/90 hover:border-blue-300 hover:bg-blue-50/40 shadow-xs active:scale-97 transition-all cursor-pointer group text-left"
-          >
-            <div className="w-11 h-11 rounded-2xl bg-blue-500 text-white flex items-center justify-center shadow-xs group-hover:scale-105 transition-transform mb-3">
-              <MapPin className="w-5 h-5" />
+              <button
+                onClick={() => handlePlayAudio("status-card", `${status.title}. ${status.why}`)}
+                className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-white text-slate-950 text-xs font-black shadow-xs cursor-pointer active:scale-95 transition-all"
+                title="Listen aloud"
+              >
+                <Volume2
+                  className={`w-4 h-4 ${
+                    playingAudioId === "status-card" ? "text-purple-600 animate-bounce" : "text-slate-800"
+                  }`}
+                />
+                <span>{isHindi ? "सुनिए" : "Listen"}</span>
+              </button>
             </div>
-            <div>
-              <span className="text-sm font-bold text-slate-900 block leading-tight">
-                {isHindi ? "सामान कहां है?" : "Find Item"}
-              </span>
-              <span className="text-[11px] text-slate-500 font-medium mt-0.5 block">
-                {isHindi ? "आइसल और शेल्फ मैप" : "Aisle & shelf guide"}
-              </span>
-            </div>
-          </button>
 
-          {/* Tile 2: Call Buddy Vikram (Emerald) */}
-          <button
-            onClick={() => setActiveModal("buddy")}
-            className="flex flex-col items-start justify-between p-3.5 sm:p-4 rounded-3xl bg-white border border-slate-200/90 hover:border-emerald-300 hover:bg-emerald-50/40 shadow-xs active:scale-97 transition-all cursor-pointer group text-left"
-          >
-            <div className="w-11 h-11 rounded-2xl bg-emerald-600 text-white flex items-center justify-center shadow-xs group-hover:scale-105 transition-transform mb-3">
-              <Phone className="w-5 h-5" />
-            </div>
-            <div>
-              <span className="text-sm font-bold text-slate-900 block leading-tight">
-                {isHindi ? "विक्रम भैया" : "Call Buddy"}
+            <div className="space-y-1.5">
+              <span className="text-[11px] font-extrabold uppercase tracking-wider text-purple-200 block">
+                {isHindi ? "👉 अभी क्या करना है?" : "👉 WHAT TO DO NOW"}
               </span>
-              <span className="text-[11px] text-emerald-600 font-bold mt-0.5 block">
-                {isHindi ? "मदद बुलाओ (Floor)" : "Ask Vikram on Floor"}
-              </span>
+              <h2 className="text-xl sm:text-2xl font-black leading-snug tracking-tight">
+                {status.title}
+              </h2>
+              <p className="text-xs sm:text-sm text-white/90 leading-relaxed pt-1">
+                <strong className="text-purple-200 font-bold">{isHindi ? "क्यों? " : "Why? "}</strong>
+                {status.why}
+              </p>
             </div>
-          </button>
 
-          {/* Tile 3: Scanner Troubleshooting (Purple) */}
-          <button
-            onClick={() => setActiveModal("scanner")}
-            className="flex flex-col items-start justify-between p-3.5 sm:p-4 rounded-3xl bg-white border border-slate-200/90 hover:border-purple-300 hover:bg-purple-50/40 shadow-xs active:scale-97 transition-all cursor-pointer group text-left"
-          >
-            <div className="w-11 h-11 rounded-2xl bg-purple-600 text-white flex items-center justify-center shadow-xs group-hover:scale-105 transition-transform mb-3">
-              <ScanLine className="w-5 h-5" />
-            </div>
-            <div>
-              <span className="text-sm font-bold text-slate-900 block leading-tight">
-                {isHindi ? "स्कैनर प्रॉब्लम" : "Scanner Fix"}
-              </span>
-              <span className="text-[11px] text-slate-500 font-medium mt-0.5 block">
-                {isHindi ? "2 मिनट का आसान हल" : "Quick troubleshooting"}
-              </span>
-            </div>
-          </button>
+            {/* DOMINANT PRIMARY ACTION BUTTON */}
+            <div className="pt-2 space-y-2">
+              <button
+                id="home-primary-cta-btn"
+                type="button"
+                onClick={status.primaryAction}
+                className="w-full py-4 px-5 rounded-2xl bg-white text-slate-950 hover:bg-slate-50 font-black text-sm sm:text-base shadow-lg shadow-black/10 active:scale-98 transition-all flex items-center justify-center gap-2 cursor-pointer border-2 border-white"
+              >
+                <span>{status.primaryBtnText}</span>
+                <ArrowRight className="w-4 h-4" />
+              </button>
 
-          {/* Tile 4: Today's Target & Ramp Goal (Amber/Orange) */}
-          <button
-            onClick={() => setActiveModal("target")}
-            className="flex flex-col items-start justify-between p-3.5 sm:p-4 rounded-3xl bg-white border border-slate-200/90 hover:border-amber-300 hover:bg-amber-50/40 shadow-xs active:scale-97 transition-all cursor-pointer group text-left"
-          >
-            <div className="w-11 h-11 rounded-2xl bg-amber-500 text-white flex items-center justify-center shadow-xs group-hover:scale-105 transition-transform mb-3">
-              <Target className="w-5 h-5" />
+              <div className="flex items-center justify-between pt-1 px-1">
+                <button
+                  type="button"
+                  onClick={status.secondaryAction}
+                  className="text-xs font-bold text-white/80 hover:text-white underline underline-offset-4 cursor-pointer"
+                >
+                  {status.secondaryBtnText} →
+                </button>
+                <span className="text-[11px] font-medium text-white/70">
+                  {isHindi ? `साथी: ${newHire.buddy.split(" ")[0]}` : `Buddy: ${newHire.buddy.split(" ")[0]}`}
+                </span>
+              </div>
             </div>
-            <div>
-              <span className="text-sm font-bold text-slate-900 block leading-tight">
-                {isHindi ? "आज का लक्ष्य" : "Today's Target"}
-              </span>
-              <span className="text-[11px] text-amber-700 font-bold mt-0.5 block">
-                {isHindi ? "98% एक्यूरेसी 👍" : "98% Accuracy 👍"}
-              </span>
-            </div>
-          </button>
-        </div>
-      </div>
+          </div>
 
-      {/* ========================================================= */}
-      {/* 4. COMPANION INTERACTION CARD (Minimal, Clean Feedback)   */}
-      {/* ========================================================= */}
-      {latestInteraction ? (
-        <div className="bg-white rounded-3xl p-4 border border-slate-200/90 shadow-xs space-y-2.5 animate-in fade-in zoom-in duration-150">
-          <div className="flex items-center justify-between">
-            <span className="text-xs font-bold text-slate-700 flex items-center gap-1.5">
-              <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
-              {isHindi ? "साथी का जवाब" : "Floor Companion"}
-            </span>
+          {/* TODAY'S STATS AT A GLANCE (Compact 3-Column Strip) */}
+          <div className="bg-white rounded-[24px] p-3.5 border border-purple-100 shadow-2xs space-y-2">
+            <div className="flex items-center justify-between px-1">
+              <span className="text-xs font-black text-slate-800 uppercase tracking-wide">
+                {isHindi ? "आज की प्रगति" : "Today's Progress"}
+              </span>
+              <span className="text-[11px] font-bold text-slate-400">Day {currentDay}</span>
+            </div>
+
+            <div className="grid grid-cols-3 gap-2 text-center">
+              <div className="p-2.5 rounded-2xl bg-slate-50 border border-slate-100">
+                <span className="text-[10px] font-bold text-slate-400 block uppercase">
+                  {isHindi ? "स्पीड" : "Speed"}
+                </span>
+                <span className="text-base font-black text-slate-900 block mt-0.5">
+                  {currentRecord.workSignal?.actualPickRate ?? 35}
+                  <span className="text-[10px] text-slate-400 font-normal"> / 50</span>
+                </span>
+                <span className="text-[9px] font-bold text-violet-600 block">
+                  {isHindi ? "रैम्प जारी" : "Ramping"}
+                </span>
+              </div>
+
+              <div className="p-2.5 rounded-2xl bg-emerald-50/60 border border-emerald-100">
+                <span className="text-[10px] font-bold text-emerald-700 block uppercase">
+                  {isHindi ? "एक्यूरेसी" : "Accuracy"}
+                </span>
+                <span className="text-base font-black text-emerald-900 block mt-0.5">
+                  {currentRecord.workSignal?.accuracyRate ?? 98}%
+                </span>
+                <span className="text-[9px] font-bold text-emerald-600 block">
+                  ✓ {isHindi ? "बहुत अच्छी" : "Great"}
+                </span>
+              </div>
+
+              <div
+                onClick={() => setActiveSection("modules")}
+                className="p-2.5 rounded-2xl bg-purple-50/60 border border-purple-100 cursor-pointer hover:bg-purple-100/60 transition-colors"
+              >
+                <span className="text-[10px] font-bold text-purple-700 block uppercase">
+                  {isHindi ? "ट्रेनिंग" : "Training"}
+                </span>
+                <span className="text-base font-black text-purple-950 block mt-0.5">
+                  {newHire.modulesCompleted ?? 3}
+                  <span className="text-[10px] text-purple-400 font-normal"> / 10</span>
+                </span>
+                <span className="text-[9px] font-bold text-purple-600 block">
+                  {isHindi ? "मॉड्यूल" : "Modules"} →
+                </span>
+              </div>
+            </div>
+          </div>
+
+          {/* NEED HELP? 1-TAP BUDDY ASSIST */}
+          <div className="bg-white rounded-[24px] p-3.5 border border-slate-200/80 shadow-2xs flex items-center justify-between gap-3">
+            <div className="flex items-center gap-2.5 min-w-0">
+              <div className="w-10 h-10 rounded-full bg-emerald-100 text-emerald-700 flex items-center justify-center shrink-0 font-bold text-sm">
+                🤝
+              </div>
+              <div className="min-w-0">
+                <h4 className="text-xs font-bold text-slate-900 truncate">
+                  {isHindi ? `साथी ${newHire.buddy.split(" ")[0]} फ्लोर पर हैं` : `Buddy ${newHire.buddy.split(" ")[0]} is on floor`}
+                </h4>
+                <p className="text-[11px] text-slate-500 truncate">
+                  {isHindi ? "कोई सवाल हो तो तुरंत पूछें" : "Ask questions or call to your rack"}
+                </p>
+              </div>
+            </div>
+
             <button
-              onClick={() => handlePlayAudio("latest-interaction", latestInteraction.replyText)}
-              className="flex items-center gap-1 text-[11px] font-bold text-emerald-700 hover:text-emerald-800 bg-emerald-50 px-2 py-0.5 rounded-full cursor-pointer"
+              onClick={() => setActiveSection("buddy")}
+              className="px-3 py-2 rounded-xl bg-slate-900 hover:bg-slate-800 text-white text-xs font-bold shrink-0 cursor-pointer shadow-xs active:scale-95 transition-all"
             >
-              <Volume2 className="w-3.5 h-3.5" />
-              <span>{isHindi ? "दोबारा सुनें" : "Replay"}</span>
+              {isHindi ? "पूछें 🗣️" : "Ask 🗣️"}
             </button>
           </div>
-
-          <div className="p-2.5 rounded-2xl bg-slate-50 border border-slate-100 text-xs text-slate-600 italic">
-            🗣️ "{latestInteraction.userText}"
-          </div>
-
-          <p className="text-xs sm:text-sm font-medium text-slate-900 leading-relaxed">
-            {latestInteraction.replyText}
-          </p>
-        </div>
-      ) : (
-        /* Friendly greeting tip when no message sent yet */
-        <div className="bg-white/80 rounded-2xl p-3 border border-slate-200/70 text-xs text-slate-600 flex items-center gap-2.5 shadow-2xs">
-          <div className="w-8 h-8 rounded-full bg-emerald-100 text-emerald-700 flex items-center justify-center shrink-0">
-            <Sparkles className="w-4 h-4" />
-          </div>
-          <p className="leading-snug">
-            {isHindi
-              ? "कोई भी दिक्कत हो या सामान ना मिले, नीचे माइक दबाकर बोलें।"
-              : "Facing any issue or can't locate an item? Tap the mic below to speak."}
-          </p>
         </div>
       )}
 
       {/* ========================================================= */}
-      {/* 5. 1-TAP QUICK QUESTIONS (Spoken Chips)                   */}
+      {/* 2. MODULES: 10-DAY LMS TRAINING JOURNEY                   */}
       {/* ========================================================= */}
-      <div className="flex gap-1.5 overflow-x-auto pb-0.5 scrollbar-none">
-        {(isHindi
-          ? [
-              "आइसल 4 से 8 में सामान नहीं मिल रहा",
-              "दही और दूध का कोल्ड रूम कहां है?",
-              "स्कैनर बारकोड नहीं पढ़ रहा",
-            ]
-          : [
-              "Aisles 4 to 8 taking too long",
-              "Where is the cold dairy room?",
-              "Barcode scanner disconnected",
-            ]
-        ).map((chip, idx) => (
-          <button
-            key={idx}
-            type="button"
-            onClick={() => handleSendMessage(chip)}
-            className="text-[11px] font-medium bg-white hover:bg-emerald-50 hover:border-emerald-300 text-slate-700 border border-slate-200/90 px-3 py-1.5 rounded-full shrink-0 transition-all cursor-pointer shadow-2xs active:scale-95 whitespace-nowrap"
-          >
-            🗣️ "{chip}"
-          </button>
-        ))}
-      </div>
+      {activeSection === "modules" && (
+        <ModulesView
+          newHire={newHire}
+          onUpdateHire={onUpdateHire}
+          isHindi={isHindi}
+        />
+      )}
 
       {/* ========================================================= */}
-      {/* 6. BIG TOUCH-FRIENDLY VOICE ACTION BAR (WhatsApp Style)   */}
+      {/* 3. BUDDY: LET ME TALK TO SOMEONE (VOICE-FIRST & NATURAL)  */}
       {/* ========================================================= */}
-      <div className="pt-1">
-        <button
-          id="big-voice-speak-btn"
-          type="button"
-          onClick={handleToggleVoice}
-          disabled={isProcessing}
-          className={`w-full py-3.5 px-4 rounded-3xl font-black text-sm flex items-center justify-center gap-2.5 shadow-md active:scale-98 transition-all cursor-pointer ${
-            isListening
-              ? "bg-rose-600 text-white ring-4 ring-rose-200 animate-pulse"
-              : "bg-emerald-600 hover:bg-emerald-700 text-white shadow-emerald-600/25"
-          }`}
-        >
-          {isListening ? (
-            <>
-              <MicOff className="w-5 h-5 animate-spin" />
-              <span>{isHindi ? "🔴 सुन रहा हूं... बोलिए" : "🔴 Listening... Speak now"}</span>
-            </>
-          ) : isProcessing ? (
-            <>
-              <span className="w-4 h-4 rounded-full border-2 border-white border-t-transparent animate-spin" />
-              <span>{isHindi ? "समझ रहा हूं..." : "Understanding report..."}</span>
-            </>
-          ) : (
-            <>
-              <Mic className="w-5 h-5" />
-              <span>{isHindi ? "बोल कर बताएं (Tap to Speak)" : "Tap to Speak (Voice Report)"}</span>
-            </>
-          )}
-        </button>
+      {activeSection === "buddy" && (
+        <div className="space-y-4 animate-in fade-in duration-200">
+          {/* Buddy Profile & Live Floor Stance */}
+          <div className="bg-white rounded-[28px] p-4 border border-emerald-100 shadow-sm flex items-center justify-between">
+            <div className="flex items-center gap-3">
+              <img
+                src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=150&h=150&fit=crop&crop=face"
+                alt="Buddy Vikram"
+                className="w-12 h-12 rounded-full object-cover border-2 border-emerald-500 shadow-xs"
+              />
+              <div>
+                <h3 className="text-sm font-bold text-slate-900">{newHire.buddy}</h3>
+                <p className="text-[11px] text-slate-500 font-medium">Senior Floor Buddy</p>
+                <span className="text-[10px] text-emerald-700 font-bold bg-emerald-50 px-2 py-0.5 rounded-full inline-block mt-0.5">
+                  🟢 {isHindi ? "फ्लोर पर हैं (Aisles 4-8)" : "On Duty on Floor (Aisles 4-8)"}
+                </span>
+              </div>
+            </div>
 
-        {/* Subtle toggle for typing */}
-        <div className="flex justify-center mt-2">
-          <button
-            type="button"
-            onClick={() => setShowTextInput(!showTextInput)}
-            className="text-[11px] text-slate-500 hover:text-slate-800 font-medium underline underline-offset-2 cursor-pointer"
-          >
-            {showTextInput
-              ? isHindi ? "टाइपिंग छुपाएं" : "Hide text input"
-              : isHindi ? "या टाइप करके लिखें" : "Or type text report"}
-          </button>
-        </div>
-
-        {/* Optional Collapsible Text Input */}
-        {showTextInput && (
-          <div className="flex items-center gap-2 mt-2 animate-in fade-in duration-100">
-            <input
-              id="learner-text-input"
-              type="text"
-              value={inputText}
-              onChange={(e) => setInputText(e.target.value)}
-              onKeyDown={(e) => e.key === "Enter" && handleSendMessage()}
-              placeholder={isHindi ? "सवाल या शिफ्ट रिपोर्ट लिखें..." : "Type question or report..."}
-              disabled={isProcessing}
-              className="flex-1 text-xs sm:text-sm px-3.5 py-2.5 rounded-2xl border border-slate-200 bg-white focus:outline-none focus:ring-2 focus:ring-emerald-500 shadow-2xs"
-            />
             <button
-              onClick={() => handleSendMessage()}
-              disabled={isProcessing || !inputText.trim()}
-              className="p-2.5 rounded-2xl bg-slate-900 hover:bg-slate-800 text-white disabled:opacity-30 cursor-pointer transition-all active:scale-95 shrink-0"
-              title="Send"
+              onClick={() => {
+                setBuddyAlertSent(true);
+                setActiveModal("buddy");
+              }}
+              className="px-3 py-1.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-full text-xs font-bold shadow-2xs cursor-pointer active:scale-95 transition-all flex items-center gap-1.5 shrink-0"
             >
-              <Send className="w-4 h-4" />
+              <Phone className="w-3.5 h-3.5" />
+              <span>{isHindi ? "बुलाएं" : "Call to Rack"}</span>
             </button>
           </div>
-        )}
-      </div>
+
+          {/* Voice-First Push-to-Talk Action Bar */}
+          <div className="bg-gradient-to-br from-violet-50 via-purple-50 to-white rounded-[28px] p-4 border border-purple-100/90 shadow-2xs space-y-3">
+            <div className="text-center space-y-1">
+              <h3 className="text-xs font-black text-slate-900 uppercase tracking-wide">
+                {isHindi ? "विक्रम भैया से पूछें (Voice First)" : "Ask Buddy Vikram (Voice-First)"}
+              </h3>
+              <p className="text-xs text-slate-500">
+                {isHindi
+                  ? "माइक दबाकर सवाल पूछें, साथी तुरंत जवाब देगा:"
+                  : "Tap the mic and speak naturally. Your buddy answers right back:"}
+              </p>
+            </div>
+
+            <button
+              id="big-voice-speak-btn"
+              type="button"
+              onClick={handleToggleVoice}
+              disabled={isProcessing}
+              className={`w-full py-4 px-4 rounded-[26px] font-black text-sm flex items-center justify-center gap-2.5 shadow-lg active:scale-98 transition-all cursor-pointer ${
+                isListening
+                  ? "bg-rose-600 text-white ring-4 ring-rose-200 animate-pulse"
+                  : "bg-gradient-to-r from-violet-600 via-purple-600 to-fuchsia-600 hover:opacity-95 text-white shadow-purple-500/25"
+              }`}
+            >
+              {isListening ? (
+                <>
+                  <MicOff className="w-5 h-5 animate-spin" />
+                  <span>{isHindi ? "🔴 सुन रहा हूं... बोलिए" : "🔴 Listening... Speak now"}</span>
+                </>
+              ) : isProcessing ? (
+                <>
+                  <span className="w-4 h-4 rounded-full border-2 border-white border-t-transparent animate-spin" />
+                  <span>{isHindi ? "समझ रहा हूं..." : "Understanding question..."}</span>
+                </>
+              ) : (
+                <>
+                  <Mic className="w-5 h-5" />
+                  <span>{isHindi ? "बोल कर पूछें (Tap to Speak)" : "Tap to Speak (Ask Question)"}</span>
+                </>
+              )}
+            </button>
+
+            {/* Collapsible text typing fallback for noisy floor */}
+            <div className="flex justify-center">
+              <button
+                type="button"
+                onClick={() => setShowTextInput(!showTextInput)}
+                className="text-[11px] text-slate-500 hover:text-purple-700 font-medium underline underline-offset-2 cursor-pointer"
+              >
+                {showTextInput
+                  ? isHindi ? "टाइपिंग छुपाएं" : "Hide typing"
+                  : isHindi ? "या लिख कर पूछें" : "Or type text question"}
+              </button>
+            </div>
+
+            {showTextInput && (
+              <div className="flex items-center gap-2 animate-in fade-in duration-100">
+                <input
+                  id="learner-text-input"
+                  type="text"
+                  value={inputText}
+                  onChange={(e) => setInputText(e.target.value)}
+                  onKeyDown={(e) => e.key === "Enter" && handleSendMessage()}
+                  placeholder={isHindi ? "सवाल लिखें..." : "Type your question..."}
+                  disabled={isProcessing}
+                  className="flex-1 text-xs sm:text-sm px-3.5 py-2.5 rounded-2xl border border-slate-200 bg-white focus:outline-none focus:ring-2 focus:ring-purple-500 shadow-2xs"
+                />
+                <button
+                  onClick={() => handleSendMessage()}
+                  disabled={isProcessing || !inputText.trim()}
+                  className="p-2.5 rounded-2xl bg-gradient-to-r from-violet-600 to-fuchsia-600 text-white disabled:opacity-30 cursor-pointer transition-all active:scale-95 shrink-0"
+                  title="Send"
+                >
+                  <Send className="w-4 h-4" />
+                </button>
+              </div>
+            )}
+          </div>
+
+          {/* Conversation Exchange Card */}
+          {latestInteraction ? (
+            <div className="bg-white rounded-[28px] p-4 border border-purple-100/90 shadow-md space-y-2.5 animate-in fade-in duration-150">
+              <div className="flex items-center justify-between">
+                <span className="text-xs font-bold text-slate-800 flex items-center gap-1.5">
+                  <span className="w-2 h-2 rounded-full bg-emerald-600 animate-pulse"></span>
+                  {isHindi ? "विक्रम भैया का जवाब" : "Buddy Vikram's Response"}
+                </span>
+                <button
+                  onClick={() => handlePlayAudio("latest-interaction", latestInteraction.replyText)}
+                  className="flex items-center gap-1 text-[11px] font-bold text-violet-700 hover:text-violet-900 bg-purple-50 px-2.5 py-0.5 rounded-full cursor-pointer"
+                >
+                  <Volume2 className="w-3.5 h-3.5" />
+                  <span>{isHindi ? "दोबारा सुनें" : "Replay"}</span>
+                </button>
+              </div>
+
+              <div className="p-2.5 rounded-2xl bg-slate-50 border border-slate-100 text-xs text-slate-600 italic">
+                🗣️ "{latestInteraction.userText}"
+              </div>
+
+              <p className="text-xs sm:text-sm font-medium text-slate-900 leading-relaxed">
+                {latestInteraction.replyText}
+              </p>
+
+              <div className="pt-2 border-t border-slate-100 flex items-center justify-between">
+                <button
+                  onClick={handleToggleVoice}
+                  className="text-[11px] font-bold text-violet-600 hover:text-violet-800 flex items-center gap-1 cursor-pointer"
+                >
+                  <RotateCcw className="w-3.5 h-3.5" />
+                  <span>{isHindi ? "दूसरा सवाल पूछें" : "Ask follow-up question"}</span>
+                </button>
+                <span className="text-[10px] text-slate-400">{latestInteraction.timestamp}</span>
+              </div>
+            </div>
+          ) : (
+            <div className="bg-white rounded-[24px] p-3.5 border border-purple-100/80 text-xs text-slate-600 flex items-center gap-3 shadow-xs">
+              <div className="w-9 h-9 rounded-2xl bg-gradient-to-br from-violet-600 to-fuchsia-600 text-white flex items-center justify-center shrink-0 shadow-xs">
+                <Sparkles className="w-4 h-4" />
+              </div>
+              <p className="leading-snug text-slate-700">
+                {isHindi
+                  ? "माइक दबाकर बोलें या नीचे दिए गए आम सवालों में से एक चुनें।"
+                  : "Tap the mic above or tap any common question below to practice."}
+              </p>
+            </div>
+          )}
+
+          {/* Voice Practice Situation Chips */}
+          <div className="space-y-2 pt-1">
+            <h4 className="text-xs font-bold text-slate-700 px-1">
+              {isHindi ? "आम वर्कप्लेस सवाल (टैप करें):" : "Common Floor Questions (Tap to Ask):"}
+            </h4>
+            <div className="flex gap-1.5 overflow-x-auto pb-1 scrollbar-none">
+              {(isHindi
+                ? [
+                    "आइसल 4 से 8 में सामान नहीं मिल रहा",
+                    "दही और दूध का कोल्ड रूम कहां है?",
+                    "स्कैनर बारकोड नहीं पढ़ रहा",
+                    "सामान का पैकेट फटा हुआ है, क्या करूं?",
+                    "भारी सामान टोट में कैसे रखें?",
+                  ]
+                : [
+                    "Aisles 4 to 8 taking too long",
+                    "Where is the cold dairy room?",
+                    "Barcode scanner disconnected",
+                    "Item package is damaged, what should I do?",
+                    "How to balance heavy items in tote?",
+                  ]
+              ).map((chip, idx) => (
+                <button
+                  key={idx}
+                  type="button"
+                  onClick={() => handleSendMessage(chip)}
+                  className="text-[11px] font-medium bg-white hover:bg-purple-50 hover:border-purple-300 text-slate-700 border border-purple-100/90 px-3 py-1.5 rounded-full shrink-0 transition-all cursor-pointer shadow-2xs active:scale-95 whitespace-nowrap"
+                >
+                  🗣️ "{chip}"
+                </button>
+              ))}
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* ========================================================= */}
+      {/* 4. DASHBOARD: WHAT HAVE I LEARNED & JOB READINESS VISUAL  */}
+      {/* ========================================================= */}
+      {activeSection === "dashboard" && (
+        <div className="space-y-4 animate-in fade-in duration-200">
+          {/* THE PRIMARY VISUAL: THE JOB-READY HUMAN FIGURE */}
+          <JobReadyHumanFigure
+            newHire={newHire}
+            currentDay={currentDay}
+            isHindi={isHindi}
+          />
+
+          {/* Quick Bridge Card to Floor Shift & Training Modules */}
+          <div className="grid grid-cols-2 gap-2">
+            <div className="bg-slate-900 rounded-[28px] p-3.5 text-white shadow-md border border-slate-800 space-y-1.5 flex flex-col justify-between">
+              <div>
+                <div className="flex items-center gap-1.5 text-blue-400 text-xs font-bold">
+                  <Briefcase className="w-3.5 h-3.5" />
+                  <span>{isHindi ? "शिफ्ट टूल्स" : "Floor Shift"}</span>
+                </div>
+                <p className="text-[10px] text-slate-300 mt-1">
+                  {isHindi ? "पिक रेट डायल, स्टोर मैप व गाइड" : "Pick dial, store zone map & guides"}
+                </p>
+              </div>
+              <button
+                onClick={() => setActiveModal("work")}
+                className="w-full py-1.5 rounded-xl bg-white text-slate-900 text-xs font-bold cursor-pointer shadow-xs active:scale-95 transition-transform hover:bg-slate-100"
+              >
+                {isHindi ? "टूल्स खोलें 🛠️" : "Floor Tools 🛠️"}
+              </button>
+            </div>
+
+            <div className="bg-violet-900 rounded-[28px] p-3.5 text-white shadow-md border border-violet-800 space-y-1.5 flex flex-col justify-between">
+              <div>
+                <div className="flex items-center gap-1.5 text-violet-300 text-xs font-bold">
+                  <BookOpen className="w-3.5 h-3.5" />
+                  <span>{isHindi ? "एलएमएस मॉड्यूल" : "LMS Training"}</span>
+                </div>
+                <p className="text-[10px] text-violet-200 mt-1">
+                  {newHire.modulesCompleted ?? 3}/10 {isHindi ? "मॉड्यूल पूरे हुए" : "Modules completed"}
+                </p>
+              </div>
+              <button
+                onClick={() => setActiveSection("modules")}
+                className="w-full py-1.5 rounded-xl bg-white text-violet-950 text-xs font-bold cursor-pointer shadow-xs active:scale-95 transition-transform hover:bg-violet-50"
+              >
+                {isHindi ? "मॉड्यूल देखें 📚" : "View Modules 📚"}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* ========================================================= */}
+      {/* FLOATING BAR MENU: APPLE GLASS TRANSLUCENT                */}
+      {/* ========================================================= */}
+      <FloatingGlassMenu
+        activeSection={activeSection}
+        onSelectSection={setActiveSection}
+        isHindi={isHindi}
+        hasAttention={isNeedsHelp || isSupportAssigned}
+        buddyAssigned={isSupportAssigned}
+      />
 
       {/* ========================================================= */}
       {/* MODAL 1: DARK STORE AISLE & ITEM MAP                      */}
@@ -968,6 +1188,87 @@ export const NewHireView: React.FC<NewHireViewProps> = ({
               className="w-full py-2.5 bg-slate-900 text-white rounded-2xl text-xs font-bold cursor-pointer"
             >
               {isHindi ? "समझ गया 👍" : "Got it 👍"}
+            </button>
+          </div>
+        </div>
+      )}
+
+      {/* ========================================================= */}
+      {/* MODAL 5: FULL FLOOR REFERENCE TOOLS MODAL                */}
+      {/* ========================================================= */}
+      {activeModal === "work" && (
+        <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-xs flex items-center justify-center p-3 overflow-y-auto">
+          <div className="bg-slate-50 rounded-3xl max-w-md w-full p-4 space-y-4 max-h-[90vh] overflow-y-auto shadow-2xl border border-slate-200">
+            <div className="flex items-center justify-between pb-2 border-b border-slate-200">
+              <div className="flex items-center gap-2">
+                <div className="w-8 h-8 rounded-xl bg-blue-600 text-white flex items-center justify-center">
+                  <Briefcase className="w-4 h-4" />
+                </div>
+                <div>
+                  <h3 className="text-sm font-bold text-slate-900">
+                    {isHindi ? "ऑन-फ्लोर शिफ्ट टूल्स" : "On-Floor Shift Tools"}
+                  </h3>
+                  <p className="text-[10px] text-slate-500">Dark Store #104 • Day {currentDay}</p>
+                </div>
+              </div>
+              <button
+                onClick={() => setActiveModal(null)}
+                className="p-1 rounded-full text-slate-400 hover:text-slate-800 cursor-pointer"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+
+            {/* Live Dial */}
+            <CircularDialWidget
+              pickRate={currentRecord.pickRate || 35}
+              targetPickRate={50}
+              accuracyRate={currentRecord.errorRate === 0 ? 100 : Math.max(88, Math.round(100 - (currentRecord.errorRate || 2) * 4))}
+              readinessScore={Math.round((newHire.rampProgress || 0.65) * 100)}
+              onCallBuddy={() => setActiveModal("buddy")}
+              onScannerFix={() => setActiveModal("scanner")}
+              onAisleMap={() => setActiveModal("map")}
+              onOpenTarget={() => setActiveModal("target")}
+              isHindi={isHindi}
+            />
+
+            {/* Store Zones Grid */}
+            <StoreZonesGrid
+              onSelectZone={(zoneId, zoneName) => {
+                setActiveModal(null);
+                if (zoneId === "aisles_4_8") {
+                  handleSendMessage(
+                    isHindi
+                      ? "आइसल 4 से 8 में सामान ढूंढने में देर लग रही है, मदद चाहिए।"
+                      : "Taking longer in Aisles 4-8. Where are the bulk grocery items?"
+                  );
+                } else if (zoneId === "cold_room") {
+                  handleSendMessage(
+                    isHindi
+                      ? "दूध और दही का कोल्ड रूम कहां है?"
+                      : "Where is the cold room for dairy and frozen milk?"
+                  );
+                } else if (zoneId === "scanner_dock") {
+                  setActiveModal("scanner");
+                } else if (zoneId === "buddy_desk") {
+                  setActiveModal("buddy");
+                } else {
+                  handleSendMessage(
+                    isHindi
+                      ? `${zoneName} के बारे में बताएं`
+                      : `Guide me to ${zoneName}`
+                  );
+                }
+              }}
+              isHindi={isHindi}
+              activeZoneId={currentDay === 3 ? "aisles_4_8" : "aisles_1_3"}
+            />
+
+            <button
+              onClick={() => setActiveModal(null)}
+              className="w-full py-2.5 bg-slate-900 text-white rounded-2xl text-xs font-bold cursor-pointer"
+            >
+              {isHindi ? "बंद करें" : "Close Floor Tools"}
             </button>
           </div>
         </div>

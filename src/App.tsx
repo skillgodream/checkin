@@ -1,10 +1,10 @@
 import React, { useState, useEffect } from "react";
 import { Header, ActiveTab } from "./components/Header";
-import { BottomNav } from "./components/BottomNav";
 import { NewHireView } from "./components/NewHireView";
 import { ManagerView } from "./components/ManagerView";
 import { OrganizationView } from "./components/OrganizationView";
 import { LoopInspectorModal } from "./components/LoopInspectorModal";
+import { TelemetryDialModal } from "./components/TelemetryDialModal";
 import { initialCohort, initialOrgSummary } from "./data/seedData";
 import {
   NewHire,
@@ -60,8 +60,10 @@ export default function App() {
 
   const [orgSummary, setOrgSummary] = useState(initialOrgSummary);
   const [isLoopModalOpen, setIsLoopModalOpen] = useState<boolean>(false);
+  const [isTelemetryModalOpen, setIsTelemetryModalOpen] = useState<boolean>(false);
   const [hasApiKey, setHasApiKey] = useState<boolean>(false);
   const [isFramed, setIsFramed] = useState<boolean>(true);
+  const [isHindi, setIsHindi] = useState<boolean>(true);
 
   // Synchronize state changes to localStorage
   useEffect(() => {
@@ -237,6 +239,10 @@ export default function App() {
     setActiveHireId("nh-rahul-01");
   };
 
+  const handleUpdateHire = (updatedHire: NewHire) => {
+    setNewHires((prev) => prev.map((h) => (h.id === updatedHire.id ? updatedHire : h)));
+  };
+
   const handleAskHelp = async (question: string) => {
     return askCompanion(question, currentDay);
   };
@@ -270,12 +276,14 @@ export default function App() {
           onSelectDay={handleSelectDay}
           onResetDemo={handleResetDemo}
           onOpenLoopModal={() => setIsLoopModalOpen(true)}
+          onOpenTelemetryDial={() => setIsTelemetryModalOpen(true)}
           hasApiKey={hasApiKey}
           doingWellCount={doingWellCount}
           needsAttentionCount={needsAttentionCount}
           atRiskCount={atRiskCount}
           isFramed={isFramed}
-          onToggleFrame={() => setIsFramed(!isFramed)}
+          isHindi={isHindi}
+          onToggleLanguage={() => setIsHindi((prev) => !prev)}
         />
 
         {/* Main Experience View */}
@@ -287,6 +295,10 @@ export default function App() {
               onDailySignalSubmitted={handleDailySignalSubmitted}
               onAskHelp={handleAskHelp}
               onSelectDay={handleSelectDay}
+              onUpdateHire={handleUpdateHire}
+              isHindi={isHindi}
+              onToggleLanguage={() => setIsHindi((prev) => !prev)}
+              setIsHindi={setIsHindi}
             />
           )}
 
@@ -314,22 +326,20 @@ export default function App() {
             />
           )}
         </main>
-
-        {/* Fixed Mobile Bottom Navigation */}
-        <BottomNav
-          activeTab={activeTab}
-          setActiveTab={setActiveTab}
-          onOpenLoopModal={() => setIsLoopModalOpen(true)}
-          needsAttentionCount={needsAttentionCount}
-          atRiskCount={atRiskCount}
-          currentDay={currentDay}
-        />
       </div>
 
       {/* Core Loop Inspector Modal */}
       <LoopInspectorModal
         isOpen={isLoopModalOpen}
         onClose={() => setIsLoopModalOpen(false)}
+        newHire={activeHire}
+        currentDay={currentDay}
+      />
+
+      {/* Direct Floor Telemetry / Temperature Gauge Modal */}
+      <TelemetryDialModal
+        isOpen={isTelemetryModalOpen}
+        onClose={() => setIsTelemetryModalOpen(false)}
         newHire={activeHire}
         currentDay={currentDay}
       />

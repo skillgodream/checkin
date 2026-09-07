@@ -285,6 +285,7 @@ export interface DailySignal {
   summary: string;
   companionResponse?: string;
   timestamp: string;
+  helpRequestsCount?: number;
 }
 
 export interface ManagerSignal {
@@ -305,6 +306,9 @@ export interface WorkSignal {
   ordersCompleted: number;
   targetOrders: number;
   gapIdentified?: string;
+  externalBottleneck?: string;
+  helpRequestsCount?: number;
+  hasWorkEvidence?: boolean;
 }
 
 export interface IdentifiedPattern {
@@ -360,6 +364,30 @@ export interface DayRecord {
   statusReason: string;
 }
 
+export interface ModuleActivity {
+  id: string;
+  type: "video" | "quiz" | "simulation" | "practice" | "assessment";
+  title: string;
+  titleHi?: string;
+  durationMinutes: number;
+  completed: boolean;
+  score?: number; // e.g. 95%
+}
+
+export interface TrainingModule {
+  dayNumber: number; // 1 to 10
+  id: string;        // e.g. "lms-mod-01"
+  code: string;      // e.g. "LMS-MOD-01"
+  title: string;
+  titleHi?: string;
+  description: string;
+  descriptionHi?: string;
+  durationMinutes: number;
+  mappedCapabilityIds: number[];
+  activities: ModuleActivity[];
+  passingScore: number;
+}
+
 export interface NewHire {
   id: string;
   name: string;
@@ -375,7 +403,10 @@ export interface NewHire {
   status: NewHireStatus;
   statusReason: string;
   recommendedActionSnippet?: string;
-  // Adaptive Intelligence extensions
+  // Adaptive Intelligence & Training Journey extensions
+  modulesCompleted?: number;                  // 0-10 mandatory LMS modules completed
+  quizAverageScore?: number;                  // LMS quiz score % (e.g. 95)
+  completedModuleIds?: string[];               // List of completed module IDs
   currentCapabilityId?: number;                // Primary capability currently active/focused
   overallReadinessScore?: number;             // 0-100% summary of verified floor capabilities
   capabilities?: Record<number, CapabilityState>; // Ledger of all 20 capabilities

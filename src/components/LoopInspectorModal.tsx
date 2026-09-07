@@ -51,7 +51,7 @@ export const LoopInspectorModal: React.FC<LoopInspectorModalProps> = ({
                 </span>
               </div>
               <p className="text-xs text-slate-300">
-                Observe → Understand → Connect → Act → Check • {newHire.name} (Day {currentDay})
+                Observe → Understand → Connect → Decide → Act → Check • {newHire.name} (Day {currentDay})
               </p>
             </div>
           </div>
@@ -63,7 +63,7 @@ export const LoopInspectorModal: React.FC<LoopInspectorModalProps> = ({
           </button>
         </div>
 
-        {/* Modal Content - 5 Steps as Chunky Squircles */}
+        {/* Modal Content - 6 Steps as Chunky Squircles */}
         <div className="p-4 sm:p-6 space-y-3.5 max-h-[75vh] overflow-y-auto">
           {/* Step 1: OBSERVE */}
           <div className="p-4 bg-slate-50 rounded-3xl border border-slate-200/90 shadow-2xs space-y-2.5">
@@ -120,7 +120,7 @@ export const LoopInspectorModal: React.FC<LoopInspectorModalProps> = ({
                 <div className="w-6 h-6 rounded-xl bg-indigo-600 text-white flex items-center justify-center text-xs font-black">
                   2
                 </div>
-                <span>UNDERSTAND (Structured Signal Extraction)</span>
+                <span>UNDERSTAND (Root Cause Diagnosis & Signal Extraction)</span>
               </span>
               <span className="text-[11px] text-indigo-700 font-bold">NLP Engine</span>
             </div>
@@ -160,7 +160,7 @@ export const LoopInspectorModal: React.FC<LoopInspectorModalProps> = ({
                 <div className="w-6 h-6 rounded-xl bg-purple-600 text-white flex items-center justify-center text-xs font-black">
                   3
                 </div>
-                <span>CONNECT (Cross-Signal Pattern Detection)</span>
+                <span>CONNECT (Capability Graph & Prerequisite Mapping)</span>
               </span>
               <span className="text-[10px] font-black px-2.5 py-0.5 rounded-full bg-purple-100 text-purple-800">
                 {dayRecord?.identifiedPattern?.patternName || "Layout Familiarity"}
@@ -171,22 +171,51 @@ export const LoopInspectorModal: React.FC<LoopInspectorModalProps> = ({
               <p className="text-slate-800 font-medium leading-relaxed">
                 <strong className="text-purple-950">Why it is happening: </strong>
                 {dayRecord?.identifiedPattern?.diagnosis ||
-                  "New hire says they are confused + supervisor notes aisle search + speed plateaued while accuracy stayed high (98%). System confirms physical dark store rack familiarity issue, not lack of effort."}
+                  "New hire reports spatial confusion in Aisles 4-8. Accuracy remains high (98%), confirming strong diligence. System links friction to Capability 3 (Location Navigation) rather than a motivation problem."}
               </p>
             </div>
           </div>
 
-          {/* Step 4: ACT */}
+          {/* Step 4: DECIDE */}
+          <div className="p-4 bg-slate-50 rounded-3xl border border-slate-200/90 shadow-2xs space-y-2.5">
+            <div className="flex items-center justify-between">
+              <span className="text-xs font-black uppercase tracking-wider text-amber-700 flex items-center gap-2">
+                <div className="w-6 h-6 rounded-xl bg-amber-600 text-white flex items-center justify-center text-xs font-black">
+                  4
+                </div>
+                <span>DECIDE (Adaptive Gear Shift Selection)</span>
+              </span>
+              <span className="text-[10px] font-black px-2.5 py-0.5 rounded-full bg-amber-100 text-amber-900 uppercase">
+                {dayRecord?.recommendedAction?.decisionType ? dayRecord.recommendedAction.decisionType.replace(/_/g, " ") : "REINFORCE CURRENT"}
+              </span>
+            </div>
+
+            <div className="bg-white p-3.5 rounded-2xl border border-slate-200/80 shadow-2xs text-xs space-y-1.5">
+              <div className="flex items-center justify-between text-[11px]">
+                <span className="font-bold text-slate-700">Selected Path Decision:</span>
+                <span className="font-black text-amber-800">
+                  Target Capability #{dayRecord?.recommendedAction?.targetCapabilityId || 3}
+                </span>
+              </div>
+              <p className="text-slate-800 font-medium leading-relaxed">
+                <strong className="text-amber-950">Adaptive Rationale: </strong>
+                {dayRecord?.recommendedAction?.rationale ||
+                  "Worker was exposed to aisle numbering, but real-world floor navigation is inconsistent. Intelligence chooses targeted floor reinforcement rather than generic advancement."}
+              </p>
+            </div>
+          </div>
+
+          {/* Step 5: ACT */}
           <div className="p-4 bg-slate-50 rounded-3xl border border-slate-200/90 shadow-2xs space-y-2.5">
             <div className="flex items-center justify-between">
               <span className="text-xs font-black uppercase tracking-wider text-emerald-700 flex items-center gap-2">
                 <div className="w-6 h-6 rounded-xl bg-emerald-600 text-white flex items-center justify-center text-xs font-black">
-                  4
+                  5
                 </div>
                 <span>ACT (Smallest Practical Action)</span>
               </span>
               <span className="text-[11px] text-slate-500 font-bold">
-                Not an LMS course
+                Floor Intervention
               </span>
             </div>
 
@@ -196,21 +225,14 @@ export const LoopInspectorModal: React.FC<LoopInspectorModalProps> = ({
                   {dayRecord?.recommendedAction?.title ||
                     "Buddy walkthrough of location navigation in Aisles 4-8"}
                 </h4>
-                {dayRecord?.recommendedAction?.decisionType && (
-                  <span className="text-[10px] font-black uppercase tracking-wider px-2 py-0.5 rounded-full bg-emerald-200 text-emerald-900">
-                    {dayRecord.recommendedAction.decisionType.replace(/_/g, " ")}
-                  </span>
-                )}
+                <span className="text-[10px] font-black uppercase tracking-wider px-2 py-0.5 rounded-full bg-emerald-200 text-emerald-900">
+                  {dayRecord?.recommendedAction?.urgency || "Next Shift"}
+                </span>
               </div>
               <p className="text-emerald-900">
                 {dayRecord?.recommendedAction?.description ||
                   "Pair with Senior Picker (Vikram) for a 15-minute floor walkthrough focusing on Aisles 4-8 rack codes."}
               </p>
-              {dayRecord?.recommendedAction?.rationale && (
-                <p className="text-[11px] text-emerald-800 italic pt-0.5">
-                  <strong>Adaptive Rationale:</strong> {dayRecord.recommendedAction.rationale}
-                </p>
-              )}
               <div className="pt-2 flex items-center justify-between text-emerald-800 font-bold border-t border-emerald-200">
                 <span>
                   Actor: {dayRecord?.recommendedAction?.targetActor || "Buddy Vikram"}
@@ -222,12 +244,12 @@ export const LoopInspectorModal: React.FC<LoopInspectorModalProps> = ({
             </div>
           </div>
 
-          {/* Step 5: CHECK */}
+          {/* Step 6: CHECK */}
           <div className="p-4 bg-slate-50 rounded-3xl border border-slate-200/90 shadow-2xs space-y-2.5">
             <div className="flex items-center justify-between">
               <span className="text-xs font-black uppercase tracking-wider text-teal-700 flex items-center gap-2">
                 <div className="w-6 h-6 rounded-xl bg-teal-600 text-white flex items-center justify-center text-xs font-black">
-                  5
+                  6
                 </div>
                 <span>CHECK (Outcome Recorded & Loop Closed)</span>
               </span>
@@ -240,7 +262,7 @@ export const LoopInspectorModal: React.FC<LoopInspectorModalProps> = ({
               <p className="text-slate-800 font-medium">
                 <strong>Did situation improve? </strong>
                 {dayRecord?.actionOutcome?.notes ||
-                  `Intervention scheduled. Once supervisor or buddy records check outcome, ${newHire.name.split(" ")[0]}'s ramp status is automatically updated.`}
+                  `Intervention scheduled. Once supervisor or buddy records check outcome, ${newHire.name.split(" ")[0]}'s capability ledger and ramp status are automatically updated.`}
               </p>
               <div className="text-slate-600 flex items-center gap-3 font-bold text-[11px] pt-1">
                 <span>Updated Status: <strong className="text-slate-900">{dayRecord?.statusAtEnd || newHire.status}</strong></span>

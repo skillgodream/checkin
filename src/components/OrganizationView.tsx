@@ -36,7 +36,7 @@ export const OrganizationView: React.FC<OrganizationViewProps> = ({
   const atRiskCount = newHires.filter((h) => h.status === "At risk").length;
 
   return (
-    <div className="max-w-md mx-auto px-4 py-3 space-y-4 pb-28 select-none">
+    <div className="max-w-md mx-auto px-4 py-3 space-y-4 pb-8 select-none">
       {/* ========================================================= */}
       {/* 1. TOP GREETING HEADER (Matches Unified App Style)        */}
       {/* ========================================================= */}

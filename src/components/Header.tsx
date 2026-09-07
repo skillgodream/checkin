@@ -1,11 +1,15 @@
-import React from "react";
+import React, { useState, useRef, useEffect } from "react";
 import {
   Calendar,
-  RotateCcw,
   Sparkles,
   Zap,
   Activity,
-  Layers,
+  Eye,
+  User,
+  Sliders,
+  ChevronRight,
+  Gauge,
+  Languages,
 } from "lucide-react";
 import { Logo } from "./Logo";
 export type ActiveTab = "new_hire" | "manager" | "organization";
@@ -15,14 +19,17 @@ interface HeaderProps {
   setActiveTab: (tab: ActiveTab) => void;
   currentDay: number;
   onSelectDay: (day: number) => void;
-  onResetDemo: () => void;
+  onResetDemo?: () => void;
   onOpenLoopModal: () => void;
+  onOpenTelemetryDial?: () => void;
   hasApiKey: boolean;
   doingWellCount?: number;
   needsAttentionCount?: number;
   atRiskCount?: number;
   isFramed?: boolean;
   onToggleFrame?: () => void;
+  isHindi?: boolean;
+  onToggleLanguage?: () => void;
 }
 
 export const Header: React.FC<HeaderProps> = ({
@@ -30,15 +37,45 @@ export const Header: React.FC<HeaderProps> = ({
   setActiveTab,
   currentDay,
   onSelectDay,
-  onResetDemo,
   onOpenLoopModal,
+  onOpenTelemetryDial,
   hasApiKey,
   doingWellCount = 8,
   needsAttentionCount = 3,
   atRiskCount = 1,
-  isFramed = true,
-  onToggleFrame,
+  isHindi = true,
+  onToggleLanguage,
 }) => {
+  const [isEyeMenuOpen, setIsEyeMenuOpen] = useState(false);
+  const eyeMenuRef = useRef<HTMLDivElement>(null);
+
+  // Close eye menu when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (eyeMenuRef.current && !eyeMenuRef.current.contains(event.target as Node)) {
+        setIsEyeMenuOpen(false);
+      }
+    };
+    if (isEyeMenuOpen) {
+      document.addEventListener("mousedown", handleClickOutside);
+    }
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, [isEyeMenuOpen]);
+
+  const handleSelectTab = (tab: ActiveTab) => {
+    setActiveTab(tab);
+    setIsEyeMenuOpen(false);
+  };
+
+  const handleSelectLoop = () => {
+    onOpenLoopModal();
+    setIsEyeMenuOpen(false);
+  };
+
+  const isBackstageActive = activeTab === "manager" || activeTab === "organization";
+
   return (
     <header className="bg-white/95 backdrop-blur-md border-b border-slate-200/80 sticky top-0 z-40 shadow-2xs">
       <div className="max-w-md mx-auto px-4 py-2.5">
@@ -70,27 +107,177 @@ export const Header: React.FC<HeaderProps> = ({
             </div>
           </div>
 
-          {/* Right Action Icons */}
+          {/* Right Action Icons with Permanent Eye Control and Direct Dial Gauge */}
           <div className="flex items-center gap-1.5 shrink-0">
-            {onToggleFrame && (
+            {/* Direct Dial Gauge Button (Opens the Round Temperature/Pick Rate Telemetry Page) */}
+            {onOpenTelemetryDial && (
               <button
-                onClick={onToggleFrame}
-                title={isFramed ? "Switch to fluid mobile" : "Switch to phone chassis"}
-                className="p-2 rounded-2xl text-slate-600 hover:text-slate-900 bg-slate-100 hover:bg-slate-200 transition-all text-[11px] font-bold flex items-center gap-1 cursor-pointer"
+                id="header-dial-gauge-btn"
+                onClick={onOpenTelemetryDial}
+                title="Live Pick Rate & Readiness Gauge"
+                aria-label="Live Pick Rate & Readiness Gauge"
+                className="p-2 rounded-2xl transition-all cursor-pointer flex items-center justify-center relative active:scale-95 bg-gradient-to-r from-violet-600 to-fuchsia-600 text-white shadow-sm shadow-purple-500/25 hover:opacity-95 ring-1 ring-purple-300/40"
               >
-                <Layers className="w-3.5 h-3.5 text-slate-500" />
-                <span className="hidden xs:inline">{isFramed ? "Chassis" : "Fluid"}</span>
+                <Gauge className="w-4 h-4 stroke-[2.2]" />
+                <span className="absolute -top-0.5 -right-0.5 w-2 h-2 rounded-full bg-emerald-400 ring-2 ring-white" />
               </button>
             )}
 
-            <button
-              id="header-reset-btn"
-              onClick={onResetDemo}
-              title="Reset Demo Scenario"
-              className="p-2 rounded-2xl text-slate-500 hover:text-slate-900 bg-slate-100 hover:bg-slate-200 transition-all cursor-pointer"
-            >
-              <RotateCcw className="w-3.5 h-3.5" />
-            </button>
+            {/* Language Toggle Button (Hindi / English) placed near Eye Icon */}
+            {onToggleLanguage && (
+              <button
+                id="header-language-btn"
+                onClick={onToggleLanguage}
+                title={isHindi ? "Switch to English (अंग्रेजी में देखें)" : "हिंदी में बदलें (Switch to Hindi)"}
+                aria-label="Toggle language"
+                className="px-2.5 py-1.5 rounded-2xl transition-all cursor-pointer flex items-center justify-center gap-1 active:scale-95 bg-slate-100 hover:bg-slate-200 text-slate-800 border border-slate-200/80 shadow-2xs font-black text-xs"
+              >
+                <Languages className="w-4 h-4 text-violet-700" />
+                <span className="text-[11px] font-black uppercase text-violet-700">
+                  {isHindi ? "हिंदी" : "EN"}
+                </span>
+              </button>
+            )}
+
+            {/* Eye Icon Button & Exclusive Backstage Dropdown Menu */}
+            <div className="relative" ref={eyeMenuRef}>
+              <button
+                id="header-eye-btn"
+                onClick={() => setIsEyeMenuOpen((prev) => !prev)}
+                title="Management Views & Loop Flow"
+                aria-label="Management Views & Loop Flow"
+                aria-expanded={isEyeMenuOpen}
+                className={`p-2 rounded-2xl transition-all cursor-pointer flex items-center justify-center relative active:scale-95 ${
+                  isEyeMenuOpen || isBackstageActive
+                    ? "bg-violet-600 text-white shadow-md shadow-violet-500/25 ring-2 ring-violet-400/40"
+                    : "text-slate-600 hover:text-slate-900 bg-slate-100 hover:bg-slate-200"
+                }`}
+              >
+                <Eye className="w-4 h-4 stroke-[2.2]" />
+                {/* Alert badge if any hires need attention or are at risk */}
+                {(needsAttentionCount > 0 || atRiskCount > 0) && !isEyeMenuOpen && (
+                  <span className="absolute -top-1 -right-1 w-2.5 h-2.5 rounded-full bg-fuchsia-500 ring-2 ring-white animate-pulse" />
+                )}
+              </button>
+
+              {/* Backstage Quick Popover Menu */}
+              {isEyeMenuOpen && (
+                <div
+                  id="header-eye-popover"
+                  className="absolute right-0 mt-2 w-56 rounded-2xl bg-white border border-slate-200/90 shadow-xl py-2 z-50 animate-in fade-in zoom-in-95 duration-150"
+                >
+                  <div className="px-3 py-1.5 border-b border-slate-100 flex items-center justify-between">
+                    <span className="text-[10px] font-black uppercase tracking-wider text-slate-400">
+                      Operations Hub
+                    </span>
+                    <span className="text-[10px] font-bold text-violet-600 bg-violet-50 px-1.5 py-0.5 rounded-full">
+                      Admin Access
+                    </span>
+                  </div>
+
+                  <div className="p-1 space-y-1">
+                    {/* Item 1: Supervisor */}
+                    <button
+                      id="eye-menu-supervisor"
+                      onClick={() => handleSelectTab("manager")}
+                      className={`w-full flex items-center justify-between px-3 py-2 rounded-xl text-xs font-bold transition-all cursor-pointer ${
+                        activeTab === "manager"
+                          ? "bg-violet-50 text-violet-700"
+                          : "text-slate-700 hover:bg-slate-100 hover:text-slate-900"
+                      }`}
+                    >
+                      <div className="flex items-center gap-2.5">
+                        <div
+                          className={`p-1.5 rounded-lg ${
+                            activeTab === "manager"
+                              ? "bg-violet-600 text-white"
+                              : "bg-slate-100 text-slate-600"
+                          }`}
+                        >
+                          <User className="w-3.5 h-3.5 stroke-[2.2]" />
+                        </div>
+                        <div className="text-left">
+                          <div className="leading-tight">Supervisor</div>
+                          <div className="text-[10px] text-slate-400 font-normal">
+                            Floor triage & support
+                          </div>
+                        </div>
+                      </div>
+                      {(atRiskCount > 0 || needsAttentionCount > 0) && (
+                        <span className="px-1.5 py-0.5 rounded-full text-[9px] font-black bg-fuchsia-500 text-white">
+                          {needsAttentionCount + atRiskCount}
+                        </span>
+                      )}
+                    </button>
+
+                    {/* Item 2: Store Ops */}
+                    <button
+                      id="eye-menu-store-ops"
+                      onClick={() => handleSelectTab("organization")}
+                      className={`w-full flex items-center justify-between px-3 py-2 rounded-xl text-xs font-bold transition-all cursor-pointer ${
+                        activeTab === "organization"
+                          ? "bg-violet-50 text-violet-700"
+                          : "text-slate-700 hover:bg-slate-100 hover:text-slate-900"
+                      }`}
+                    >
+                      <div className="flex items-center gap-2.5">
+                        <div
+                          className={`p-1.5 rounded-lg ${
+                            activeTab === "organization"
+                              ? "bg-violet-600 text-white"
+                              : "bg-slate-100 text-slate-600"
+                          }`}
+                        >
+                          <Zap className="w-3.5 h-3.5 stroke-[2.2]" />
+                        </div>
+                        <div className="text-left">
+                          <div className="leading-tight">Store Ops</div>
+                          <div className="text-[10px] text-slate-400 font-normal">
+                            Cohort ramp health
+                          </div>
+                        </div>
+                      </div>
+                      <ChevronRight className="w-3.5 h-3.5 text-slate-400" />
+                    </button>
+
+                    {/* Item 3: Loop Flow */}
+                    <button
+                      id="eye-menu-loop-flow"
+                      onClick={handleSelectLoop}
+                      className="w-full flex items-center justify-between px-3 py-2 rounded-xl text-xs font-bold text-slate-700 hover:bg-slate-100 hover:text-slate-900 transition-all cursor-pointer"
+                    >
+                      <div className="flex items-center gap-2.5">
+                        <div className="p-1.5 rounded-lg bg-blue-50 text-blue-600">
+                          <Sliders className="w-3.5 h-3.5 stroke-[2.2]" />
+                        </div>
+                        <div className="text-left">
+                          <div className="leading-tight">Loop Flow</div>
+                          <div className="text-[10px] text-slate-400 font-normal">
+                            6-stage intelligence cycle
+                          </div>
+                        </div>
+                      </div>
+                      <span className="text-[10px] font-bold text-blue-600 bg-blue-50 px-1.5 py-0.5 rounded-md">
+                        Inspect
+                      </span>
+                    </button>
+
+                    {/* Return to Learner Companion if in manager/org view */}
+                    {isBackstageActive && (
+                      <div className="pt-1 mt-1 border-t border-slate-100">
+                        <button
+                          id="eye-menu-return-learner"
+                          onClick={() => handleSelectTab("new_hire")}
+                          className="w-full flex items-center justify-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold text-emerald-700 bg-emerald-50 hover:bg-emerald-100 transition-all cursor-pointer"
+                        >
+                          <span>Back to Learner Companion</span>
+                        </button>
+                      </div>
+                    )}
+                  </div>
+                </div>
+              )}
+            </div>
           </div>
         </div>
 
@@ -110,7 +297,7 @@ export const Header: React.FC<HeaderProps> = ({
                   onClick={() => onSelectDay(1)}
                   className={`py-1.5 px-1 rounded-xl text-[11px] font-bold cursor-pointer transition-all text-center truncate ${
                     currentDay === 1
-                      ? "bg-white text-slate-900 shadow-xs font-black"
+                      ? "bg-gradient-to-r from-violet-600 to-fuchsia-600 text-white shadow-xs font-black"
                       : "text-slate-600 hover:text-slate-900"
                   }`}
                 >
@@ -121,7 +308,7 @@ export const Header: React.FC<HeaderProps> = ({
                   onClick={() => onSelectDay(3)}
                   className={`py-1.5 px-1 rounded-xl text-[11px] font-bold cursor-pointer transition-all text-center truncate ${
                     currentDay === 3
-                      ? "bg-amber-500 text-white shadow-xs font-black"
+                      ? "bg-gradient-to-r from-amber-500 to-orange-500 text-white shadow-xs font-black"
                       : "text-slate-600 hover:text-slate-900"
                   }`}
                 >
@@ -132,7 +319,7 @@ export const Header: React.FC<HeaderProps> = ({
                   onClick={() => onSelectDay(4)}
                   className={`py-1.5 px-1 rounded-xl text-[11px] font-bold cursor-pointer transition-all text-center truncate ${
                     currentDay === 4
-                      ? "bg-blue-600 text-white shadow-xs font-black"
+                      ? "bg-gradient-to-r from-blue-600 to-indigo-600 text-white shadow-xs font-black"
                       : "text-slate-600 hover:text-slate-900"
                   }`}
                 >
@@ -143,7 +330,7 @@ export const Header: React.FC<HeaderProps> = ({
                   onClick={() => onSelectDay(5)}
                   className={`py-1.5 px-1 rounded-xl text-[11px] font-bold cursor-pointer transition-all text-center truncate ${
                     currentDay === 5
-                      ? "bg-emerald-600 text-white shadow-xs font-black"
+                      ? "bg-gradient-to-r from-emerald-600 to-teal-600 text-white shadow-xs font-black"
                       : "text-slate-600 hover:text-slate-900"
                   }`}
                 >

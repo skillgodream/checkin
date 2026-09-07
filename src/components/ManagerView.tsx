@@ -179,7 +179,7 @@ export const ManagerView: React.FC<ManagerViewProps> = ({
   const isSupportCompleted = Boolean(currentRecord.actionOutcome && currentRecord.actionOutcome.improved);
 
   return (
-    <div className="max-w-md mx-auto px-4 py-3 space-y-4 pb-28 select-none">
+    <div className="max-w-md mx-auto px-4 py-3 space-y-4 pb-8 select-none">
       {/* ========================================================= */}
       {/* 1. TOP GREETING HEADER (Matches Unified App Style)        */}
       {/* ========================================================= */}
@@ -211,11 +211,11 @@ export const ManagerView: React.FC<ManagerViewProps> = ({
           isSupportCompleted
             ? "from-emerald-600 to-teal-700 text-white shadow-emerald-500/20"
             : activeHire.status === "Needs attention"
-            ? "from-blue-600 to-indigo-700 text-white shadow-blue-500/20"
+            ? "from-violet-700 via-purple-600 to-fuchsia-600 text-white shadow-purple-500/25"
             : activeHire.status === "At risk"
             ? "from-rose-600 to-red-700 text-white shadow-rose-500/20"
             : "from-slate-800 to-slate-950 text-white shadow-slate-900/20"
-        } rounded-3xl p-4 sm:p-5 shadow-lg relative overflow-hidden transition-all`}
+        } rounded-[28px] p-4 sm:p-5 shadow-lg relative overflow-hidden transition-all`}
       >
         <div className="absolute -right-6 -bottom-6 w-28 h-28 bg-white/10 rounded-full blur-xl pointer-events-none" />
         <div className="absolute -left-6 -top-6 w-24 h-24 bg-white/10 rounded-full blur-lg pointer-events-none" />
