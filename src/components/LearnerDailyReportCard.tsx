@@ -71,18 +71,12 @@ export const LearnerDailyReportCard: React.FC<LearnerDailyReportCardProps> = ({
   let signTitle = isHindi ? "शानदार प्रदर्शन" : "GOOD SHIFT";
   let signTag = isHindi ? "✓ लक्ष्य पर" : "On Track";
   let signSub = isHindi ? "सटीक व सुरक्षित कार्य" : "Safe & Accurate Work";
-  let signBg = "bg-gradient-to-br from-emerald-50/90 to-teal-50/40 border-emerald-200 text-emerald-950";
-  let signIconBg = "bg-emerald-600 text-white";
-  let signBadgeBg = "bg-emerald-100 text-emerald-800 border-emerald-300";
 
   if (isRecovered || (actualPace >= targetPace && accuracy >= 98)) {
     isShiftGood = true;
     signTitle = isHindi ? "शानदार (GOOD)" : "GOOD SHIFT";
     signTag = isHindi ? "✓ मजबूत गति" : "Target Exceeded";
     signSub = isHindi ? "सटीक व तेज पिकिंग" : "Fast & Accurate";
-    signBg = "bg-gradient-to-br from-emerald-50/90 to-teal-50/40 border-emerald-200 text-emerald-950";
-    signIconBg = "bg-emerald-600 text-white";
-    signBadgeBg = "bg-emerald-100 text-emerald-800 border-emerald-300";
   } else if (isPaceBelow || hasFloorIssue || hasQuizGap) {
     isShiftGood = false;
     signTitle = isHindi ? "सुधार जरूरी (NEEDS WORK)" : "NEEDS ATTENTION";
@@ -108,9 +102,6 @@ export const LearnerDailyReportCard: React.FC<LearnerDailyReportCardProps> = ({
       : isHindi
       ? "नियम दोहराना आवश्यक"
       : "Reinforcement Needed";
-    signBg = "bg-gradient-to-br from-amber-50/90 to-orange-50/40 border-amber-200 text-amber-950";
-    signIconBg = "bg-amber-500 text-white";
-    signBadgeBg = "bg-amber-100 text-amber-900 border-amber-300";
   }
 
   // Audio speech narration
@@ -144,24 +135,19 @@ export const LearnerDailyReportCard: React.FC<LearnerDailyReportCardProps> = ({
     <div
       id={isDashboardVariant ? "dashboard-yesterday-snapshot-card" : "yesterday-quick-snapshot-card"}
       onClick={handleCardClick}
-      className={`bg-white rounded-[26px] p-4 border border-slate-200/90 shadow-2xs space-y-3 cursor-pointer select-none transition-all hover:border-purple-300 hover:shadow-md active:scale-[0.995] ${
-        isDashboardVariant ? "ring-2 ring-violet-500/15" : ""
+      className={`bg-white rounded-[26px] p-4.5 sm:p-5 border border-slate-200/90 shadow-[0_6px_20px_-4px_rgba(15,23,42,0.06),0_2px_6px_-1px_rgba(15,23,42,0.03)] space-y-3.5 cursor-pointer select-none transition-all hover:border-slate-300 hover:shadow-[0_10px_24px_-4px_rgba(15,23,42,0.08)] active:scale-[0.995] ${
+        isDashboardVariant ? "ring-2 ring-slate-900/10" : ""
       }`}
     >
-      {/* 1. HEADER: CLEAN "YESTERDAY SNAPSHOT" WITH NO CLUTTERED TEXT */}
+      {/* 1. HEADER: CLEAN "YESTERDAY SNAPSHOT" WITH COHESIVE SLATE ACCENTS */}
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-2.5">
-          <div className="w-8 h-8 rounded-xl bg-violet-100 text-violet-700 flex items-center justify-center font-bold shadow-2xs">
-            <Calendar className="w-4 h-4 text-violet-600" />
+          <div className="w-8 h-8 rounded-xl bg-slate-100 text-slate-700 flex items-center justify-center font-bold shadow-2xs">
+            <Calendar className="w-4 h-4 text-slate-700" />
           </div>
           <div className="flex items-center gap-2">
             <span className="text-xs sm:text-sm font-black uppercase tracking-wider text-slate-800">
               {isHindi ? `कल का स्नैपशॉट (दिन ${yesterdayNumber})` : `YESTERDAY SNAPSHOT (DAY ${yesterdayNumber})`}
-            </span>
-            <span
-              className={`text-xs font-black px-2.5 py-0.5 rounded-full border ${signBadgeBg}`}
-            >
-              {signTag}
             </span>
           </div>
         </div>
@@ -170,51 +156,68 @@ export const LearnerDailyReportCard: React.FC<LearnerDailyReportCardProps> = ({
           <button
             type="button"
             onClick={handlePlayAudio}
-            className="p-1.5 rounded-full text-slate-400 hover:text-purple-600 transition-colors cursor-pointer"
+            className="p-1.5 rounded-full text-slate-400 hover:text-slate-700 transition-colors cursor-pointer"
             title="Listen aloud"
           >
-            <Volume2 className={`w-4 h-4 ${playingAudio ? "animate-bounce text-purple-600" : ""}`} />
+            <Volume2 className={`w-4 h-4 ${playingAudio ? "animate-bounce text-slate-900" : ""}`} />
           </button>
         </div>
       </div>
 
-      {/* 2. PICTORIAL EVIDENCE CARDS GRID (4 SCANNABLE VISUAL TILES) */}
+      {/* 2. PICTORIAL EVIDENCE CARDS GRID (CONSISTENT, HARMONIOUS NEUTRAL TILES) */}
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5 pt-0.5">
         {/* Card 1: Pick Pace vs Target */}
-        <div className="p-3 rounded-2xl bg-gradient-to-br from-violet-50/80 to-purple-50/30 border border-purple-100/90 flex flex-col justify-between space-y-2 hover:bg-violet-100/40 transition-colors">
+        <div className={`p-3 rounded-2xl bg-slate-50/80 border ${isPaceBelow ? "border-red-200/80 ring-1 ring-red-500/20" : "border-slate-200/70"} flex flex-col justify-between space-y-2.5 hover:bg-slate-100/70 transition-colors relative`}>
           <div className="flex items-center justify-between">
-            <span className="text-xs font-black uppercase tracking-wider text-purple-700">
-              {isHindi ? "पिकिंग रफ़्तार" : "Pick Speed"}
-            </span>
-            <div className="w-6 h-6 rounded-lg bg-violet-600 text-white flex items-center justify-center shadow-2xs">
+            <div className="flex items-center gap-1.5">
+              {isPaceBelow && (
+                <span className="relative flex h-2 w-2 shrink-0">
+                  <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75" />
+                  <span className="relative inline-flex rounded-full h-2 w-2 bg-red-500" />
+                </span>
+              )}
+              <span className={`text-[11px] font-bold uppercase tracking-wider ${isPaceBelow ? "text-red-700" : "text-slate-500"}`}>
+                {isHindi ? "पिकिंग रफ़्तार" : "Pick Speed"}
+              </span>
+            </div>
+            <div className={`w-6 h-6 rounded-lg bg-white border ${isPaceBelow ? "border-red-200 text-red-600" : "border-slate-200/70 text-slate-600"} flex items-center justify-center shadow-2xs`}>
               <TrendingUp className="w-3.5 h-3.5" />
             </div>
           </div>
           <div>
             <div className="flex items-baseline gap-1">
               <span className="text-2xl font-black text-slate-900 leading-none">{actualPace}</span>
-              <span className="text-xs font-bold text-slate-500">/hr</span>
+              <span className="text-xs font-bold text-slate-400">/hr</span>
             </div>
-            {/* Progress bar visual */}
-            <div className="w-full bg-purple-100 rounded-full h-2 mt-1.5 overflow-hidden">
+            {/* Unified Sleek Progress Bar */}
+            <div className="w-full bg-slate-200 rounded-full h-1.5 mt-2 overflow-hidden">
               <div
-                className="bg-violet-600 h-2 rounded-full transition-all duration-500"
+                className={`h-1.5 rounded-full transition-all duration-500 ${isPaceBelow ? "bg-red-500" : "bg-slate-900"}`}
                 style={{ width: `${pacePct}%` }}
               />
             </div>
-            <span className="text-xs text-slate-600 font-bold block mt-1.5">
-              🎯 {isHindi ? `लक्ष्य ${targetPace}/hr` : `Goal ${targetPace}/hr`}
+            <span className={`text-xs font-bold block mt-1.5 ${isPaceBelow ? "text-red-600" : "text-slate-600"}`}>
+              {isPaceBelow ? "⚠️ " : "🎯 "}
+              {isHindi ? `लक्ष्य ${targetPace}/hr` : `Goal ${targetPace}/hr`}
             </span>
           </div>
         </div>
 
         {/* Card 2: Accuracy Rate */}
-        <div className="p-3 rounded-2xl bg-gradient-to-br from-emerald-50/80 to-teal-50/30 border border-emerald-100/90 flex flex-col justify-between space-y-2 hover:bg-emerald-100/40 transition-colors">
+        <div className={`p-3 rounded-2xl bg-slate-50/80 border ${accuracy < 98 ? "border-red-200/80 ring-1 ring-red-500/20" : "border-slate-200/70"} flex flex-col justify-between space-y-2.5 hover:bg-slate-100/70 transition-colors relative`}>
           <div className="flex items-center justify-between">
-            <span className="text-xs font-black uppercase tracking-wider text-emerald-700">
-              {isHindi ? "एक्यूरेसी" : "Accuracy"}
-            </span>
-            <div className="w-6 h-6 rounded-lg bg-emerald-600 text-white flex items-center justify-center shadow-2xs">
+            <div className="flex items-center gap-1.5">
+              {accuracy < 98 && (
+                <span className="relative flex h-2 w-2 shrink-0">
+                  <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75" />
+                  <span className="relative inline-flex rounded-full h-2 w-2 bg-red-500" />
+                </span>
+              )}
+              <span className={`text-[11px] font-bold uppercase tracking-wider ${accuracy < 98 ? "text-red-700" : "text-slate-500"}`}>
+                {isHindi ? "एक्यूरेसी" : "Accuracy"}
+              </span>
+            </div>
+            <div className={`w-6 h-6 rounded-lg bg-white border ${accuracy < 98 ? "border-red-200 text-red-600" : "border-slate-200/70 text-slate-600"} flex items-center justify-center shadow-2xs`}>
               <ShieldCheck className="w-3.5 h-3.5" />
             </div>
           </div>
@@ -222,66 +225,86 @@ export const LearnerDailyReportCard: React.FC<LearnerDailyReportCardProps> = ({
             <div className="flex items-baseline gap-1">
               <span className="text-2xl font-black text-slate-900 leading-none">{accuracy}%</span>
             </div>
-            {/* Accuracy bar visual */}
-            <div className="w-full bg-emerald-100 rounded-full h-2 mt-1.5 overflow-hidden">
+            {/* Unified Sleek Progress Bar */}
+            <div className="w-full bg-slate-200 rounded-full h-1.5 mt-2 overflow-hidden">
               <div
-                className="bg-emerald-600 h-2 rounded-full transition-all duration-500"
+                className={`h-1.5 rounded-full transition-all duration-500 ${accuracy < 98 ? "bg-red-500" : "bg-slate-900"}`}
                 style={{ width: `${accuracy}%` }}
               />
             </div>
-            <span className="text-xs text-emerald-700 font-bold block mt-1.5">
+            <span className={`text-xs font-bold block mt-1.5 ${accuracy < 98 ? "text-red-600" : "text-slate-600"}`}>
               ✓ {isHindi ? "0 त्रुटियां" : "Zero Errors"}
             </span>
           </div>
         </div>
 
         {/* Card 3: Orders Completed */}
-        <div className="p-3 rounded-2xl bg-gradient-to-br from-blue-50/80 to-sky-50/30 border border-blue-100/90 flex flex-col justify-between space-y-2 hover:bg-blue-100/40 transition-colors">
+        <div className="p-3 rounded-2xl bg-slate-50/80 border border-slate-200/70 flex flex-col justify-between space-y-2.5 hover:bg-slate-100/70 transition-colors">
           <div className="flex items-center justify-between">
-            <span className="text-xs font-black uppercase tracking-wider text-blue-700">
+            <span className="text-[11px] font-bold uppercase tracking-wider text-slate-500">
               {isHindi ? "ऑर्डर" : "Orders"}
             </span>
-            <div className="w-6 h-6 rounded-lg bg-blue-600 text-white flex items-center justify-center shadow-2xs">
+            <div className="w-6 h-6 rounded-lg bg-white border border-slate-200/70 text-slate-600 flex items-center justify-center shadow-2xs">
               <Package className="w-3.5 h-3.5" />
             </div>
           </div>
           <div>
             <div className="flex items-baseline gap-1">
               <span className="text-2xl font-black text-slate-900 leading-none">{ordersCompleted}</span>
-              <span className="text-xs font-bold text-slate-500">{isHindi ? "पूरे" : "done"}</span>
+              <span className="text-xs font-bold text-slate-400">{isHindi ? "पूरे" : "done"}</span>
             </div>
-            <div className="w-full bg-blue-100 rounded-full h-2 mt-1.5 overflow-hidden">
+            {/* Unified Sleek Progress Bar */}
+            <div className="w-full bg-slate-200 rounded-full h-1.5 mt-2 overflow-hidden">
               <div
-                className="bg-blue-600 h-2 rounded-full transition-all duration-500"
+                className="bg-slate-900 h-1.5 rounded-full transition-all duration-500"
                 style={{ width: `${Math.min(100, (ordersCompleted / 40) * 100)}%` }}
               />
             </div>
-            <span className="text-xs text-blue-700 font-bold block mt-1.5">
+            <span className="text-xs text-slate-600 font-bold block mt-1.5">
               📦 {isHindi ? "समय पर" : "On-Time"}
             </span>
           </div>
         </div>
 
-        {/* Card 4: GOOD / BAD SIGN (OVERALL SHIFT ASSESSMENT) */}
-        <div className={`p-3 rounded-2xl ${signBg} flex flex-col justify-between space-y-2 hover:brightness-98 transition-all`}>
+        {/* Card 4: Status Tile (Consistent neutral base with tasteful accent badge) */}
+        <div className={`p-3 rounded-2xl bg-slate-50/80 border ${!isShiftGood ? "border-red-200/80 ring-1 ring-red-500/20" : "border-slate-200/70"} flex flex-col justify-between space-y-2.5 hover:bg-slate-100/70 transition-colors relative`}>
           <div className="flex items-center justify-between">
-            <span className="text-xs font-black uppercase tracking-wider">
-              {isShiftGood ? (isHindi ? "स्थिति" : "STATUS") : (isHindi ? "स्थिति" : "STATUS")}
-            </span>
-            <div className={`w-6 h-6 rounded-lg ${signIconBg} flex items-center justify-center shadow-2xs`}>
+            <div className="flex items-center gap-1.5">
+              {!isShiftGood && (
+                <span className="relative flex h-2 w-2 shrink-0">
+                  <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75" />
+                  <span className="relative inline-flex rounded-full h-2 w-2 bg-red-500" />
+                </span>
+              )}
+              <span className={`text-[11px] font-bold uppercase tracking-wider ${!isShiftGood ? "text-red-700" : "text-slate-500"}`}>
+                {isHindi ? "स्थिति" : "Status"}
+              </span>
+            </div>
+            <div className={`w-6 h-6 rounded-lg bg-white border ${!isShiftGood ? "border-red-200 text-red-600" : "border-slate-200/70 text-slate-600"} flex items-center justify-center shadow-2xs`}>
               {isShiftGood ? <ThumbsUp className="w-3.5 h-3.5" /> : <AlertTriangle className="w-3.5 h-3.5" />}
             </div>
           </div>
           <div>
             <div className="flex items-center gap-1">
-              <span className="text-lg sm:text-xl font-black leading-tight tracking-tight">
-                {isShiftGood ? (isHindi ? "👍 सही रहा" : "👍 GOOD") : (isHindi ? "⚠️ ध्यान दें" : "⚠️ ATTENTION")}
+              <span className="text-lg sm:text-xl font-black text-slate-900 leading-tight">
+                {isShiftGood ? (isHindi ? "सही रहा" : "GOOD") : (isHindi ? "ध्यान दें" : "ATTENTION")}
               </span>
             </div>
-            <div className={`mt-1.5 px-2 py-0.5 rounded-md text-xs font-bold border inline-block ${signBadgeBg}`}>
-              {signTag}
+            <div className="mt-1.5">
+              <span
+                className={`px-2 py-0.5 rounded-md text-[11px] font-bold border inline-flex items-center gap-1.5 ${
+                  isShiftGood
+                    ? "bg-white border-slate-200 text-slate-800"
+                    : "bg-red-50 border-red-200 text-red-700"
+                }`}
+              >
+                {!isShiftGood && (
+                  <span className="w-1.5 h-1.5 rounded-full bg-red-500 animate-pulse" />
+                )}
+                {signTag}
+              </span>
             </div>
-            <span className="text-xs opacity-85 font-semibold block mt-1 truncate">
+            <span className="text-xs text-slate-500 font-medium block mt-1 truncate">
               {signSub}
             </span>
           </div>
@@ -289,21 +312,21 @@ export const LearnerDailyReportCard: React.FC<LearnerDailyReportCardProps> = ({
       </div>
 
       {/* 3. TACTILE ACTION FOOTER */}
-      <div className="pt-2 border-t border-slate-100 flex items-center justify-between text-xs">
+      <div className="pt-2.5 border-t border-slate-100 flex items-center justify-between text-xs">
         <span className="text-xs font-medium text-slate-500 flex items-center gap-1.5">
           {isDashboardVariant ? (
             <>
-              <FileText className="w-4 h-4 text-violet-600" />
+              <FileText className="w-4 h-4 text-slate-500" />
               <span>{isHindi ? "पूरा विवरण देखें" : "Tap for full shift details"}</span>
             </>
           ) : (
             <>
-              <Sparkles className="w-4 h-4 text-violet-500" />
+              <Sparkles className="w-4 h-4 text-slate-400" />
               <span>{isHindi ? "डैशबोर्ड रिपोर्ट देखें" : "Tap for full details"}</span>
             </>
           )}
         </span>
-        <div className="text-xs font-bold text-violet-700 flex items-center gap-1 group-hover:translate-x-0.5 transition-transform">
+        <div className="text-xs font-bold text-slate-700 hover:text-slate-950 flex items-center gap-1 transition-colors">
           <span>{isHindi ? "विवरण →" : "Details →"}</span>
         </div>
       </div>

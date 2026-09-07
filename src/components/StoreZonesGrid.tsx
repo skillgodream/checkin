@@ -110,7 +110,7 @@ export const StoreZonesGrid: React.FC<StoreZonesGridProps> = ({
         </span>
       </div>
 
-      {/* 2x3 Squircle Grid Matching the Smart Home Reference */}
+      {/* 2x3 Squircle Grid Matching Clean Consistent Palette */}
       <div className="grid grid-cols-2 gap-3">
         {zones.map((zone) => {
           const isActive = selectedId === zone.id;
@@ -120,19 +120,26 @@ export const StoreZonesGrid: React.FC<StoreZonesGridProps> = ({
               onClick={() => handleCardClick(zone)}
               className={`flex flex-col items-center justify-center p-4 rounded-[26px] transition-all duration-200 cursor-pointer text-center relative active:scale-96 ${
                 isActive
-                  ? "bg-gradient-to-br from-violet-600 to-fuchsia-600 text-white shadow-lg shadow-purple-500/25 ring-2 ring-purple-400/40"
-                  : "bg-white text-slate-800 border border-purple-100/90 hover:border-purple-300 hover:bg-purple-50/30 shadow-xs"
+                  ? "bg-gradient-to-br from-violet-600 to-fuchsia-600 text-white shadow-lg shadow-purple-950/15 ring-2 ring-purple-400/40"
+                  : "bg-white text-slate-800 border border-slate-200/80 hover:border-slate-300 hover:bg-slate-50/80 shadow-2xs"
               }`}
             >
-              {/* Active Badge if applicable */}
-              {zone.statusBadge && !isActive && (
-                <span className="absolute top-2.5 right-2.5 w-2 h-2 rounded-full bg-amber-500 animate-pulse" />
+              {/* Red blinking circle or active badge */}
+              {zone.id === "aisles_4_8" ? (
+                <span className="absolute top-3 right-3 flex h-2.5 w-2.5">
+                  <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75" />
+                  <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-red-500" />
+                </span>
+              ) : (
+                zone.statusBadge && !isActive && (
+                  <span className="absolute top-2.5 right-2.5 w-2 h-2 rounded-full bg-slate-400" />
+                )
               )}
 
               {/* Icon */}
               <div
                 className={`mb-2 transition-transform ${
-                  isActive ? "text-white scale-105" : "text-violet-600"
+                  isActive ? "text-white scale-105" : "text-slate-700"
                 }`}
               >
                 {zone.icon}

@@ -8,6 +8,7 @@ import { LoopInspectorModal } from "./components/LoopInspectorModal";
 import { TelemetryDialModal } from "./components/TelemetryDialModal";
 import { GoogleFormFeedModal } from "./components/GoogleFormFeedModal";
 import { ClientDemoModal } from "./components/ClientDemoModal";
+import { ChatBotPullout } from "./components/ChatBotPullout";
 import { LearnerSection } from "./components/FloatingGlassMenu";
 import { initialCohort, initialOrgSummary } from "./data/seedData";
 import {
@@ -310,17 +311,27 @@ export default function App() {
   const atRiskCount = newHires.filter((h) => h.status === "At risk").length;
 
   return (
-    <div className={`min-h-screen bg-slate-100 text-slate-900 flex flex-col font-sans antialiased ${isFramed ? "md:py-4 md:px-4" : ""}`}>
+    <div
+      className={`min-h-screen ${
+        isOnboarding ? "bg-[#e7e3dc]" : "bg-slate-100"
+      } text-slate-900 flex flex-col font-sans antialiased transition-colors duration-300 ${
+        isFramed ? "md:py-6 md:px-4" : ""
+      }`}
+    >
       {/* Mobile Device Chassis Shell */}
       <div
-        className={`w-full mx-auto flex flex-col bg-slate-50 transition-all ${
-          isFramed
-            ? "max-w-md md:rounded-[36px] md:shadow-2xl md:border md:border-slate-300/80 md:overflow-hidden md:ring-8 md:ring-slate-900/5 min-h-screen md:min-h-[850px]"
-            : "max-w-lg min-h-screen shadow-xs"
+        className={`w-full mx-auto flex flex-col transition-all duration-300 ${
+          isOnboarding
+            ? isFramed
+              ? "max-w-[390px] md:rounded-[44px] md:shadow-[0_24px_60px_rgba(30,10,25,0.25)] md:overflow-hidden min-h-screen md:min-h-[844px] bg-[#181324]"
+              : "max-w-md min-h-screen bg-[#181324]"
+            : isFramed
+            ? "max-w-md md:rounded-[36px] md:shadow-2xl md:border md:border-slate-300/80 md:overflow-hidden md:ring-8 md:ring-slate-900/5 min-h-screen md:min-h-[850px] bg-slate-50"
+            : "max-w-lg min-h-screen shadow-xs bg-slate-50"
         }`}
       >
-        {/* Subtle phone speaker notch for framed mobile experience on desktop */}
-        {isFramed && (
+        {/* Subtle phone speaker notch for framed mobile experience on desktop (only during active shift views) */}
+        {isFramed && !isOnboarding && (
           <div className="hidden md:flex items-center justify-center pt-2 pb-1 bg-slate-950 border-b border-white/5">
             <div className="w-16 h-1 rounded-full bg-white/20"></div>
           </div>
@@ -359,8 +370,21 @@ export default function App() {
               isFramed={isFramed}
               isHindi={isHindi}
               onToggleLanguage={() => setIsHindi((prev) => !prev)}
+              isHomeScreen={activeTab === "new_hire" && learnerSection === "home"}
               learnerName={activeHire.name}
               buddyName={activeHire.buddy}
+            />
+
+            {/* Chatbot Pull-Out Button docked on the right side of the screen (hidden pull-out) */}
+            <ChatBotPullout
+              currentDay={currentDay}
+              learnerName={activeHire.name}
+              buddyName={activeHire.buddy}
+              isHindi={isHindi}
+              onAlertBuddy={() => {
+                setActiveTab("new_hire");
+                setLearnerSection("buddy");
+              }}
             />
 
             {/* Main Experience View */}

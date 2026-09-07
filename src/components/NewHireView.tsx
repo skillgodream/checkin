@@ -503,7 +503,7 @@ export const NewHireView: React.FC<NewHireViewProps> = ({
           {/* 3. NEED HELP? 1-TAP BUDDY ASSIST */}
           <div className="bg-white rounded-[24px] p-4 border border-slate-200/90 shadow-2xs flex items-center justify-between gap-3">
             <div className="flex items-center gap-3 min-w-0">
-              <div className="w-11 h-11 rounded-2xl bg-emerald-100 text-emerald-700 flex items-center justify-center shrink-0 font-bold text-base">
+              <div className="w-11 h-11 rounded-2xl bg-slate-100 border border-slate-200/60 text-slate-700 flex items-center justify-center shrink-0 font-bold text-base">
                 🤝
               </div>
               <div className="min-w-0">

@@ -18,6 +18,16 @@ import {
   X,
   Check,
   Zap,
+  Play,
+  ShieldCheck,
+  ScanLine,
+  MapPin,
+  Snowflake,
+  PackageCheck,
+  Boxes,
+  ShoppingCart,
+  AlertTriangle,
+  Trophy,
 } from "lucide-react";
 import { NewHire, TrainingModule, ModuleActivity, DARK_STORE_CAPABILITIES } from "../types";
 import { MANDATORY_TRAINING_MODULES } from "../data/modulesData";
@@ -36,6 +46,7 @@ export const ModulesView: React.FC<ModulesViewProps> = ({
   const [selectedModuleId, setSelectedModuleId] = useState<string | null>(
     `lms-mod-0${Math.min(10, Math.max(1, (newHire.modulesCompleted || 3) + 1))}`
   );
+  const [activeDetailModule, setActiveDetailModule] = useState<TrainingModule | null>(null);
   const [activeActivityModal, setActiveActivityModal] = useState<{
     module: TrainingModule;
     activity: ModuleActivity;
@@ -128,258 +139,339 @@ export const ModulesView: React.FC<ModulesViewProps> = ({
     }
   };
 
+  const getModuleDayIcon = (dayNumber: number) => {
+    const iconClass = "w-6 h-6 sm:w-7 sm:h-7";
+    switch (dayNumber) {
+      case 1:
+        return <ShieldCheck className={iconClass} />;
+      case 2:
+        return <ScanLine className={iconClass} />;
+      case 3:
+        return <MapPin className={iconClass} />;
+      case 4:
+        return <Snowflake className={iconClass} />;
+      case 5:
+        return <PackageCheck className={iconClass} />;
+      case 6:
+        return <Boxes className={iconClass} />;
+      case 7:
+        return <ShoppingCart className={iconClass} />;
+      case 8:
+        return <Zap className={iconClass} />;
+      case 9:
+        return <AlertTriangle className={iconClass} />;
+      case 10:
+        return <Trophy className={iconClass} />;
+      default:
+        return <BookOpen className={iconClass} />;
+    }
+  };
+
+  const getModuleShortLabel = (dayNumber: number, hindiMode: boolean) => {
+    const map: Record<number, { en: string; hi: string }> = {
+      1: { en: "Warehouse", hi: "वेयरहाउस" },
+      2: { en: "Scanner", hi: "स्कैनर" },
+      3: { en: "Aisle Racks", hi: "रैक्स" },
+      4: { en: "Cold Room", hi: "कोल्ड रूम" },
+      5: { en: "Single Pick", hi: "सिंगल पिक" },
+      6: { en: "Multi-Tote", hi: "मल्टी-टोट" },
+      7: { en: "Batch Pick", hi: "बैच पिक" },
+      8: { en: "Speed 120", hi: "स्पीड 120" },
+      9: { en: "Quality SKU", hi: "क्वालिटी SKU" },
+      10: { en: "Certify", hi: "सर्टिफिकेशन" },
+    };
+    return hindiMode ? map[dayNumber]?.hi || `डे ${dayNumber}` : map[dayNumber]?.en || `Day ${dayNumber}`;
+  };
+
   return (
     <div className="space-y-4 pb-20 animate-in fade-in duration-200 select-none">
       {/* ========================================================= */}
-      {/* 1. TRAINING JOURNEY HEADER CARD                           */}
+      {/* 1. HERO BANNER: 10-DAY TRAINING (WHITE CARD IN PURPLE CARD)*/}
       {/* ========================================================= */}
-      <div className="bg-white rounded-[28px] p-4 sm:p-5 border border-purple-100 shadow-sm space-y-3.5">
-        <div className="flex items-start justify-between gap-3">
-          <div>
-            <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-violet-100 text-violet-800 text-xs font-bold">
-              <BookOpen className="w-3.5 h-3.5" />
-              <span>{isHindi ? "अनिवार्य ट्रेनिंग" : "Mandatory LMS Training"}</span>
+      <div className="bg-gradient-to-br from-violet-600 via-purple-600 to-indigo-700 rounded-2xl p-3.5 sm:p-5 shadow-lg shadow-purple-600/20">
+        <div className="bg-white rounded-xl p-4 sm:p-5 space-y-3.5 relative overflow-hidden shadow-sm">
+          {/* Subtle background gradient accent */}
+          <div className="absolute top-0 right-0 w-36 h-36 bg-gradient-to-bl from-purple-100/40 via-violet-50/20 to-transparent rounded-full pointer-events-none -mr-8 -mt-8" />
+
+          <div className="flex items-center justify-between gap-3 relative z-10">
+            <div>
+              <h2 className="text-xl sm:text-2xl font-black text-slate-900 tracking-tight leading-tight">
+                {isHindi ? "10-दिवसीय ट्रेनिंग" : "10-Day Training"}
+              </h2>
             </div>
-            <h2 className="text-xl font-black text-slate-900 tracking-tight mt-1">
-              {isHindi ? "10-दिवसीय ट्रेनिंग" : "10-Day Training"}
-            </h2>
-            <p className="text-xs sm:text-sm text-slate-600 font-medium mt-0.5">
-              {isHindi
-                ? "10 अनिवार्य मॉड्यूल और फ्लोर प्रैक्टिस अभ्यास।"
-                : "10 core modules with hands-on floor practice."}
-            </p>
+
+            {/* Right Visual Tile & Count Badge */}
+            <div className="shrink-0 flex items-center gap-2">
+              <div className="w-11 h-11 sm:w-12 sm:h-12 rounded-xl bg-gradient-to-br from-violet-600 via-purple-600 to-indigo-700 text-white flex items-center justify-center shadow-md shadow-purple-500/20">
+                <Boxes className="w-5 h-5 sm:w-6 sm:h-6" />
+              </div>
+              <div className="text-right shrink-0 bg-violet-50/80 border border-violet-100 px-3 py-1.5 rounded-xl">
+                <div className="text-sm sm:text-base font-black text-violet-700 leading-tight">
+                  {modulesCompletedCount} / 10
+                </div>
+                <div className="text-[10px] sm:text-[11px] text-slate-500 font-semibold leading-tight">
+                  {isHindi ? "दिन पूर्ण" : "Done"}
+                </div>
+              </div>
+            </div>
           </div>
 
-          <div className="text-right shrink-0 bg-slate-50 border border-slate-200 px-3.5 py-2 rounded-2xl">
-            <div className="text-sm font-black text-violet-700">
-              {modulesCompletedCount} / 10
+          {/* Progress bar */}
+          <div className="space-y-1.5 pt-0.5 relative z-10">
+            <div className="flex items-center justify-between text-xs font-bold text-slate-700">
+              <span>{isHindi ? "पाठ्यक्रम प्रगति" : "Course Progress"}</span>
+              <span className="text-violet-700 font-black">
+                {Math.round((modulesCompletedCount / 10) * 100)}%
+              </span>
             </div>
-            <div className="text-xs text-slate-500 font-semibold">
-              {isHindi ? "पूर्ण" : "Done"}
+
+            <div className="w-full h-2.5 bg-slate-100 rounded-full overflow-hidden">
+              <div
+                className="h-full bg-gradient-to-r from-violet-600 via-purple-600 to-fuchsia-600 rounded-full transition-all duration-500"
+                style={{ width: `${Math.round((modulesCompletedCount / 10) * 100)}%` }}
+              />
             </div>
-          </div>
-        </div>
-
-        {/* Progress bar */}
-        <div className="space-y-1.5">
-          <div className="flex items-center justify-between text-xs font-bold text-slate-700">
-            <span>{isHindi ? "पाठ्यक्रम प्रगति" : "Course Progress"}</span>
-            <span className="text-violet-700 font-black">{Math.round((modulesCompletedCount / 10) * 100)}%</span>
-          </div>
-          <div className="w-full h-2.5 bg-slate-100 rounded-full overflow-hidden">
-            <div
-              className="h-full bg-gradient-to-r from-violet-600 via-purple-600 to-fuchsia-600 rounded-full transition-all duration-500"
-              style={{ width: `${Math.round((modulesCompletedCount / 10) * 100)}%` }}
-            />
-          </div>
-        </div>
-
-        {/* Core Product Principle Callout */}
-        <div className="p-3 bg-amber-50/90 rounded-2xl border border-amber-200/80 flex items-start gap-2.5 text-xs text-amber-950">
-          <AlertCircle className="w-4 h-4 text-amber-600 shrink-0 mt-0.5" />
-          <div className="leading-snug font-medium">
-            <strong className="font-bold text-slate-900 block">
-              {isHindi ? "नियम: मॉड्यूल पूरा होना ≠ जॉब रेडी होना" : "Rule: Module Completion ≠ Job Readiness"}
-            </strong>
-            <span className="text-xs text-amber-900 mt-0.5 block">
-              {isHindi
-                ? "मॉड्यूल पूरा करना अनिवार्य है। वास्तविक जॉब रेडीनेस फ्लोर पर की गई एक्यूरेसी और स्पीड से तय होती है।"
-                : "Modules build foundation. True Job Readiness is proven by accuracy and speed on the floor."}
-            </span>
           </div>
         </div>
       </div>
 
       {/* ========================================================= */}
-      {/* 2. 10-DAY MODULE LIST                                      */}
+      {/* 2. SECTION HEADER: EXPLORE LEARNING AREAS                 */}
       {/* ========================================================= */}
-      <div className="space-y-3">
-        <h3 className="text-xs font-black text-slate-700 uppercase tracking-wide px-1">
-          {isHindi ? "डे 1 से डे 10 मॉड्यूल:" : "Day 1 to Day 10 LMS Modules:"}
+      <div className="flex items-center justify-between px-1 pt-1">
+        <h3 className="text-base sm:text-lg font-black text-slate-900 tracking-tight">
+          {isHindi ? "सीखने के क्षेत्र एक्सप्लोर करें" : "Explore Learning Areas"}
         </h3>
+        <button
+          type="button"
+          onClick={() => {
+            const nextMod =
+              MANDATORY_TRAINING_MODULES.find((m) => m.dayNumber === modulesCompletedCount + 1) ||
+              MANDATORY_TRAINING_MODULES[0];
+            setSelectedModuleId(nextMod.id);
+            setActiveDetailModule(nextMod);
+          }}
+          className="text-xs sm:text-sm font-bold text-blue-600 hover:text-blue-700 cursor-pointer flex items-center gap-0.5"
+        >
+          <span>{isHindi ? "सभी देखें ›" : "View All ›"}</span>
+        </button>
+      </div>
 
+      {/* ========================================================= */}
+      {/* 3. 3-COLUMN LEARNING AREA GRID (INSPIRED BY SCREENSHOT)   */}
+      {/* ========================================================= */}
+      <div className="grid grid-cols-3 gap-2.5 sm:gap-3.5">
         {MANDATORY_TRAINING_MODULES.map((mod) => {
           const isCompleted = completedIds.includes(mod.id);
           const isCurrent = !isCompleted && mod.dayNumber === modulesCompletedCount + 1;
           const isLocked = !isCompleted && mod.dayNumber > modulesCompletedCount + 1;
-          const isExpanded = selectedModuleId === mod.id;
-
-          const mappedCapNames = mod.mappedCapabilityIds
-            .map((cid) => {
-              const cap = DARK_STORE_CAPABILITIES.find((c) => c.id === cid);
-              return cap ? cap.name : `Cap ${cid}`;
-            })
-            .join(", ");
 
           return (
             <div
               key={mod.id}
-              className={`bg-white rounded-[24px] border transition-all duration-200 overflow-hidden ${
+              onClick={() => {
+                setSelectedModuleId(mod.id);
+                setActiveDetailModule(mod);
+              }}
+              className={`bg-white rounded-xl sm:rounded-2xl p-3 sm:p-3.5 flex flex-col items-center justify-center text-center aspect-square transition-all duration-200 cursor-pointer relative shadow-sm hover:shadow-md active:scale-98 border ${
                 isCurrent
-                  ? "border-purple-300 ring-2 ring-purple-100 shadow-md"
+                  ? "border-violet-300 ring-2 ring-violet-200/80 shadow-md shadow-violet-500/10"
                   : isCompleted
-                  ? "border-slate-200/90 shadow-2xs"
-                  : "border-slate-200/60 opacity-80"
+                  ? "border-emerald-200/70 hover:border-emerald-300 bg-white"
+                  : "border-slate-100 bg-slate-50/50 hover:bg-white"
               }`}
             >
-              {/* Module Header Bar */}
-              <div
-                onClick={() => setSelectedModuleId(isExpanded ? null : mod.id)}
-                className="p-4 flex items-center justify-between cursor-pointer hover:bg-slate-50/60 transition-colors gap-3"
-              >
-                <div className="flex items-center gap-3 min-w-0">
-                  {/* Status Circle Icon */}
-                  <div
-                    className={`w-10 h-10 rounded-2xl flex items-center justify-center shrink-0 font-black text-sm ${
-                      isCompleted
-                        ? "bg-emerald-500 text-white"
-                        : isCurrent
-                        ? "bg-gradient-to-br from-violet-600 to-purple-600 text-white shadow-xs"
-                        : "bg-slate-100 text-slate-400"
-                    }`}
-                  >
-                    {isCompleted ? (
-                      <CheckCircle2 className="w-5 h-5" />
-                    ) : isCurrent ? (
-                      <span>{mod.dayNumber}</span>
-                    ) : (
-                      <Lock className="w-4 h-4 text-slate-400" />
-                    )}
-                  </div>
-
-                  <div className="min-w-0">
-                    <div className="flex items-center gap-2">
-                      <span className="text-xs font-black uppercase tracking-wider text-slate-400 truncate">
-                        {isHindi ? `मॉड्यूल ${mod.dayNumber}` : `MODULE ${mod.dayNumber}`} • {mod.durationMinutes} min
-                      </span>
-                    </div>
-                    <h4 className="text-sm sm:text-base font-black text-slate-900 mt-0.5 truncate">
-                      {isHindi && mod.titleHi ? mod.titleHi : mod.title}
-                    </h4>
-                  </div>
+              {/* Central Squircle Icon Container */}
+              <div className="relative my-auto">
+                <div
+                  className={`w-12 h-12 sm:w-14 sm:h-14 rounded-xl flex items-center justify-center transition-all ${
+                    isCompleted
+                      ? "bg-gradient-to-br from-emerald-500 to-teal-600 text-white shadow-md shadow-emerald-500/25"
+                      : isCurrent
+                      ? "bg-gradient-to-br from-violet-600 to-purple-600 text-white shadow-lg shadow-violet-600/30 ring-2 ring-white"
+                      : "bg-slate-100/90 text-slate-400"
+                  }`}
+                >
+                  {getModuleDayIcon(mod.dayNumber)}
                 </div>
 
-                <div className="flex items-center gap-2 shrink-0">
-                  {isCompleted ? (
-                    <span className="text-xs font-bold px-3 py-1 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-200">
-                      ✓ {isHindi ? "पूर्ण" : "Completed"}
-                    </span>
-                  ) : isCurrent ? (
-                    <span className="text-xs font-black px-3.5 py-1.5 rounded-full bg-gradient-to-r from-violet-600 to-purple-600 text-white shadow-xs animate-pulse">
-                      {isHindi ? "शुरू करें" : "START"}
-                    </span>
-                  ) : (
-                    <span className="text-xs font-semibold px-2.5 py-1 rounded-full bg-slate-100 text-slate-500">
-                      {isHindi ? "लॉक" : "Locked"}
-                    </span>
-                  )}
-                  {isExpanded ? (
-                    <ChevronUp className="w-4 h-4 text-slate-600" />
-                  ) : (
-                    <ChevronDown className="w-4 h-4 text-slate-600" />
-                  )}
-                </div>
+                {/* "SOON" Pill for locked modules only (tick and play icons removed) */}
+                {isLocked && (
+                  <span className="absolute -top-1.5 -right-2 bg-blue-100 text-blue-600 font-black text-[8px] sm:text-[9px] px-1.5 py-0.5 rounded-full border border-white shadow-2xs tracking-wider">
+                    {isHindi ? "जल्द" : "SOON"}
+                  </span>
+                )}
               </div>
 
-              {/* Expandable Module Detail & Activities */}
-              {isExpanded && (
-                <div className="px-4 pb-4 pt-2 border-t border-slate-100 space-y-3 bg-slate-50/40">
-                  <p className="text-xs sm:text-sm text-slate-700 leading-relaxed font-medium">
-                    {isHindi && mod.descriptionHi ? mod.descriptionHi : mod.description}
-                  </p>
-
-                  <div className="flex items-center gap-1.5 text-xs text-violet-700 bg-violet-50/80 px-3 py-2 rounded-xl border border-violet-100">
-                    <Zap className="w-3.5 h-3.5 shrink-0" />
-                    <span>
-                      <strong className="font-bold">{isHindi ? "हुनर संबंध:" : "Maps to Capability:"}</strong> {mappedCapNames}
-                    </span>
-                  </div>
-
-                  {/* 5 Mandatory Activities in this Module */}
-                  <div className="space-y-2 pt-1">
-                    <span className="text-xs font-bold uppercase tracking-wider text-slate-400 block px-1">
-                      {isHindi ? "मॉड्यूल गतिविधियां:" : "Module Activities:"}
-                    </span>
-
-                    {mod.activities.map((act) => {
-                      const isActCompleted = isCompleted || act.completed;
-
-                      return (
-                        <div
-                          key={act.id}
-                          onClick={() => {
-                            if (!isLocked) {
-                              setQuizAnswerSelected(null);
-                              setQuizSubmitted(false);
-                              setPracticeChecked(false);
-                              setActiveActivityModal({ module: mod, activity: act });
-                            }
-                          }}
-                          className={`p-3 rounded-2xl flex items-center justify-between transition-all cursor-pointer ${
-                            isLocked
-                              ? "bg-slate-100/50 opacity-60 cursor-not-allowed"
-                              : isActCompleted
-                              ? "bg-white border border-slate-200/80 hover:border-purple-300 shadow-2xs"
-                              : "bg-white border border-purple-200 hover:border-purple-400 shadow-xs"
-                          }`}
-                        >
-                          <div className="flex items-center gap-3 min-w-0">
-                            <div className="p-2 rounded-xl bg-slate-50 border border-slate-100 shrink-0">
-                              {getActivityIcon(act.type)}
-                            </div>
-                            <div className="min-w-0">
-                              <span className="text-xs font-bold text-slate-400 block uppercase">
-                                {getActivityTypeName(act.type)}
-                              </span>
-                              <span className="text-xs sm:text-sm font-bold text-slate-900 leading-tight block truncate">
-                                {isHindi && act.titleHi ? act.titleHi : act.title}
-                              </span>
-                            </div>
-                          </div>
-
-                          <div className="flex items-center gap-2 shrink-0 ml-2">
-                            {act.score !== undefined && (
-                              <span className="text-xs font-black text-emerald-700 bg-emerald-50 px-2.5 py-0.5 rounded-full border border-emerald-200">
-                                {act.score}%
-                              </span>
-                            )}
-                            {isActCompleted ? (
-                              <span className="text-xs font-bold text-emerald-600 bg-emerald-50 px-2.5 py-1 rounded-full">
-                                ✓ {isHindi ? "पूर्ण" : "Done"}
-                              </span>
-                            ) : (
-                              <span className="text-xs font-bold text-purple-700 bg-purple-50 px-3 py-1 rounded-full hover:bg-purple-100">
-                                {isHindi ? "शुरू करें →" : "Start →"}
-                              </span>
-                            )}
-                          </div>
-                        </div>
-                      );
-                    })}
-                  </div>
-
-                  {/* Module Action Trigger for In-Progress Module */}
-                  {isCurrent && (
-                    <div className="pt-2">
-                      <button
-                        onClick={() => handleCompleteActivity(mod.id, mod.activities[4].id)}
-                        className="w-full py-3 bg-gradient-to-r from-violet-600 via-purple-600 to-fuchsia-600 text-white rounded-2xl text-xs font-bold shadow-md hover:opacity-95 cursor-pointer active:scale-98 transition-all flex items-center justify-center gap-2"
-                      >
-                        <Award className="w-4 h-4" />
-                        <span>
-                          {isHindi
-                            ? `डे ${mod.dayNumber} मॉड्यूल पूरा मार्क करें`
-                            : `Complete Day ${mod.dayNumber} Module (${mod.code})`}
-                        </span>
-                      </button>
-                    </div>
-                  )}
-                </div>
-              )}
+              {/* Title & Subtitle */}
+              <div className="w-full mt-1.5">
+                <h4 className="text-xs sm:text-sm font-extrabold text-slate-900 truncate leading-tight">
+                  {getModuleShortLabel(mod.dayNumber, isHindi)}
+                </h4>
+                <p
+                  className={`text-[10px] sm:text-[11px] mt-0.5 font-medium truncate ${
+                    isCompleted
+                      ? "text-slate-500"
+                      : isCurrent
+                      ? "text-violet-700 font-bold"
+                      : "text-slate-400"
+                  }`}
+                >
+                  {isCompleted
+                    ? isHindi ? "एक्सप्लोर" : "Explore"
+                    : isCurrent
+                    ? isHindi ? "शुरू करें" : "Explore"
+                    : isHindi ? "जल्द आएगा" : "Soon"}
+                </p>
+              </div>
             </div>
           );
         })}
       </div>
+
+      {/* ========================================================= */}
+      {/* 2.5 MODULE DETAIL MODAL                                   */}
+      {/* ========================================================= */}
+      {activeDetailModule && (
+        <div className="fixed inset-0 z-40 bg-black/60 backdrop-blur-xs flex items-center justify-center p-4">
+          <div className="bg-white rounded-3xl max-w-md w-full p-4 sm:p-5 shadow-2xl border border-slate-100 max-h-[88vh] overflow-y-auto space-y-4 animate-in fade-in zoom-in duration-150">
+            {/* Header */}
+            <div className="flex items-start justify-between gap-3 border-b border-slate-100 pb-3">
+              <div>
+                <div className="flex items-center gap-2">
+                  <span className="text-[10px] sm:text-xs font-black uppercase tracking-wider px-2 py-0.5 rounded-md bg-violet-100 text-violet-800">
+                    Day {activeDetailModule.dayNumber} • {activeDetailModule.code}
+                  </span>
+                  <span className="text-xs font-bold text-slate-400 flex items-center gap-1">
+                    <Clock className="w-3.5 h-3.5" />
+                    {activeDetailModule.durationMinutes} min
+                  </span>
+                </div>
+                <h3 className="text-base sm:text-lg font-black text-slate-900 mt-1">
+                  {isHindi && activeDetailModule.titleHi ? activeDetailModule.titleHi : activeDetailModule.title}
+                </h3>
+              </div>
+              <button
+                type="button"
+                onClick={() => setActiveDetailModule(null)}
+                className="p-1.5 rounded-full text-slate-400 hover:text-slate-700 hover:bg-slate-100 transition-colors cursor-pointer shrink-0"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+
+            {/* Description */}
+            <p className="text-xs sm:text-sm text-slate-600 leading-relaxed">
+              {isHindi && activeDetailModule.descriptionHi
+                ? activeDetailModule.descriptionHi
+                : activeDetailModule.description}
+            </p>
+
+            {/* Capability mapping tag */}
+            <div className="flex items-center gap-1.5 text-xs text-violet-700 bg-violet-50/80 px-3 py-2 rounded-xl border border-violet-100">
+              <Zap className="w-3.5 h-3.5 shrink-0" />
+              <span>
+                <strong className="font-bold">{isHindi ? "हुनर संबंध:" : "Maps to:"}</strong>{" "}
+                {activeDetailModule.mappedCapabilityIds
+                  .map((cid) => {
+                    const cap = DARK_STORE_CAPABILITIES.find((c) => c.id === cid);
+                    return cap ? cap.name : `Cap ${cid}`;
+                  })
+                  .join(", ")}
+              </span>
+            </div>
+
+            {/* 5 Activities */}
+            <div className="space-y-2 pt-1">
+              <div className="flex items-center justify-between text-xs font-bold uppercase tracking-wider text-slate-400 px-0.5">
+                <span>{isHindi ? "मॉड्यूल गतिविधियां:" : "Module Activities:"}</span>
+                <span>{activeDetailModule.activities.length} tasks</span>
+              </div>
+
+              {activeDetailModule.activities.map((act) => {
+                const isModCompleted = completedIds.includes(activeDetailModule.id);
+                const isActCompleted = isModCompleted || act.completed;
+                const isModLocked =
+                  !isModCompleted &&
+                  activeDetailModule.dayNumber > modulesCompletedCount + 1;
+
+                return (
+                  <div
+                    key={act.id}
+                    onClick={() => {
+                      if (!isModLocked) {
+                        setQuizAnswerSelected(null);
+                        setQuizSubmitted(false);
+                        setPracticeChecked(false);
+                        setActiveActivityModal({ module: activeDetailModule, activity: act });
+                      }
+                    }}
+                    className={`p-3 rounded-2xl flex items-center justify-between transition-all cursor-pointer ${
+                      isModLocked
+                        ? "bg-slate-100/50 opacity-60 cursor-not-allowed"
+                        : isActCompleted
+                        ? "bg-white border border-slate-200 hover:border-violet-300 shadow-2xs"
+                        : "bg-white border border-violet-200 hover:border-violet-400 shadow-xs"
+                    }`}
+                  >
+                    <div className="flex items-center gap-3 min-w-0">
+                      <div className="p-2 rounded-xl bg-slate-50 border border-slate-100 shrink-0">
+                        {getActivityIcon(act.type)}
+                      </div>
+                      <div className="min-w-0">
+                        <span className="text-[10px] font-bold text-slate-400 block uppercase">
+                          {getActivityTypeName(act.type)}
+                        </span>
+                        <span className="text-xs sm:text-sm font-bold text-slate-900 leading-tight block truncate">
+                          {isHindi && act.titleHi ? act.titleHi : act.title}
+                        </span>
+                      </div>
+                    </div>
+
+                    <div className="flex items-center gap-2 shrink-0 ml-2">
+                      {act.score !== undefined && (
+                        <span className="text-xs font-black text-emerald-700 bg-emerald-50 px-2.5 py-0.5 rounded-full border border-emerald-200">
+                          {act.score}%
+                        </span>
+                      )}
+                      {isActCompleted ? (
+                        <span className="text-xs font-bold text-emerald-600 bg-emerald-50 px-2.5 py-1 rounded-full">
+                          ✓ {isHindi ? "पूर्ण" : "Done"}
+                        </span>
+                      ) : (
+                        <span className="text-xs font-bold text-violet-700 bg-violet-50 px-3 py-1 rounded-full hover:bg-violet-100">
+                          {isHindi ? "शुरू करें →" : "Start →"}
+                        </span>
+                      )}
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+
+            {/* Complete Module Button if Current */}
+            {activeDetailModule.dayNumber === modulesCompletedCount + 1 && (
+              <div className="pt-2">
+                <button
+                  type="button"
+                  onClick={() => {
+                    handleCompleteActivity(activeDetailModule.id, activeDetailModule.activities[4].id);
+                    setActiveDetailModule(null);
+                  }}
+                  className="w-full py-3 bg-gradient-to-r from-violet-600 via-purple-600 to-fuchsia-600 text-white rounded-2xl text-xs font-bold shadow-md hover:opacity-95 cursor-pointer active:scale-98 transition-all flex items-center justify-center gap-2"
+                >
+                  <Award className="w-4 h-4" />
+                  <span>
+                    {isHindi
+                      ? `डे ${activeDetailModule.dayNumber} मॉड्यूल पूरा मार्क करें`
+                      : `Complete Day ${activeDetailModule.dayNumber} Module`}
+                  </span>
+                </button>
+              </div>
+            )}
+          </div>
+        </div>
+      )}
 
       {/* ========================================================= */}
       {/* 3. INTERACTIVE ACTIVITY MODAL                             */}

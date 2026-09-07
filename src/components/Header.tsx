@@ -36,6 +36,7 @@ interface HeaderProps {
   onToggleFrame?: () => void;
   isHindi?: boolean;
   onToggleLanguage?: () => void;
+  isHomeScreen?: boolean;
   learnerName?: string;
   buddyName?: string;
 }
@@ -57,6 +58,7 @@ export const Header: React.FC<HeaderProps> = ({
   atRiskCount = 1,
   isHindi = true,
   onToggleLanguage,
+  isHomeScreen = true,
   learnerName = "Rahul",
   buddyName = "Vikram",
 }) => {
@@ -134,21 +136,8 @@ export const Header: React.FC<HeaderProps> = ({
             </div>
           </div>
 
-          {/* Right Action Icons with Permanent Eye Control and Direct Buddy Place Button */}
+          {/* Right Action Icons: Language button visible everywhere, menu only on home screen */}
           <div className="flex items-center gap-1.5 shrink-0">
-            {/* Direct Buddy Place Button (Replaces top telemetry gauge) */}
-            {onOpenBuddy && (
-              <button
-                id="header-buddy-btn"
-                onClick={onOpenBuddy}
-                title={isHindi ? `फ्लोर साथी (${buddyName}) से तुरंत सहायता लें` : `Floor Buddy (${buddyName}) Quick Assist`}
-                aria-label="Floor Buddy Quick Assist"
-                className="p-2 rounded-2xl transition-all cursor-pointer flex items-center justify-center relative active:scale-95 bg-gradient-to-r from-emerald-600 to-teal-600 text-white shadow-sm shadow-emerald-500/25 hover:opacity-95 ring-1 ring-emerald-300/40"
-              >
-                <UserCheck className="w-4 h-4 stroke-[2.2]" />
-                <span className="absolute -top-0.5 -right-0.5 w-2 h-2 rounded-full bg-emerald-400 ring-2 ring-white animate-pulse" />
-              </button>
-            )}
 
             {/* Language Toggle Button (Hindi / English) placed near Eye Icon */}
             {onToggleLanguage && (
@@ -166,7 +155,10 @@ export const Header: React.FC<HeaderProps> = ({
               </button>
             )}
 
-            {/* Client Demo Story Quick Launcher */}
+            {/* Top Bar Menu Items (Client Demo & Eye Menu) - ONLY visible on Home Screen */}
+            {(isHomeScreen || isBackstageActive) && (
+              <>
+                {/* Client Demo Story Quick Launcher */}
             {onOpenClientDemo && (
               <button
                 id="header-client-demo-btn"
@@ -400,6 +392,8 @@ export const Header: React.FC<HeaderProps> = ({
                 </div>
               )}
             </div>
+              </>
+            )}
           </div>
         </div>
 

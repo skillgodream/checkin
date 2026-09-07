@@ -240,14 +240,6 @@ export const LearnerJourneyRoadmap: React.FC<LearnerJourneyRoadmapProps> = ({
           >
             <Volume2 className={`w-4 h-4 ${playingAudio ? "animate-bounce text-purple-600" : ""}`} />
           </button>
-          <button
-            type="button"
-            onClick={() => setShowFullRoadmapModal(true)}
-            className="text-xs font-bold text-violet-700 hover:text-violet-900 bg-violet-50 hover:bg-violet-100 px-3 py-1.5 rounded-full border border-violet-200/80 transition-all flex items-center gap-1 cursor-pointer"
-          >
-            <span>{isHindi ? "पूरा मैप" : "View Map"}</span>
-            <ChevronRight className="w-3.5 h-3.5" />
-          </button>
         </div>
       </div>
 
