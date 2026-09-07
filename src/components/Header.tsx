@@ -30,6 +30,7 @@ interface HeaderProps {
   onToggleFrame?: () => void;
   isHindi?: boolean;
   onToggleLanguage?: () => void;
+  learnerName?: string;
 }
 
 export const Header: React.FC<HeaderProps> = ({
@@ -45,9 +46,11 @@ export const Header: React.FC<HeaderProps> = ({
   atRiskCount = 1,
   isHindi = true,
   onToggleLanguage,
+  learnerName = "Rahul",
 }) => {
   const [isEyeMenuOpen, setIsEyeMenuOpen] = useState(false);
   const eyeMenuRef = useRef<HTMLDivElement>(null);
+  const firstName = (learnerName || "Rahul").split(" ")[0];
 
   // Close eye menu when clicking outside
   useEffect(() => {
@@ -81,11 +84,21 @@ export const Header: React.FC<HeaderProps> = ({
       <div className="max-w-md mx-auto px-4 py-2.5">
         {/* Top bar: Brand + Live Tag + Actions */}
         <div className="flex items-center justify-between gap-2">
-          {/* Brand Identity with Logo */}
+          {/* Learner Greeting / Brand Identity */}
           <div className="flex items-center gap-2 min-w-0">
             <div className="min-w-0">
               <div className="flex items-center gap-1.5">
-                <Logo size="sm" />
+                {activeTab === "new_hire" ? (
+                  <span className="text-base sm:text-lg font-black text-slate-950 tracking-tight flex items-center gap-1">
+                    <span>{isHindi ? "नमस्ते," : "Hello,"}</span>
+                    <span className="text-violet-700 font-black">{firstName}</span>
+                    <span className="text-sm">👋</span>
+                  </span>
+                ) : (
+                  <span className="text-sm sm:text-base font-black text-slate-900 tracking-tight">
+                    {activeTab === "manager" ? "Supervisor Triage" : "Store Operations"}
+                  </span>
+                )}
                 {hasApiKey ? (
                   <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-50 text-emerald-700 border border-emerald-200/80 shrink-0">
                     <Sparkles className="w-2.5 h-2.5 text-emerald-600" />
@@ -99,7 +112,9 @@ export const Header: React.FC<HeaderProps> = ({
               </div>
               <p className="text-[11px] text-slate-400 font-medium truncate mt-0.5">
                 {activeTab === "new_hire"
-                  ? "Floor Companion • Dark Store #104"
+                  ? isHindi
+                    ? `फ्लोर पिकर • डार्क स्टोर #104`
+                    : `Floor Companion • Dark Store #104`
                   : activeTab === "manager"
                   ? "Floor Triage • Dark Store #104"
                   : "Store Operations • Dark Store #104"}

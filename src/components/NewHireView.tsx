@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { NewHire, DailySignal } from "../types";
+import { NewHire, DailySignal, DARK_STORE_CAPABILITIES } from "../types";
 import { analyzeDailyReport } from "../services/intelligence";
 import { speakMessage, stopSpeaking } from "../utils/speech";
 import { CircularDialWidget } from "./CircularDialWidget";
@@ -7,6 +7,8 @@ import { StoreZonesGrid } from "./StoreZonesGrid";
 import { JobReadyHumanFigure } from "./JobReadyHumanFigure";
 import { ModulesView } from "./ModulesView";
 import { FloatingGlassMenu, LearnerSection } from "./FloatingGlassMenu";
+import { LearnerJourneyRoadmap } from "./LearnerJourneyRoadmap";
+import { LearnerDailyReportCard } from "./LearnerDailyReportCard";
 import {
   Mic,
   MicOff,
@@ -32,6 +34,8 @@ import {
   ShieldCheck,
   PackageCheck,
   RotateCcw,
+  Clock,
+  Compass,
 } from "lucide-react";
 
 interface NewHireViewProps {
@@ -122,8 +126,8 @@ export const NewHireView: React.FC<NewHireViewProps> = ({
         replyText:
           currentRecord.dailySignal.companionResponse ||
           (isNeedsHelp
-            ? "Vikram will help you with Aisles 4 to 8 today. Accuracy is 98%, no stress!"
-            : "Shift reported! Great work keeping accuracy at 98%."),
+            ? `${newHire.buddy.split(" ")[0]} will help you with floor picking today. Accuracy is ${currentRecord.workSignal?.accuracyRate ?? 98}%, no stress!`
+            : "Shift reported! Great work keeping high accuracy."),
         timestamp: currentRecord.dailySignal.timestamp || "Today",
       });
     } else {
@@ -132,7 +136,7 @@ export const NewHireView: React.FC<NewHireViewProps> = ({
     setBuddyAlertSent(false);
     setInputText("");
     setShowTextInput(false);
-  }, [currentDay, newHire.id, currentRecord.dailySignal, isNeedsHelp]);
+  }, [currentDay, newHire.id, newHire.buddy, currentRecord.dailySignal, currentRecord.workSignal, isNeedsHelp]);
 
   // Audio speech player
   const handlePlayAudio = (id: string, text: string) => {
@@ -238,8 +242,8 @@ export const NewHireView: React.FC<NewHireViewProps> = ({
         const replyText =
           analyzed.companionResponse ||
           (isHindi
-            ? `समझ गया ${newHire.name.split(" ")[0]}! विक्रम भैया को बता दिया है, वो आपको फ्लोर पर समझा देंगे।`
-            : `Got it, ${newHire.name.split(" ")[0]}! Buddy Vikram has been alerted to walk through with you.`);
+            ? `समझ गया ${newHire.name.split(" ")[0]}! ${newHire.buddy.split(" ")[0]} भैया को बता दिया है, वो आपको फ्लोर पर समझा देंगे।`
+            : `Got it, ${newHire.name.split(" ")[0]}! Buddy ${newHire.buddy.split(" ")[0]} has been alerted to walk through with you.`);
 
         const signal: DailySignal = {
           id: `sig-${Date.now()}`,
@@ -278,35 +282,111 @@ export const NewHireView: React.FC<NewHireViewProps> = ({
     }
   };
 
-  // Status card content based on state & language
+  // Enhanced status & intelligent prescription content answering the 6 core questions
   const getStatusContent = () => {
     const accuracy = currentRecord.workSignal?.accuracyRate ?? 98;
     const actualPace = currentRecord.workSignal?.actualPickRate ?? 35;
     const targetPace = currentRecord.workSignal?.targetPickRate ?? 50;
     const buddyName = newHire.buddy.split(" ")[0];
+    const supervisorName = newHire.supervisor.split(" ")[0];
 
+    // 1. Tool / Hardware obstacle
+    if (
+      currentRecord.dailySignal?.category === "Tool" ||
+      currentRecord.recommendedAction?.decisionType === "tool_remedy" ||
+      currentRecord.identifiedPattern?.category === "Tool"
+    ) {
+      return {
+        badge: isHindi ? "डिवाइस सूचना 🛠️" : "Device Action 🛠️",
+        whatTitle: isHindi
+          ? "स्कैनर लेंस साफ करें या डिस्पैच टेबल पर डिवाइस बदलें"
+          : "Clean scanner lens or swap handheld unit at dispatch desk",
+        why: isHindi
+          ? "यह स्कैनर हार्डवेयर की समस्या है, आपकी ट्रेनिंग की नहीं। बारकोड पढ़ने में देरी दर्ज हुई है। किसी अतिरिक्त ट्रेनिंग की जरूरत नहीं है।"
+          : "This is a scanner tool issue, not a training problem. Handheld read latency was detected on the floor. No extra training is required.",
+        successTarget: isHindi
+          ? "डिस्पैच टेबल पर टेस्ट बारकोड तुरंत बीप के साथ स्कैन होना चाहिए।"
+          : "Test barcode scans instantly with clean beep at dispatch desk.",
+        howWhere: isHindi ? "डार्क स्टोर डिस्पैच टेबल" : "Dispatch Desk & Tool Station",
+        whoCanHelp: isHindi ? "स्टोर ऑपरेशन्स / टूल सपोर्ट" : "Floor Ops / Tool Support",
+        whereHeading: isHindi ? "सामान्य सोलो पिकिंग जारी रखना" : "Resume uninterrupted solo order picking",
+        primaryBtnText: isHindi ? "🛠️ 2-मिनट स्कैनर गाइड खोलें" : "🛠️ Open 2-Min Scanner Guide",
+        primaryAction: () => setActiveModal("scanner"),
+        secondaryBtnText: isHindi ? `${buddyName} भैया को बताएं` : `Notify Buddy ${buddyName}`,
+        secondaryAction: () => setActiveSection("buddy"),
+      };
+    }
+
+    // 2. External store / facility bottleneck
+    if (
+      currentRecord.workSignal?.externalBottleneck ||
+      currentRecord.identifiedPattern?.patternName.includes("Bottleneck") ||
+      currentRecord.recommendedAction?.decisionType === "environment_support"
+    ) {
+      return {
+        badge: isHindi ? "स्टोर वातावरण 🏢" : "Facility Notice 🏢",
+        whatTitle: isHindi
+          ? "सावधानीपूर्वक सही सामान स्कैन करना जारी रखें"
+          : "Continue steady, safe order picking (facility notice active)",
+        why: isHindi
+          ? "कन्वेयर या स्टोर बाधा के कारण शिफ्ट गति धीमी हुई थी। आपकी क्षमता व लगन में कोई कमी नहीं है।"
+          : "A store conveyor bottleneck slowed the wave pace, not your skill or effort. Core capability remains strong.",
+        successTarget: isHindi
+          ? "सुरक्षित व सही बारकोड स्कैनिंग बनाए रखें।"
+          : "Maintain 98%+ accurate scans while wave clears.",
+        howWhere: isHindi ? "डार्क स्टोर फ्लोर" : "Dark Store Floor (All Aisles)",
+        whoCanHelp: isHindi ? "सुपरवाइजर व स्टोर ऑपरेशन्स" : `Supervisor ${supervisorName} & Ops`,
+        whereHeading: isHindi ? "स्टोर बाधा हटने पर सामान्य गति" : "Full pace when facility clears",
+        primaryBtnText: isHindi ? "📦 शिफ्ट टूल्स खोलें" : "📦 Open Floor Tools & Pick",
+        primaryAction: () => setActiveModal("work"),
+        secondaryBtnText: isHindi ? "स्टोर मैप देखें" : "View Store Map",
+        secondaryAction: () => setActiveModal("map"),
+      };
+    }
+
+    // 3. Support Completed / Intervention Succeeded (Intervention Memory)
     if (isSupportCompleted) {
       return {
         badge: isHindi ? "सपोर्ट पूरा हुआ 👍" : "Support Complete 👍",
-        title: isHindi ? "अकेले ऑर्डर पिक करना शुरू करें" : "Start solo order picking",
+        whatTitle: isHindi
+          ? "स्वतंत्र रूप से अकेले सोलो ऑर्डर पिकिंग शुरू करें"
+          : "Start independent solo order picking across assigned zones",
         why: isHindi
-          ? `${buddyName} भैया के साथ अभ्यास के बाद आपकी स्पीड ${actualPace} सामान/घंटा हो गई और 0 गलती है।`
-          : `After practicing with ${buddyName}, your speed is ${actualPace}/hr with zero errors. You are ready!`,
-        primaryBtnText: isHindi ? "📦 ऑर्डर पिकिंग शुरू करें" : "📦 Start Solo Order Picking",
+          ? `${buddyName} भैया के साथ अभ्यास के बाद आपकी स्पीड ${actualPace} सामान/घंटा हो गई और 0 गलती है। अब आप अकेले पिक कर सकते हैं!`
+          : `After practicing with ${buddyName}, your speed reached ${actualPace}/hr with ${accuracy}% accuracy. Support is reduced so you can work solo!`,
+        successTarget: isHindi
+          ? "लगातार 5 ऑर्डर बिना साथी को बुलाए समय पर पूरे करें।"
+          : "Complete 5 consecutive pick orders solo within target cycle time.",
+        howWhere: isHindi ? "डार्क स्टोर फ्लोर (आइसल 1 से 8)" : "Dark Store Floor (Aisles 1–8)",
+        whoCanHelp: isHindi ? "स्वयं (साथी जरूरत पड़ने पर उपलब्ध)" : `Self (${buddyName} on standby)`,
+        whereHeading: isHindi ? "स्टेज 3: पूरी तरह स्वतंत्र कार्य" : "Stage 3: Autonomous Independent Work",
+        primaryBtnText: isHindi ? "📦 सोलो पिकिंग शुरू करें" : "📦 Start Solo Order Picking",
         primaryAction: () => setActiveModal("work"),
         secondaryBtnText: isHindi ? "साथी से बात करें" : "Talk to Buddy",
         secondaryAction: () => setActiveSection("buddy"),
       };
     }
+
+    const targetCapId = currentRecord?.recommendedAction?.targetCapabilityId || newHire.currentCapabilityId || 3;
+    const targetCapDef = DARK_STORE_CAPABILITIES.find((c) => c.id === targetCapId);
+    const targetCapName = targetCapDef ? targetCapDef.name : "Rack & bin navigation";
+
+    // 4. Support Assigned / Prescribed Walkthrough
     if (isSupportAssigned) {
       return {
-        badge: isHindi ? "आज का मुख्य कदम 🤝" : "Today's Main Action 🤝",
-        title: isHindi
-          ? `${buddyName} भैया के साथ 15 मिनट का वॉकथ्रू`
-          : `15-minute floor walkthrough with ${buddyName}`,
+        badge: isHindi ? "आज का मुख्य कदम 🤝" : "Today's Focus 🤝",
+        whatTitle: isHindi
+          ? `${buddyName} भैया के साथ 15 मिनट का फ्लोर वॉकथ्रू (${targetCapName})`
+          : `15-minute floor walkthrough with Buddy ${buddyName} (${targetCapName})`,
         why: isHindi
-          ? `आपकी एक्यूरेसी ${accuracy}% (बहुत अच्छी) है। आइसल 4 से 8 में रैक के नंबर याद करने के लिए ${buddyName} भैया मदद करेंगे।`
-          : `Your scanning accuracy is ${accuracy}% (great job). ${buddyName} will guide you to find bins faster in Aisles 4–8.`,
+          ? `आपकी एक्यूरेसी ${accuracy}% (बहुत अच्छी) है। ${targetCapName} में कुशलता बढ़ाने के लिए ${buddyName} भैया 15 मिनट साथ चलेंगे ताकि समय बर्बाद न हो।`
+          : `Your scanning accuracy is ${accuracy}% (great job). ${buddyName} will guide you on ${targetCapName} so you don't lose time.`,
+        successTarget: isHindi
+          ? "5 सामान बिना भटके 3 मिनट के अंदर सही पिक करें।"
+          : "Pick 5 items under 3 minutes without backtracking.",
+        howWhere: isHindi ? "डार्क स्टोर फ्लोर व शेल्फ" : "Dark Store Floor & Picking Aisles",
+        whoCanHelp: isHindi ? `${buddyName} भैया (सीनियर पिकर)` : `Buddy ${buddyName} (Senior Floor Picker)`,
+        whereHeading: isHindi ? "स्वतंत्र 45+ पिक स्पीड व जीरो एरर" : "Autonomous 45+ items/hr pacing",
         primaryBtnText: isHindi ? `📞 ${buddyName} भैया को बुलाएं` : `📞 Call ${buddyName} to My Rack`,
         primaryAction: () => {
           setBuddyAlertSent(true);
@@ -316,25 +396,45 @@ export const NewHireView: React.FC<NewHireViewProps> = ({
         secondaryAction: () => setActiveModal("map"),
       };
     }
+
+    // 5. Needs Help / Early Foundation
     if (isNeedsHelp) {
       return {
         badge: isHindi ? "मदद उपलब्ध है 🤝" : "Help Available 🤝",
-        title: isHindi ? "आइसल में सामान ढूंढने का अभ्यास करें" : "Practice finding items in aisles",
+        whatTitle: isHindi
+          ? `${targetCapName} का अभ्यास करें`
+          : `Practice ${targetCapName}`,
         why: isHindi
-          ? `आपकी एक्यूरेसी ${accuracy}% है जो बेहतरीन है। रैक नंबर याद करने में ${buddyName} भैया से 2 मिनट पूछें।`
-          : `Your accuracy is ${accuracy}% (strong). Ask ${buddyName} for a quick 2-minute tip on shelf locations.`,
+          ? `आपकी एक्यूरेसी ${accuracy}% है जो बेहतरीन है। ${targetCapName} में ${buddyName} भैया से 2 मिनट का टिप लें।`
+          : `Your accuracy is ${accuracy}% (strong). Ask ${buddyName} for a quick 2-minute tip on ${targetCapName}.`,
+        successTarget: isHindi
+          ? "अगले 3 ऑर्डरों में शेल्फ कोड सही पहचानें।"
+          : "Identify shelf coordinates correctly on next 3 orders.",
+        howWhere: isHindi ? "स्टोर फ्लोर / साथी चैट" : "Floor / Buddy Chat",
+        whoCanHelp: isHindi ? `${buddyName} भैया` : `Buddy ${buddyName}`,
+        whereHeading: isHindi ? "स्वतंत्र पिकिंग की ओर" : "Towards Solo Work",
         primaryBtnText: isHindi ? `🗣️ ${buddyName} से पूछें` : `🗣️ Ask ${buddyName}`,
         primaryAction: () => setActiveSection("buddy"),
         secondaryBtnText: isHindi ? "शिफ्ट टूल्स खोलें" : "Open Floor Tools",
         secondaryAction: () => setActiveModal("work"),
       };
     }
+
+    // 6. Default Steady Ramp
     return {
       badge: isHindi ? "आज का मुख्य काम 👍" : "Today's Task 👍",
-      title: isHindi ? "आराम से सही सामान स्कैन और पिक करें" : "Pick and scan items accurately",
+      whatTitle: isHindi
+        ? "आराम से सही सामान स्कैन और पिक करें"
+        : "Pick and scan items accurately across shift",
       why: isHindi
         ? `आपकी एक्यूरेसी ${accuracy}% है। सही बारकोड स्कैन करें, स्पीड अपने आप बढ़ जाएगी।`
         : `Your accuracy is ${accuracy}%. Always check the barcode before placing in the tote.`,
+      successTarget: isHindi
+        ? "पूरी शिफ्ट में 98%+ एक्यूरेसी बनाए रखें।"
+        : "Maintain 98%+ scanning accuracy across shift.",
+      howWhere: isHindi ? "डार्क स्टोर फ्लोर" : "Dark Store Floor (Assigned Waves)",
+      whoCanHelp: isHindi ? "स्वयं (मार्गदर्शन उपलब्ध)" : "Self (Buddy on standby)",
+      whereHeading: isHindi ? "स्टेज 4: 45+ सामान/घंटा की रफ़्तार" : "Stage 4: 45+ items/hr pacing",
       primaryBtnText: isHindi ? "📦 काम शुरू करें (टूल्स)" : "📦 Open Floor Tools & Pick",
       primaryAction: () => setActiveModal("work"),
       secondaryBtnText: isHindi ? "ट्रेनिंग मॉड्यूल" : "Training Modules",
@@ -347,117 +447,35 @@ export const NewHireView: React.FC<NewHireViewProps> = ({
   return (
     <div className="max-w-md mx-auto px-4 py-3 space-y-4 pb-28 select-none">
       {/* ========================================================= */}
-      {/* 1. TOP GREETING HEADER (Clean, Spacious like Reference)   */}
-      {/* ========================================================= */}
-      <div className="flex items-center justify-between pt-1">
-        <div>
-          <h1 className="text-xl sm:text-2xl font-black text-slate-900 tracking-tight flex items-center gap-1.5">
-            <span>{isHindi ? "नमस्ते," : "Hello,"}</span>
-            <span className="text-slate-950 font-black">{newHire.name.split(" ")[0]}!</span>
-            <span className="text-lg">👋</span>
-          </h1>
-          <p className="text-xs text-slate-500 font-medium mt-0.5">
-            {isHindi ? `फ्लोर पिकर • दिन ${currentDay}` : `Floor Picker • Day ${currentDay}`}
-          </p>
-        </div>
-
-        {/* Language Switcher Pill */}
-        <div className="flex items-center bg-slate-100 p-1 rounded-full border border-slate-200/80 shadow-2xs">
-          <button
-            onClick={() => setIsHindi(true)}
-            className={`px-2.5 py-1 rounded-full text-xs font-bold transition-all cursor-pointer ${
-              isHindi
-                ? "bg-emerald-600 text-white shadow-xs"
-                : "text-slate-500 hover:text-slate-900"
-            }`}
-          >
-            हिंदी
-          </button>
-          <button
-            onClick={() => setIsHindi(false)}
-            className={`px-2.5 py-1 rounded-full text-xs font-bold transition-all cursor-pointer ${
-              !isHindi
-                ? "bg-slate-900 text-white shadow-xs"
-                : "text-slate-500 hover:text-slate-900"
-            }`}
-          >
-            Eng
-          </button>
-        </div>
-      </div>
-
-      {/* ========================================================= */}
-      {/* 4-TAB NAVIGATION BAR: HOME | MODULES | BUDDY | DASHBOARD */}
-      {/* ========================================================= */}
-      <div className="flex p-1 bg-slate-100/90 rounded-2xl border border-slate-200/80 shadow-2xs">
-        <button
-          id="tab-home-btn"
-          type="button"
-          onClick={() => setActiveSection("home")}
-          className={`flex-1 flex items-center justify-center gap-1 py-2 px-1.5 rounded-xl text-xs font-bold transition-all cursor-pointer ${
-            activeSection === "home"
-              ? "bg-white text-slate-950 shadow-xs"
-              : "text-slate-500 hover:text-slate-900"
-          }`}
-        >
-          <Home className="w-3.5 h-3.5 text-violet-600" />
-          <span>{isHindi ? "होम" : "Home"}</span>
-        </button>
-        <button
-          id="tab-modules-btn"
-          type="button"
-          onClick={() => setActiveSection("modules")}
-          className={`flex-1 flex items-center justify-center gap-1 py-2 px-1.5 rounded-xl text-xs font-bold transition-all cursor-pointer ${
-            activeSection === "modules"
-              ? "bg-white text-slate-950 shadow-xs"
-              : "text-slate-500 hover:text-slate-900"
-          }`}
-        >
-          <BookOpen className="w-3.5 h-3.5 text-blue-600" />
-          <span>{isHindi ? "पाठ्यक्रम" : "Modules"}</span>
-        </button>
-        <button
-          id="tab-buddy-btn"
-          type="button"
-          onClick={() => setActiveSection("buddy")}
-          className={`flex-1 flex items-center justify-center gap-1 py-2 px-1.5 rounded-xl text-xs font-bold transition-all cursor-pointer ${
-            activeSection === "buddy"
-              ? "bg-white text-slate-950 shadow-xs"
-              : "text-slate-500 hover:text-slate-900"
-          }`}
-        >
-          <MessageCircle className="w-3.5 h-3.5 text-emerald-600" />
-          <span>{isHindi ? "साथी" : "Buddy"}</span>
-        </button>
-        <button
-          id="tab-dashboard-btn"
-          type="button"
-          onClick={() => setActiveSection("dashboard")}
-          className={`flex-1 flex items-center justify-center gap-1 py-2 px-1.5 rounded-xl text-xs font-bold transition-all cursor-pointer ${
-            activeSection === "dashboard"
-              ? "bg-white text-slate-950 shadow-xs"
-              : "text-slate-500 hover:text-slate-900"
-          }`}
-        >
-          <User className="w-3.5 h-3.5 text-purple-600" />
-          <span>{isHindi ? "हुनर" : "Dashboard"}</span>
-        </button>
-      </div>
-
-      {/* ========================================================= */}
-      {/* 1. HOME: WHAT DO I NEED TO KNOW OR DO RIGHT NOW?          */}
+      {/* 1. HOME: WHERE AM I? WHAT TO DO NOW? WHY? WHO HELPS?       */}
       {/* ========================================================= */}
       {activeSection === "home" && (
         <div className="space-y-4 animate-in fade-in duration-200">
-          {/* DOMINANT PRIMARY ACTION CARD: WHAT TO DO NOW */}
-          <div className="bg-gradient-to-br from-violet-700 via-purple-700 to-fuchsia-700 rounded-[28px] p-5 text-white shadow-xl shadow-purple-950/15 relative overflow-hidden space-y-4">
+          {/* 1. WHERE AM I? THE 6-STAGE INTELLIGENT LEARNER ROADMAP */}
+          <LearnerJourneyRoadmap
+            newHire={newHire}
+            currentDay={currentDay}
+            isHindi={isHindi}
+            onSelectStage={() => setActiveSection("dashboard")}
+          />
+
+          {/* 2. WHAT DO I NEED TO DO NOW? (DOMINANT PRESCRIPTION CARD) */}
+          <div
+            id="todays-focus-card"
+            className="bg-gradient-to-br from-violet-700 via-purple-700 to-fuchsia-700 rounded-[28px] p-5 text-white shadow-xl shadow-purple-950/15 relative overflow-hidden space-y-3.5"
+          >
             <div className="flex items-center justify-between">
               <span className="px-3 py-1 rounded-full text-xs font-black tracking-wide uppercase bg-white/20 text-white backdrop-blur-xs">
                 {status.badge}
               </span>
 
               <button
-                onClick={() => handlePlayAudio("status-card", `${status.title}. ${status.why}`)}
+                onClick={() =>
+                  handlePlayAudio(
+                    "status-card",
+                    `${status.whatTitle}. ${status.why}. Target: ${status.successTarget}`
+                  )
+                }
                 className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-white text-slate-950 text-xs font-black shadow-xs cursor-pointer active:scale-95 transition-all"
                 title="Listen aloud"
               >
@@ -470,21 +488,49 @@ export const NewHireView: React.FC<NewHireViewProps> = ({
               </button>
             </div>
 
+            {/* WHAT TO DO NOW */}
             <div className="space-y-1.5">
               <span className="text-[11px] font-extrabold uppercase tracking-wider text-purple-200 block">
-                {isHindi ? "👉 अभी क्या करना है?" : "👉 WHAT TO DO NOW"}
+                {isHindi ? "🎯 आज क्या करना है?" : "🎯 TODAY'S FOCUS: WHAT TO DO NOW"}
               </span>
               <h2 className="text-xl sm:text-2xl font-black leading-snug tracking-tight">
-                {status.title}
+                {status.whatTitle}
               </h2>
-              <p className="text-xs sm:text-sm text-white/90 leading-relaxed pt-1">
-                <strong className="text-purple-200 font-bold">{isHindi ? "क्यों? " : "Why? "}</strong>
+            </div>
+
+            {/* WHY AM I DOING THIS? (NO JARGON) */}
+            <div className="p-3 rounded-2xl bg-white/10 backdrop-blur-xs border border-white/15 space-y-1">
+              <span className="text-[10px] font-black uppercase tracking-wider text-purple-200 block">
+                {isHindi ? "💡 यह क्यों जरूरी है?" : "💡 WHY AM I DOING THIS?"}
+              </span>
+              <p className="text-xs sm:text-[13px] text-white/95 leading-relaxed font-medium">
                 {status.why}
               </p>
             </div>
 
+            {/* SUCCESS TARGET & WHO/WHERE */}
+            <div className="grid grid-cols-2 gap-2 text-xs">
+              <div className="p-2.5 rounded-xl bg-white/10 backdrop-blur-xs border border-white/10">
+                <span className="text-[10px] font-bold text-purple-200 block uppercase">
+                  {isHindi ? "🏁 सफलता का लक्ष्य" : "🏁 Success Target"}
+                </span>
+                <span className="text-[11px] font-bold text-white block mt-0.5 leading-tight">
+                  {status.successTarget}
+                </span>
+              </div>
+
+              <div className="p-2.5 rounded-xl bg-white/10 backdrop-blur-xs border border-white/10">
+                <span className="text-[10px] font-bold text-purple-200 block uppercase">
+                  {isHindi ? "🤝 कौन मदद करेगा?" : "🤝 Who Can Help?"}
+                </span>
+                <span className="text-[11px] font-bold text-white block mt-0.5 leading-tight">
+                  {status.whoCanHelp}
+                </span>
+              </div>
+            </div>
+
             {/* DOMINANT PRIMARY ACTION BUTTON */}
-            <div className="pt-2 space-y-2">
+            <div className="pt-1 space-y-2">
               <button
                 id="home-primary-cta-btn"
                 type="button"
@@ -495,75 +541,33 @@ export const NewHireView: React.FC<NewHireViewProps> = ({
                 <ArrowRight className="w-4 h-4" />
               </button>
 
-              <div className="flex items-center justify-between pt-1 px-1">
+              <div className="flex items-center justify-between pt-1 px-1 text-xs">
                 <button
                   type="button"
                   onClick={status.secondaryAction}
-                  className="text-xs font-bold text-white/80 hover:text-white underline underline-offset-4 cursor-pointer"
+                  className="font-bold text-white/80 hover:text-white underline underline-offset-4 cursor-pointer"
                 >
                   {status.secondaryBtnText} →
                 </button>
-                <span className="text-[11px] font-medium text-white/70">
-                  {isHindi ? `साथी: ${newHire.buddy.split(" ")[0]}` : `Buddy: ${newHire.buddy.split(" ")[0]}`}
+                <span className="text-[11px] font-medium text-white/80 flex items-center gap-1">
+                  <Compass className="w-3 h-3" />
+                  <span className="truncate max-w-[170px]">{status.whereHeading}</span>
                 </span>
               </div>
             </div>
           </div>
 
-          {/* TODAY'S STATS AT A GLANCE (Compact 3-Column Strip) */}
-          <div className="bg-white rounded-[24px] p-3.5 border border-purple-100 shadow-2xs space-y-2">
-            <div className="flex items-center justify-between px-1">
-              <span className="text-xs font-black text-slate-800 uppercase tracking-wide">
-                {isHindi ? "आज की प्रगति" : "Today's Progress"}
-              </span>
-              <span className="text-[11px] font-bold text-slate-400">Day {currentDay}</span>
-            </div>
+          {/* 3. DAILY SHIFT REPORT & WHAT IT MEANS */}
+          <LearnerDailyReportCard
+            newHire={newHire}
+            currentDay={currentDay}
+            isHindi={isHindi}
+            onOpenWorkTools={() => setActiveModal("work")}
+            onOpenBuddy={() => setActiveSection("buddy")}
+            onOpenModules={() => setActiveSection("modules")}
+          />
 
-            <div className="grid grid-cols-3 gap-2 text-center">
-              <div className="p-2.5 rounded-2xl bg-slate-50 border border-slate-100">
-                <span className="text-[10px] font-bold text-slate-400 block uppercase">
-                  {isHindi ? "स्पीड" : "Speed"}
-                </span>
-                <span className="text-base font-black text-slate-900 block mt-0.5">
-                  {currentRecord.workSignal?.actualPickRate ?? 35}
-                  <span className="text-[10px] text-slate-400 font-normal"> / 50</span>
-                </span>
-                <span className="text-[9px] font-bold text-violet-600 block">
-                  {isHindi ? "रैम्प जारी" : "Ramping"}
-                </span>
-              </div>
-
-              <div className="p-2.5 rounded-2xl bg-emerald-50/60 border border-emerald-100">
-                <span className="text-[10px] font-bold text-emerald-700 block uppercase">
-                  {isHindi ? "एक्यूरेसी" : "Accuracy"}
-                </span>
-                <span className="text-base font-black text-emerald-900 block mt-0.5">
-                  {currentRecord.workSignal?.accuracyRate ?? 98}%
-                </span>
-                <span className="text-[9px] font-bold text-emerald-600 block">
-                  ✓ {isHindi ? "बहुत अच्छी" : "Great"}
-                </span>
-              </div>
-
-              <div
-                onClick={() => setActiveSection("modules")}
-                className="p-2.5 rounded-2xl bg-purple-50/60 border border-purple-100 cursor-pointer hover:bg-purple-100/60 transition-colors"
-              >
-                <span className="text-[10px] font-bold text-purple-700 block uppercase">
-                  {isHindi ? "ट्रेनिंग" : "Training"}
-                </span>
-                <span className="text-base font-black text-purple-950 block mt-0.5">
-                  {newHire.modulesCompleted ?? 3}
-                  <span className="text-[10px] text-purple-400 font-normal"> / 10</span>
-                </span>
-                <span className="text-[9px] font-bold text-purple-600 block">
-                  {isHindi ? "मॉड्यूल" : "Modules"} →
-                </span>
-              </div>
-            </div>
-          </div>
-
-          {/* NEED HELP? 1-TAP BUDDY ASSIST */}
+          {/* 4. NEED HELP? 1-TAP BUDDY ASSIST */}
           <div className="bg-white rounded-[24px] p-3.5 border border-slate-200/80 shadow-2xs flex items-center justify-between gap-3">
             <div className="flex items-center gap-2.5 min-w-0">
               <div className="w-10 h-10 rounded-full bg-emerald-100 text-emerald-700 flex items-center justify-center shrink-0 font-bold text-sm">
@@ -803,11 +807,28 @@ export const NewHireView: React.FC<NewHireViewProps> = ({
       {/* ========================================================= */}
       {activeSection === "dashboard" && (
         <div className="space-y-4 animate-in fade-in duration-200">
-          {/* THE PRIMARY VISUAL: THE JOB-READY HUMAN FIGURE */}
+          {/* 1. INTERACTIVE 6-STAGE ROADMAP */}
+          <LearnerJourneyRoadmap
+            newHire={newHire}
+            currentDay={currentDay}
+            isHindi={isHindi}
+          />
+
+          {/* 2. THE PRIMARY VISUAL: THE JOB-READY HUMAN FIGURE */}
           <JobReadyHumanFigure
             newHire={newHire}
             currentDay={currentDay}
             isHindi={isHindi}
+          />
+
+          {/* 3. DAILY SHIFT REPORT & CONTINUITY */}
+          <LearnerDailyReportCard
+            newHire={newHire}
+            currentDay={currentDay}
+            isHindi={isHindi}
+            onOpenWorkTools={() => setActiveModal("work")}
+            onOpenBuddy={() => setActiveSection("buddy")}
+            onOpenModules={() => setActiveSection("modules")}
           />
 
           {/* Quick Bridge Card to Floor Shift & Training Modules */}

@@ -224,6 +224,196 @@ export function assessReadiness(capabilities: Record<number, CapabilityState>): 
 // Backward-compatible alias for assessReadiness
 export const calculateReadinessScore = assessReadiness;
 
+export interface CanonicalRoadmapStage {
+  id: number;
+  stageNumber: number;
+  key: "training" | "capability" | "independent" | "productivity" | "reliability" | "job_ready";
+  titleEn: string;
+  titleHi: string;
+  shortDescEn: string;
+  shortDescHi: string;
+  milestoneEn: string;
+  milestoneHi: string;
+  status: "completed" | "current" | "upcoming";
+  isCurrent: boolean;
+  completionPercentage: number;
+}
+
+export interface LearnerRoadmapResult {
+  currentStageIndex: number; // 0 to 5
+  currentStage: CanonicalRoadmapStage;
+  nextMilestoneEn: string;
+  nextMilestoneHi: string;
+  destinationEn: string;
+  destinationHi: string;
+  stages: CanonicalRoadmapStage[];
+  demonstratedCount: number;
+  totalCapabilities: number;
+  readinessScore: number;
+  targetCapabilityDef?: CapabilityDefinition;
+}
+
+/**
+ * Pure presentation derivation over the authoritative capabilities ledger,
+ * readiness score, and shift history.
+ */
+export function deriveLearnerRoadmap(
+  hire: NewHire,
+  currentDay: number
+): LearnerRoadmapResult {
+  const capabilities = hire.capabilities || {};
+  const currentRecord = hire.daysHistory.find((d) => d.dayNumber === currentDay);
+  const currentPickRate = currentRecord?.workSignal?.actualPickRate ?? 35;
+  const accuracy = currentRecord?.workSignal?.accuracyRate ?? 98;
+  const modulesCompleted = hire.modulesCompleted ?? Math.min(10, currentDay);
+  const readinessScore = typeof hire.overallReadinessScore === "number"
+    ? (hire.overallReadinessScore <= 1 ? Math.round(hire.overallReadinessScore * 100) : Math.round(hire.overallReadinessScore))
+    : assessReadiness(capabilities);
+
+  const demonstratedCount = (Object.values(capabilities) as CapabilityState[]).filter(
+    (c) => c && (c.evidence === "demonstrated" || c.mastery === "proficient" || c.mastery === "mastered")
+  ).length;
+
+  const targetCapId = currentRecord?.recommendedAction?.targetCapabilityId || hire.currentCapabilityId || 3;
+  const targetCapDef = DARK_STORE_CAPABILITIES.find((c) => c.id === targetCapId);
+
+  // Authoritative stage calculation
+  let currentStageIndex = 0;
+  if (readinessScore >= 85 || demonstratedCount >= 18 || (currentPickRate >= 50 && accuracy >= 98 && demonstratedCount >= 16)) {
+    currentStageIndex = 5; // 6. Job Ready
+  } else if ((currentPickRate >= 45 && accuracy >= 98 && demonstratedCount >= 12) || (readinessScore >= 70 && demonstratedCount >= 12)) {
+    currentStageIndex = 4; // 5. Reliability
+  } else if ((currentPickRate >= 38 && demonstratedCount >= 8) || (readinessScore >= 50 && demonstratedCount >= 8)) {
+    currentStageIndex = 3; // 4. Productivity
+  } else if ((modulesCompleted >= 3 && demonstratedCount >= 4) || readinessScore >= 35) {
+    currentStageIndex = 2; // 3. Independent Work
+  } else if (modulesCompleted >= 1 || demonstratedCount >= 1) {
+    currentStageIndex = 1; // 2. Capability
+  } else {
+    currentStageIndex = 0; // 1. Training
+  }
+
+  const rawStages: Array<{
+    stageNumber: number;
+    key: "training" | "capability" | "independent" | "productivity" | "reliability" | "job_ready";
+    titleEn: string;
+    titleHi: string;
+    shortDescEn: string;
+    shortDescHi: string;
+    milestoneEn: string;
+    milestoneHi: string;
+  }> = [
+    {
+      stageNumber: 1,
+      key: "training",
+      titleEn: "1. Training & Orientation",
+      titleHi: "1. बुनियादी ट्रेनिंग",
+      shortDescEn: "LMS safety, store zones & terminal basics",
+      shortDescHi: "स्टोर सुरक्षा, ज़ोन लेआउट व टर्मिनल की जानकारी",
+      milestoneEn: "Complete mandatory foundation safety & terminal modules",
+      milestoneHi: "बुनियादी सुरक्षा व टर्मिनल ट्रेनिंग मॉड्यूल पूरे करें",
+    },
+    {
+      stageNumber: 2,
+      key: "capability",
+      titleEn: "2. Demonstrated Capability",
+      titleHi: "2. हुनर व तकनीक",
+      shortDescEn: targetCapDef ? `${targetCapDef.name}` : "Scanning accuracy & coordinate navigation",
+      shortDescHi: targetCapDef ? `${targetCapDef.name}` : "बारकोड स्कैनिंग व लोकेशन नेविगेशन",
+      milestoneEn: targetCapDef ? `Demonstrate proficiency in ${targetCapDef.name}` : "Demonstrate accurate rack & bin navigation",
+      milestoneHi: targetCapDef ? `${targetCapDef.name} में कुशलता प्रमाणित करें` : "स्टोर रैक व शेल्फ में सही सामान बिना गलती पिक करना",
+    },
+    {
+      stageNumber: 3,
+      key: "independent",
+      titleEn: "3. Independent Work",
+      titleHi: "3. स्वतंत्र कार्य",
+      shortDescEn: "Solo picking without recurring buddy calls",
+      shortDescHi: "बिना साथी की मदद के खुद पूरे ऑर्डर पिक करना",
+      milestoneEn: "Complete 5 consecutive customer pick orders solo without assistance",
+      milestoneHi: "लगातार 5 ऑर्डर अकेले सफलतापूर्वक पूरे करें",
+    },
+    {
+      stageNumber: 4,
+      key: "productivity",
+      titleEn: "4. Productivity & Speed",
+      titleHi: "4. रफ़्तार व गति",
+      shortDescEn: "Reaching 40-50 items/hr with zero backtracking",
+      shortDescHi: "40-50 सामान/घंटा की रफ़्तार से पिकिंग करना",
+      milestoneEn: "Sustain 45+ items/hr pick rate across assigned wave",
+      milestoneHi: "पूरी शिफ्ट वेव में 45+ सामान/घंटा की स्पीड बनाए रखना",
+    },
+    {
+      stageNumber: 5,
+      key: "reliability",
+      titleEn: "5. Shift Reliability",
+      titleHi: "5. स्थिरता व सटीकता",
+      shortDescEn: "Consistent 98%+ scanning accuracy & exception handling",
+      shortDescHi: "लगातार 98%+ एक्यूरेसी व जीरो डैमेज बनाए रखना",
+      milestoneEn: "Maintain 98%+ scanning accuracy consistently across 3 shifts",
+      milestoneHi: "लगातार 3 शिफ्टों में 98%+ एक्यूरेसी बनाए रखना",
+    },
+    {
+      stageNumber: 6,
+      key: "job_ready",
+      titleEn: "6. Job Ready / Certified",
+      titleHi: "6. पूर्ण कार्यकुशल (सर्टिफाइड)",
+      shortDescEn: "Certified Autonomous Dark Store Picker",
+      shortDescHi: "प्रमाणित स्वतंत्र डार्क स्टोर पिकर",
+      milestoneEn: "Full shift autonomy across all store zones under peak SLA",
+      milestoneHi: "सभी स्टोर ज़ोन में पूर्ण स्वतंत्र व तेज़ पिकिंग",
+    },
+  ];
+
+  const stages: CanonicalRoadmapStage[] = rawStages.map((s, idx) => {
+    const isCompleted = idx < currentStageIndex;
+    const isCurrent = idx === currentStageIndex;
+    const status: "completed" | "current" | "upcoming" = isCompleted ? "completed" : isCurrent ? "current" : "upcoming";
+    let completionPercentage = 0;
+    if (isCompleted) {
+      completionPercentage = 100;
+    } else if (isCurrent) {
+      if (idx === 0) completionPercentage = Math.round(Math.min(100, (modulesCompleted / 3) * 100));
+      else if (idx === 1) completionPercentage = Math.round(Math.min(100, (demonstratedCount / 4) * 100));
+      else if (idx === 2) completionPercentage = Math.round(Math.min(100, (demonstratedCount / 8) * 100));
+      else if (idx === 3) completionPercentage = Math.round(Math.min(100, ((currentPickRate - 30) / 20) * 100));
+      else if (idx === 4) completionPercentage = Math.round(Math.min(100, ((accuracy - 90) / 10) * 100));
+      else completionPercentage = readinessScore;
+    }
+    return {
+      id: s.stageNumber,
+      stageNumber: s.stageNumber,
+      key: s.key,
+      titleEn: s.titleEn,
+      titleHi: s.titleHi,
+      shortDescEn: s.shortDescEn,
+      shortDescHi: s.shortDescHi,
+      milestoneEn: s.milestoneEn,
+      milestoneHi: s.milestoneHi,
+      status,
+      isCurrent,
+      completionPercentage: Math.max(0, Math.min(100, completionPercentage)),
+    };
+  });
+
+  const currentStage = stages[currentStageIndex];
+  const nextStage = stages[Math.min(5, currentStageIndex + 1)];
+
+  return {
+    currentStageIndex,
+    currentStage,
+    nextMilestoneEn: currentStageIndex === 5 ? "Autonomous shift certification maintained" : nextStage.milestoneEn,
+    nextMilestoneHi: currentStageIndex === 5 ? "प्रमाणित कार्यकुशलता जारी है" : nextStage.milestoneHi,
+    destinationEn: "Certified Autonomous Dark Store Picker (50+ items/hr, 99% accuracy)",
+    destinationHi: "प्रमाणित स्वतंत्र डार्क स्टोर पिकर (50+ सामान/घंटा, 99% एक्यूरेसी)",
+    stages,
+    demonstratedCount,
+    totalCapabilities: DARK_STORE_CAPABILITIES.length,
+    readinessScore,
+    targetCapabilityDef: targetCapDef,
+  };
+}
+
 // Internal data structures for the single authoritative pipeline
 interface ObservedSignals {
   currentPickRate: number;

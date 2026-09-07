@@ -284,6 +284,7 @@ export default function App() {
           isFramed={isFramed}
           isHindi={isHindi}
           onToggleLanguage={() => setIsHindi((prev) => !prev)}
+          learnerName={activeHire.name}
         />
 
         {/* Main Experience View */}

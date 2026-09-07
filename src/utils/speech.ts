@@ -1,7 +1,12 @@
 // Browser-native Text-to-Speech utility for frontline workers
 
-export function speakMessage(text: string, isHindi: boolean = false) {
+export function speakMessage(
+  text: string,
+  isHindi: boolean = false,
+  onEnd?: () => void
+) {
   if (typeof window === "undefined" || !("speechSynthesis" in window)) {
+    if (onEnd) onEnd();
     return;
   }
 
@@ -14,7 +19,10 @@ export function speakMessage(text: string, isHindi: boolean = false) {
       .replace(/https?:\/\/\S+/g, "")
       .trim();
 
-    if (!cleanText) return;
+    if (!cleanText) {
+      if (onEnd) onEnd();
+      return;
+    }
 
     const utterance = new SpeechSynthesisUtterance(cleanText);
     utterance.rate = 0.92; // Slightly slower pacing for warehouse clarity
@@ -38,9 +46,17 @@ export function speakMessage(text: string, isHindi: boolean = false) {
       utterance.lang = "en-IN";
     }
 
+    utterance.onend = () => {
+      if (onEnd) onEnd();
+    };
+    utterance.onerror = () => {
+      if (onEnd) onEnd();
+    };
+
     window.speechSynthesis.speak(utterance);
   } catch (err) {
     console.warn("Speech synthesis unavailable:", err);
+    if (onEnd) onEnd();
   }
 }
 

@@ -113,8 +113,10 @@ export const JobReadyHumanFigure: React.FC<JobReadyHumanFigureProps> = ({
   // Overall readiness percentage matching reference image style
   const overallReadiness = Math.min(
     100,
-    newHire.overallReadinessScore
-      ? Math.round(newHire.overallReadinessScore * 100)
+    typeof newHire.overallReadinessScore === "number"
+      ? (newHire.overallReadinessScore <= 1
+          ? Math.round(newHire.overallReadinessScore * 100)
+          : Math.round(newHire.overallReadinessScore))
       : learningPct + practicePct + simPct + assessPct
   );
 
