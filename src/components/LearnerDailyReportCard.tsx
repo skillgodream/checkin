@@ -135,9 +135,11 @@ export const LearnerDailyReportCard: React.FC<LearnerDailyReportCardProps> = ({
     <div
       id={isDashboardVariant ? "dashboard-yesterday-snapshot-card" : "yesterday-quick-snapshot-card"}
       onClick={handleCardClick}
-      className={`bg-white rounded-[26px] p-4.5 sm:p-5 border border-slate-200/90 shadow-[0_6px_20px_-4px_rgba(15,23,42,0.06),0_2px_6px_-1px_rgba(15,23,42,0.03)] space-y-3.5 cursor-pointer select-none transition-all hover:border-slate-300 hover:shadow-[0_10px_24px_-4px_rgba(15,23,42,0.08)] active:scale-[0.995] ${
-        isDashboardVariant ? "ring-2 ring-slate-900/10" : ""
-      }`}
+      className={`rounded-[26px] p-4.5 sm:p-5 border shadow-[0_6px_20px_-4px_rgba(15,23,42,0.06),0_2px_6px_-1px_rgba(15,23,42,0.03)] space-y-3.5 cursor-pointer select-none transition-all hover:shadow-[0_10px_24px_-4px_rgba(15,23,42,0.08)] active:scale-[0.995] ${
+        !isShiftGood
+          ? "border-red-300 ring-2 ring-red-500/15 bg-gradient-to-br from-white via-red-50/25 to-white"
+          : "border-emerald-300 ring-2 ring-emerald-500/15 bg-gradient-to-br from-white via-emerald-50/25 to-white"
+      } ${isDashboardVariant ? "ring-2 ring-slate-900/10" : ""}`}
     >
       {/* 1. HEADER: CLEAN "YESTERDAY SNAPSHOT" WITH COHESIVE SLATE ACCENTS */}
       <div className="flex items-center justify-between">
@@ -164,10 +166,14 @@ export const LearnerDailyReportCard: React.FC<LearnerDailyReportCardProps> = ({
         </div>
       </div>
 
-      {/* 2. PICTORIAL EVIDENCE CARDS GRID (CONSISTENT, HARMONIOUS NEUTRAL TILES) */}
+      {/* 2. PICTORIAL EVIDENCE CARDS GRID (CONSISTENT, HARMONIOUS TILES) */}
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5 pt-0.5">
         {/* Card 1: Pick Pace vs Target */}
-        <div className={`p-3 rounded-2xl bg-slate-50/80 border ${isPaceBelow ? "border-red-200/80 ring-1 ring-red-500/20" : "border-slate-200/70"} flex flex-col justify-between space-y-2.5 hover:bg-slate-100/70 transition-colors relative`}>
+        <div className={`p-3 rounded-2xl border flex flex-col justify-between space-y-2.5 transition-colors relative ${
+          isPaceBelow
+            ? "bg-red-50/90 border-red-300 shadow-2xs"
+            : "bg-slate-50/80 border-slate-200/70 hover:bg-slate-100/70"
+        }`}>
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-1.5">
               {isPaceBelow && (
@@ -186,8 +192,8 @@ export const LearnerDailyReportCard: React.FC<LearnerDailyReportCardProps> = ({
           </div>
           <div>
             <div className="flex items-baseline gap-1">
-              <span className="text-2xl font-black text-slate-900 leading-none">{actualPace}</span>
-              <span className="text-xs font-bold text-slate-400">/hr</span>
+              <span className={`text-2xl font-black leading-none ${isPaceBelow ? "text-red-900" : "text-slate-900"}`}>{actualPace}</span>
+              <span className={`text-xs font-bold ${isPaceBelow ? "text-red-600" : "text-slate-400"}`}>/hr</span>
             </div>
             {/* Unified Sleek Progress Bar */}
             <div className="w-full bg-slate-200 rounded-full h-1.5 mt-2 overflow-hidden">
@@ -196,7 +202,7 @@ export const LearnerDailyReportCard: React.FC<LearnerDailyReportCardProps> = ({
                 style={{ width: `${pacePct}%` }}
               />
             </div>
-            <span className={`text-xs font-bold block mt-1.5 ${isPaceBelow ? "text-red-600" : "text-slate-600"}`}>
+            <span className={`text-xs font-bold block mt-1.5 ${isPaceBelow ? "text-red-700" : "text-slate-600"}`}>
               {isPaceBelow ? "⚠️ " : "🎯 "}
               {isHindi ? `लक्ष्य ${targetPace}/hr` : `Goal ${targetPace}/hr`}
             </span>
@@ -204,7 +210,11 @@ export const LearnerDailyReportCard: React.FC<LearnerDailyReportCardProps> = ({
         </div>
 
         {/* Card 2: Accuracy Rate */}
-        <div className={`p-3 rounded-2xl bg-slate-50/80 border ${accuracy < 98 ? "border-red-200/80 ring-1 ring-red-500/20" : "border-slate-200/70"} flex flex-col justify-between space-y-2.5 hover:bg-slate-100/70 transition-colors relative`}>
+        <div className={`p-3 rounded-2xl border flex flex-col justify-between space-y-2.5 transition-colors relative ${
+          accuracy < 98
+            ? "bg-red-50/90 border-red-300 shadow-2xs"
+            : "bg-slate-50/80 border-slate-200/70 hover:bg-slate-100/70"
+        }`}>
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-1.5">
               {accuracy < 98 && (
@@ -223,7 +233,7 @@ export const LearnerDailyReportCard: React.FC<LearnerDailyReportCardProps> = ({
           </div>
           <div>
             <div className="flex items-baseline gap-1">
-              <span className="text-2xl font-black text-slate-900 leading-none">{accuracy}%</span>
+              <span className={`text-2xl font-black leading-none ${accuracy < 98 ? "text-red-900" : "text-slate-900"}`}>{accuracy}%</span>
             </div>
             {/* Unified Sleek Progress Bar */}
             <div className="w-full bg-slate-200 rounded-full h-1.5 mt-2 overflow-hidden">
@@ -232,8 +242,8 @@ export const LearnerDailyReportCard: React.FC<LearnerDailyReportCardProps> = ({
                 style={{ width: `${accuracy}%` }}
               />
             </div>
-            <span className={`text-xs font-bold block mt-1.5 ${accuracy < 98 ? "text-red-600" : "text-slate-600"}`}>
-              ✓ {isHindi ? "0 त्रुटियां" : "Zero Errors"}
+            <span className={`text-xs font-bold block mt-1.5 ${accuracy < 98 ? "text-red-700" : "text-slate-600"}`}>
+              {accuracy < 98 ? "⚠️ Check errors" : `✓ ${isHindi ? "0 त्रुटियां" : "Zero Errors"}`}
             </span>
           </div>
         </div>
@@ -266,8 +276,12 @@ export const LearnerDailyReportCard: React.FC<LearnerDailyReportCardProps> = ({
           </div>
         </div>
 
-        {/* Card 4: Status Tile (Consistent neutral base with tasteful accent badge) */}
-        <div className={`p-3 rounded-2xl bg-slate-50/80 border ${!isShiftGood ? "border-red-200/80 ring-1 ring-red-500/20" : "border-slate-200/70"} flex flex-col justify-between space-y-2.5 hover:bg-slate-100/70 transition-colors relative`}>
+        {/* Card 4: Status Tile (Consistent neutral base or red when attention needed) */}
+        <div className={`p-3 rounded-2xl border flex flex-col justify-between space-y-2.5 transition-colors relative ${
+          !isShiftGood
+            ? "bg-red-50/90 border-red-300 shadow-2xs"
+            : "bg-slate-50/80 border-slate-200/70 hover:bg-slate-100/70"
+        }`}>
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-1.5">
               {!isShiftGood && (
@@ -286,7 +300,7 @@ export const LearnerDailyReportCard: React.FC<LearnerDailyReportCardProps> = ({
           </div>
           <div>
             <div className="flex items-center gap-1">
-              <span className="text-lg sm:text-xl font-black text-slate-900 leading-tight">
+              <span className={`text-lg sm:text-xl font-black leading-tight ${!isShiftGood ? "text-red-900" : "text-slate-900"}`}>
                 {isShiftGood ? (isHindi ? "सही रहा" : "GOOD") : (isHindi ? "ध्यान दें" : "ATTENTION")}
               </span>
             </div>
@@ -295,7 +309,7 @@ export const LearnerDailyReportCard: React.FC<LearnerDailyReportCardProps> = ({
                 className={`px-2 py-0.5 rounded-md text-[11px] font-bold border inline-flex items-center gap-1.5 ${
                   isShiftGood
                     ? "bg-white border-slate-200 text-slate-800"
-                    : "bg-red-50 border-red-200 text-red-700"
+                    : "bg-red-100 border-red-300 text-red-800"
                 }`}
               >
                 {!isShiftGood && (
@@ -304,7 +318,7 @@ export const LearnerDailyReportCard: React.FC<LearnerDailyReportCardProps> = ({
                 {signTag}
               </span>
             </div>
-            <span className="text-xs text-slate-500 font-medium block mt-1 truncate">
+            <span className={`text-xs font-medium block mt-1 truncate ${!isShiftGood ? "text-red-700" : "text-slate-500"}`}>
               {signSub}
             </span>
           </div>

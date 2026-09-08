@@ -76,22 +76,15 @@ export default function App() {
   const [isFramed, setIsFramed] = useState<boolean>(true);
   const [isHindi, setIsHindi] = useState<boolean>(true);
   const [learnerSection, setLearnerSection] = useState<LearnerSection>("home");
-  const [isOnboarding, setIsOnboarding] = useState<boolean>(() => {
-    try {
-      const saved = localStorage.getItem("checkin_checkout_onboarding_state");
-      if (saved !== null) {
-        return JSON.parse(saved);
-      }
-    } catch (e) {}
-    return true; // Defaults to onboarding on first view
-  });
+  // Onboarding page is the default first page by its own
+  const [isOnboarding, setIsOnboarding] = useState<boolean>(true);
 
-  // Synchronize state changes to localStorage
+  // Clean up any legacy persisted onboarding state so onboarding always comes by default
   useEffect(() => {
     try {
-      localStorage.setItem("checkin_checkout_onboarding_state", JSON.stringify(isOnboarding));
+      localStorage.removeItem("checkin_checkout_onboarding_state");
     } catch (e) {}
-  }, [isOnboarding]);
+  }, []);
   useEffect(() => {
     try {
       localStorage.setItem(STORAGE_KEY_HIRES, JSON.stringify(newHires));
@@ -292,10 +285,13 @@ export default function App() {
       localStorage.removeItem(STORAGE_KEY_HIRES);
       localStorage.removeItem(STORAGE_KEY_DAY);
       localStorage.removeItem(STORAGE_KEY_ACTIVE_HIRE);
+      localStorage.removeItem("checkin_checkout_onboarding_state");
     } catch (e) {}
     setNewHires(initialCohort);
     setCurrentDay(3);
     setActiveHireId("nh-rahul-01");
+    setIsOnboarding(true);
+    setLearnerSection("home");
   };
 
   const handleUpdateHire = (updatedHire: NewHire) => {
@@ -402,6 +398,7 @@ export default function App() {
                   setIsHindi={setIsHindi}
                   activeSection={learnerSection}
                   onSelectSection={setLearnerSection}
+                  onOpenOnboarding={() => setIsOnboarding(true)}
                 />
               )}
 

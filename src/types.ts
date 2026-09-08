@@ -467,4 +467,12 @@ export interface SnapshotEvidenceItem {
   themeColor: "purple" | "emerald" | "amber" | "blue" | "rose" | "indigo" | "slate";
   progressPct?: number;
   priorityWeight: number; // Higher weight = higher priority for Home 4-grid selection
+  source?: string;
+  evidenceType?: string;
+  timestampDay?: number;
+  observedValue?: string | number;
+  capabilityId?: number;
+  confidence?: "high" | "medium" | "low";
+  comparisonToPrevious?: string;
+  direction?: "supporting" | "conflicting" | "neutral";
 }

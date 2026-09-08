@@ -37,10 +37,31 @@ export const ChatBotPullout: React.FC<ChatBotPulloutProps> = ({
   isHindi = true,
   onAlertBuddy,
 }) => {
-  // Pill state: whether the pull-out pill is expanded or tucked (hidden)
-  const [isTucked, setIsTucked] = useState<boolean>(false);
+  // Pill state: pre-hidden by default (isTucked = true)
+  const [isTucked, setIsTucked] = useState<boolean>(true);
   // Drawer state: whether the full chatbot drawer is open
   const [isDrawerOpen, setIsDrawerOpen] = useState<boolean>(false);
+
+  // Touch gesture tracking for tactile swipe-to-pull
+  const touchStartX = useRef<number | null>(null);
+
+  const handleTouchStart = (e: React.TouchEvent) => {
+    touchStartX.current = e.touches[0].clientX;
+  };
+
+  const handleTouchEnd = (e: React.TouchEvent) => {
+    if (touchStartX.current !== null) {
+      const deltaX = e.changedTouches[0].clientX - touchStartX.current;
+      if (deltaX < -25) {
+        // Swiped left -> pull out!
+        setIsTucked(false);
+      } else if (deltaX > 25) {
+        // Swiped right -> tuck back!
+        setIsTucked(true);
+      }
+      touchStartX.current = null;
+    }
+  };
 
   // Chat conversation state
   const firstName = (learnerName || "Rahul").split(" ")[0];
@@ -199,115 +220,71 @@ export const ChatBotPullout: React.FC<ChatBotPulloutProps> = ({
       {!isDrawerOpen && (
         <div
           id="chatbot-pullout-container"
-          className={`fixed right-0 top-[52%] -translate-y-1/2 z-40 transition-transform duration-300 ease-out select-none ${
-            isTucked ? "translate-x-[calc(100%-42px)]" : "translate-x-0"
-          }`}
+          onTouchStart={handleTouchStart}
+          onTouchEnd={handleTouchEnd}
+          className="fixed right-0 top-[52%] -translate-y-1/2 z-40 select-none transition-all duration-300 ease-out"
         >
-          <div className="flex items-center">
-            {/* The Main Pill Button: Exactly matches user reference image */}
+          {isTucked ? (
+            /* Pre-hidden state: Ultra-slim edge tab that takes almost zero screen space */
             <button
-              id="chatbot-pullout-btn"
+              id="chatbot-pull-tab"
               type="button"
-              onClick={() => {
-                if (isTucked) {
-                  setIsTucked(false);
-                } else {
-                  setIsDrawerOpen(true);
-                }
-              }}
-              title={isHindi ? "कुछ भी पूछें! (AI बॉट)" : "Ask me anything! (AI Chatbot)"}
-              aria-label="Ask me anything Chatbot"
-              className="group flex items-center bg-white hover:bg-slate-50 border border-slate-200/90 shadow-[0_10px_30px_rgba(30,10,60,0.18)] rounded-l-full py-1.5 pl-1.5 pr-4.5 cursor-pointer active:scale-98 transition-all ring-1 ring-black/5"
+              onClick={() => setIsTucked(false)}
+              title={isHindi ? "AI बॉट खींचें" : "Pull to open AI Assistant"}
+              aria-label="Pull to open AI Assistant"
+              className="group flex items-center justify-center bg-gradient-to-l from-purple-700 via-purple-600 to-indigo-700 hover:from-purple-600 hover:to-indigo-600 text-white rounded-l-full w-3.5 sm:w-4 h-12 shadow-[-2px_4px_10px_rgba(101,52,199,0.35)] border-y border-l border-purple-300/40 cursor-pointer active:scale-95 transition-all hover:w-5 hover:shadow-[-3px_5px_14px_rgba(101,52,199,0.45)]"
             >
-              {/* Cute Robot Mascot Avatar Circle (as in user's image) */}
-              <div className="relative shrink-0">
-                <div className="w-10 h-10 sm:w-11 sm:h-11 rounded-full bg-gradient-to-b from-blue-50 via-white to-blue-100/70 border-2 border-white shadow-md flex items-center justify-center overflow-hidden ring-1 ring-slate-200/60">
-                  {/* SVG Robot Avatar matching reference image */}
-                  <svg
-                    viewBox="0 0 100 100"
-                    className="w-8 h-8 sm:w-9 sm:h-9 drop-shadow-xs"
-                    aria-hidden="true"
-                  >
-                    {/* Head base */}
-                    <rect
-                      x="18"
-                      y="18"
-                      width="64"
-                      height="54"
-                      rx="27"
-                      fill="#FFFFFF"
-                      stroke="#E2E8F0"
-                      strokeWidth="2.5"
-                    />
-                    {/* Left ear antenna */}
-                    <rect x="11" y="38" width="8" height="14" rx="4" fill="#3B82F6" />
-                    {/* Right ear antenna */}
-                    <rect x="81" y="38" width="8" height="14" rx="4" fill="#3B82F6" />
-                    {/* Blue visor screen */}
-                    <rect
-                      x="25"
-                      y="30"
-                      width="50"
-                      height="28"
-                      rx="14"
-                      fill="#1E3A8A"
-                    />
-                    {/* Left glowing eye */}
-                    <path
-                      d="M37 42 Q42 37 47 42"
-                      stroke="#38BDF8"
-                      strokeWidth="4"
-                      strokeLinecap="round"
-                      fill="none"
-                    />
-                    {/* Right glowing eye */}
-                    <path
-                      d="M53 42 Q58 37 63 42"
-                      stroke="#38BDF8"
-                      strokeWidth="4"
-                      strokeLinecap="round"
-                      fill="none"
-                    />
-                    {/* Body collar */}
-                    <path
-                      d="M32 74 C32 74 38 88 50 88 C62 88 68 74 68 74 Z"
-                      fill="#F1F5F9"
-                      stroke="#CBD5E1"
-                      strokeWidth="2"
-                    />
-                  </svg>
+              <ChevronLeft className="w-3 h-3 text-white stroke-[2.5] animate-pulse group-hover:-translate-x-0.5 transition-transform" />
+            </button>
+          ) : (
+            /* Pulled-Out state: Full reference pill with tuck button */
+            <div className="flex items-center animate-in slide-in-from-right duration-250">
+              <button
+                id="chatbot-pullout-btn"
+                type="button"
+                onClick={() => setIsDrawerOpen(true)}
+                title={isHindi ? "बातचीत शुरू करें" : "Open Chat Drawer"}
+                className="group flex items-center bg-white hover:bg-slate-50 border border-slate-200/90 shadow-[0_10px_30px_rgba(30,10,60,0.18)] rounded-l-full py-1.5 pl-1.5 pr-4 cursor-pointer active:scale-98 transition-all ring-1 ring-black/5"
+              >
+                {/* Robot Avatar */}
+                <div className="relative shrink-0">
+                  <div className="w-10 h-10 sm:w-11 sm:h-11 rounded-full bg-gradient-to-b from-blue-50 via-white to-blue-100/70 border-2 border-white shadow-md flex items-center justify-center overflow-hidden ring-1 ring-slate-200/60">
+                    <svg viewBox="0 0 100 100" className="w-8 h-8 sm:w-9 sm:h-9 drop-shadow-xs" aria-hidden="true">
+                      <rect x="18" y="18" width="64" height="54" rx="27" fill="#FFFFFF" stroke="#E2E8F0" strokeWidth="2.5" />
+                      <rect x="11" y="38" width="8" height="14" rx="4" fill="#3B82F6" />
+                      <rect x="81" y="38" width="8" height="14" rx="4" fill="#3B82F6" />
+                      <rect x="25" y="30" width="50" height="28" rx="14" fill="#1E3A8A" />
+                      <path d="M37 42 Q42 37 47 42" stroke="#38BDF8" strokeWidth="4" strokeLinecap="round" fill="none" />
+                      <path d="M53 42 Q58 37 63 42" stroke="#38BDF8" strokeWidth="4" strokeLinecap="round" fill="none" />
+                      <path d="M32 74 C32 74 38 88 50 88 C62 88 68 74 68 74 Z" fill="#F1F5F9" stroke="#CBD5E1" strokeWidth="2" />
+                    </svg>
+                  </div>
+                  <span className="absolute -top-0.5 -right-0.5 w-3 h-3 rounded-full bg-emerald-500 border-2 border-white shadow-xs animate-pulse" />
                 </div>
 
-                {/* Subtle active ping dot */}
-                <span className="absolute -top-0.5 -right-0.5 w-3 h-3 rounded-full bg-emerald-500 border-2 border-white shadow-xs animate-pulse" />
-              </div>
+                {/* Bold Purple Text: "Ask me anything!" */}
+                <div className="pl-2.5 flex items-center gap-1.5 whitespace-nowrap">
+                  <span className="text-[#6534C7] font-black text-sm sm:text-[15px] tracking-tight">
+                    {isHindi ? "कुछ भी पूछें!" : "Ask me anything!"}
+                  </span>
+                  <Sparkles className="w-3.5 h-3.5 text-amber-500" />
+                </div>
+              </button>
 
-              {/* Bold Purple Text: "Ask me anything!" */}
-              <div className="pl-2.5 flex items-center gap-1.5 whitespace-nowrap">
-                <span className="text-[#6534C7] font-black text-sm sm:text-[15px] tracking-tight">
-                  {isHindi ? "कुछ भी पूछें!" : "Ask me anything!"}
-                </span>
-                <Sparkles className="w-3.5 h-3.5 text-amber-500" />
-              </div>
-            </button>
-
-            {/* Small tuck/pull toggle handle on the right edge */}
-            <button
-              type="button"
-              onClick={(e) => {
-                e.stopPropagation();
-                setIsTucked((prev) => !prev);
-              }}
-              title={isTucked ? "Pull out (खोलें)" : "Hide (छुपाएं)"}
-              className="bg-slate-100 hover:bg-slate-200 text-slate-500 hover:text-slate-800 p-1.5 rounded-l-md border-y border-l border-slate-300 shadow-2xs cursor-pointer transition-colors"
-            >
-              {isTucked ? (
-                <ChevronLeft className="w-3.5 h-3.5" />
-              ) : (
-                <ChevronRight className="w-3.5 h-3.5" />
-              )}
-            </button>
-          </div>
+              {/* Tuck back button */}
+              <button
+                type="button"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  setIsTucked(true);
+                }}
+                title={isHindi ? "छुपाएं (Tuck in)" : "Hide (Tuck in)"}
+                className="bg-slate-100 hover:bg-slate-200 text-slate-500 hover:text-slate-800 p-2 rounded-l-md border-y border-l border-slate-300 shadow-2xs cursor-pointer transition-colors"
+              >
+                <ChevronRight className="w-4 h-4" />
+              </button>
+            </div>
+          )}
         </div>
       )}
 
@@ -318,7 +295,10 @@ export const ChatBotPullout: React.FC<ChatBotPulloutProps> = ({
         <div
           id="chatbot-drawer-overlay"
           className="fixed inset-0 z-50 flex justify-end bg-black/40 backdrop-blur-xs animate-in fade-in duration-200"
-          onClick={() => setIsDrawerOpen(false)}
+          onClick={() => {
+            setIsDrawerOpen(false);
+            setIsTucked(true);
+          }}
         >
           <div
             id="chatbot-drawer-panel"
@@ -382,7 +362,10 @@ export const ChatBotPullout: React.FC<ChatBotPulloutProps> = ({
               {/* Close Button */}
               <button
                 type="button"
-                onClick={() => setIsDrawerOpen(false)}
+                onClick={() => {
+                  setIsDrawerOpen(false);
+                  setIsTucked(true);
+                }}
                 className="w-8 h-8 rounded-full bg-white/15 hover:bg-white/25 flex items-center justify-center text-white transition-colors cursor-pointer"
                 title="Close chat"
               >

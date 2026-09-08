@@ -51,6 +51,7 @@ interface NewHireViewProps {
   setIsHindi?: (isHindi: boolean) => void;
   activeSection?: LearnerSection;
   onSelectSection?: (section: LearnerSection) => void;
+  onOpenOnboarding?: () => void;
 }
 
 export const NewHireView: React.FC<NewHireViewProps> = ({
@@ -63,6 +64,7 @@ export const NewHireView: React.FC<NewHireViewProps> = ({
   setIsHindi: propSetIsHindi,
   activeSection: propActiveSection,
   onSelectSection: propOnSelectSection,
+  onOpenOnboarding,
 }) => {
   // Current day record from authoritative state
   const currentRecord = newHire.daysHistory.find((d) => d.dayNumber === currentDay) || {
@@ -501,24 +503,50 @@ export const NewHireView: React.FC<NewHireViewProps> = ({
           />
 
           {/* 3. NEED HELP? 1-TAP BUDDY ASSIST */}
-          <div className="bg-white rounded-[24px] p-4 border border-slate-200/90 shadow-2xs flex items-center justify-between gap-3">
-            <div className="flex items-center gap-3 min-w-0">
-              <div className="w-11 h-11 rounded-2xl bg-slate-100 border border-slate-200/60 text-slate-700 flex items-center justify-center shrink-0 font-bold text-base">
-                🤝
+          <div
+            onClick={() => setActiveSection("buddy")}
+            className="rounded-[24px] p-4 border border-slate-200/90 shadow-xs flex items-center justify-between gap-3 relative overflow-hidden cursor-pointer group active:scale-[0.99] transition-all"
+            style={{
+              backgroundImage: `url('https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?auto=format&fit=crop&w=800&q=80')`,
+              backgroundSize: "cover",
+              backgroundPosition: "center",
+            }}
+          >
+            {/* Dark gradient overlay for perfect readability */}
+            <div className="absolute inset-0 bg-gradient-to-r from-slate-950/90 via-slate-950/75 to-slate-950/40 pointer-events-none group-hover:from-slate-950/95 transition-all" />
+
+            <div className="flex items-center gap-3 min-w-0 relative z-10">
+              <div className="relative shrink-0">
+                <div className="w-12 h-12 rounded-2xl overflow-hidden border-2 border-white/80 shadow-md">
+                  <img
+                    src="https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?auto=format&fit=crop&w=200&q=80"
+                    alt={newHire.buddy}
+                    className="w-full h-full object-cover"
+                  />
+                </div>
+                <span className="absolute -bottom-0.5 -right-0.5 w-3.5 h-3.5 rounded-full bg-emerald-500 border-2 border-slate-950 animate-pulse" />
               </div>
               <div className="min-w-0">
-                <h4 className="text-sm font-black text-slate-900 truncate">
-                  {isHindi ? `साथी ${newHire.buddy.split(" ")[0]} फ्लोर पर हैं` : `Buddy ${newHire.buddy.split(" ")[0]} is on floor`}
-                </h4>
-                <p className="text-xs text-slate-500 truncate font-medium mt-0.5">
-                  {isHindi ? "कोई सवाल हो तो तुरंत पूछें" : "Need help? Tap to talk or call to rack"}
+                <div className="flex items-center gap-2">
+                  <h4 className="text-sm font-black text-white truncate">
+                    {isHindi ? `साथी ${newHire.buddy.split(" ")[0]} फ्लोर पर हैं` : `Buddy ${newHire.buddy.split(" ")[0]} is on floor`}
+                  </h4>
+                  <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-500/20 text-emerald-300 border border-emerald-500/30">
+                    LIVE
+                  </span>
+                </div>
+                <p className="text-xs text-purple-200 truncate font-medium mt-0.5">
+                  {isHindi ? "तुरंत मदद या रैक गाइड के लिए टैप करें" : "Tap for instant guidance & live rack support"}
                 </p>
               </div>
             </div>
 
             <button
-              onClick={() => setActiveSection("buddy")}
-              className="px-4 py-2.5 rounded-xl bg-slate-900 hover:bg-slate-800 text-white text-xs font-black shrink-0 cursor-pointer shadow-xs active:scale-95 transition-all"
+              onClick={(e) => {
+                e.stopPropagation();
+                setActiveSection("buddy");
+              }}
+              className="px-4 py-2.5 rounded-xl bg-white text-slate-950 hover:bg-purple-50 text-xs font-black shrink-0 cursor-pointer shadow-md active:scale-95 transition-all relative z-10"
             >
               {isHindi ? "पूछें 🗣️" : "Ask 🗣️"}
             </button>
@@ -531,6 +559,20 @@ export const NewHireView: React.FC<NewHireViewProps> = ({
             isHindi={isHindi}
             onSelectStage={() => setActiveSection("dashboard")}
           />
+
+          {/* Quick Access: Revisit Onboarding Welcome Walkthrough */}
+          {onOpenOnboarding && (
+            <div className="pt-2 pb-1 flex justify-center">
+              <button
+                type="button"
+                onClick={onOpenOnboarding}
+                className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-white hover:bg-purple-50 text-purple-700 hover:text-purple-800 text-xs font-bold transition-all border border-purple-200/80 shadow-2xs cursor-pointer active:scale-95"
+              >
+                <Sparkles className="w-3.5 h-3.5 text-purple-600" />
+                <span>{isHindi ? "ऑनबोर्डिंग स्क्रीन देखें (Walkthrough)" : "View Onboarding Screen"}</span>
+              </button>
+            </div>
+          )}
         </div>
       )}
 

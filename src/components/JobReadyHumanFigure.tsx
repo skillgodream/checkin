@@ -287,8 +287,8 @@ export const JobReadyHumanFigure: React.FC<JobReadyHumanFigureProps> = ({
         {/* CARD A: OVERALL CAREER READINESS GAUGE & BREAKDOWN          */}
         {/* =========================================================== */}
         <div className="lg:col-span-5 space-y-4">
-          {/* Circular Readiness Ring Card */}
-          <div className="bg-gradient-to-b from-slate-50 to-white rounded-3xl p-4 sm:p-5 border border-slate-200/80 shadow-xs space-y-4">
+          {/* Circular Readiness Ring Card - Compact & Space Efficient */}
+          <div className="bg-gradient-to-b from-slate-50 to-white rounded-3xl p-3.5 sm:p-4 border border-slate-200/80 shadow-xs space-y-3">
             <div className="flex items-center justify-between">
               <h3 className="text-xs font-black uppercase tracking-wider text-slate-500">
                 {isHindi ? "कुल जॉब तत्परता" : "Overall Career Readiness"}
@@ -298,9 +298,10 @@ export const JobReadyHumanFigure: React.FC<JobReadyHumanFigureProps> = ({
               </span>
             </div>
 
-            {/* Circular Donut Dial Gauge */}
-            <div className="flex flex-col items-center justify-center py-2">
-              <div className="relative w-36 h-36 flex items-center justify-center">
+            {/* Compact Horizontal Layout: Circular Donut Gauge + Role Details */}
+            <div className="flex items-center gap-3 sm:gap-4 py-0.5">
+              {/* Circular Gauge */}
+              <div className="relative w-24 h-24 sm:w-26 sm:h-26 shrink-0 flex items-center justify-center">
                 <svg className="w-full h-full -rotate-90" viewBox="0 0 120 120">
                   {/* Background Track */}
                   <circle
@@ -308,7 +309,7 @@ export const JobReadyHumanFigure: React.FC<JobReadyHumanFigureProps> = ({
                     cy="60"
                     r="48"
                     className="stroke-slate-100"
-                    strokeWidth="12"
+                    strokeWidth="11"
                     fill="transparent"
                   />
                   {/* Progress Arc */}
@@ -317,7 +318,7 @@ export const JobReadyHumanFigure: React.FC<JobReadyHumanFigureProps> = ({
                     cy="60"
                     r="48"
                     stroke="url(#readiness-grad)"
-                    strokeWidth="12"
+                    strokeWidth="11"
                     strokeLinecap="round"
                     fill="transparent"
                     strokeDasharray={2 * Math.PI * 48}
@@ -343,63 +344,106 @@ export const JobReadyHumanFigure: React.FC<JobReadyHumanFigureProps> = ({
 
                 {/* Center Percentage Display */}
                 <div className="absolute inset-0 flex flex-col items-center justify-center text-center">
-                  <span className="text-3xl font-black text-slate-900 tracking-tight">
+                  <span className="text-2xl font-black text-slate-900 tracking-tight leading-none">
                     {overallReadiness}%
                   </span>
-                  <span className="text-[11px] font-bold text-slate-500 uppercase tracking-wide">
+                  <span className="text-[9px] font-bold text-slate-500 uppercase tracking-wide mt-0.5">
                     {isHindi ? "रेडी" : "Ready"}
                   </span>
                 </div>
               </div>
-            </div>
 
-            {/* Job Role Pill */}
-            <div className="p-3 bg-slate-50 rounded-2xl border border-slate-200/80 flex items-center gap-3">
-              <div className="w-9 h-9 rounded-xl bg-white border border-slate-200 flex items-center justify-center text-slate-700 shadow-2xs shrink-0">
-                <Building2 className="w-4 h-4 text-violet-600" />
-              </div>
-              <div className="min-w-0">
-                <div className="text-xs font-black text-slate-900 truncate">
-                  {isHindi ? "वेयरहाउस एसोसिएट / पिकर" : "Warehouse Associate"}
+              {/* Role Info & Status Pill */}
+              <div className="flex-1 min-w-0 space-y-2">
+                <div className="p-2.5 bg-slate-50/90 rounded-2xl border border-slate-200/80 flex items-center gap-2.5">
+                  <div className="w-8 h-8 rounded-xl bg-white border border-slate-200 flex items-center justify-center text-slate-700 shadow-2xs shrink-0">
+                    <Building2 className="w-4 h-4 text-violet-600" />
+                  </div>
+                  <div className="min-w-0">
+                    <div className="text-xs font-black text-slate-900 truncate">
+                      {isHindi ? "वेयरहाउस एसोसिएट" : "Warehouse Associate"}
+                    </div>
+                    <div className="text-[10px] text-slate-500 truncate">
+                      {isHindi ? "डार्क स्टोर लॉजिस्टिक्स" : "Logistics & Supply Chain"}
+                    </div>
+                  </div>
                 </div>
-                <div className="text-[11px] text-slate-500 truncate">
-                  {isHindi ? "डार्क स्टोर पूर्ति एवं लॉजिस्टिक्स" : "Logistics & Supply Chain"}
+
+                <div className="flex items-center justify-between text-[11px] px-1 font-semibold text-slate-600">
+                  <span className="flex items-center gap-1 text-emerald-700 font-bold">
+                    <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
+                    {isHindi ? "ऑन-ट्रैक" : "On-Track"}
+                  </span>
+                  <span className="text-slate-400 font-medium">Day {currentDay}/14</span>
                 </div>
               </div>
             </div>
           </div>
 
-          {/* Your Progress Breakdown Card */}
-          <div className="bg-white rounded-3xl p-4 sm:p-5 border border-slate-200/80 shadow-xs space-y-3">
-            <h3 className="text-xs font-black uppercase tracking-wider text-slate-600">
-              {isHindi ? "प्रगति का विवरण" : "Your Progress Breakdown"}
-            </h3>
+          {/* Your Progress Breakdown Card - 4 Grid Placement */}
+          <div className="bg-white rounded-3xl p-3.5 sm:p-4 border border-slate-200/80 shadow-xs space-y-3">
+            <div className="flex items-center justify-between">
+              <h3 className="text-xs font-black uppercase tracking-wider text-slate-600">
+                {isHindi ? "प्रगति का विवरण" : "Your Progress Breakdown"}
+              </h3>
+              <span className="text-[10px] text-slate-400 font-semibold">
+                {isHindi ? "4 श्रेणियां" : "4 Areas"}
+              </span>
+            </div>
 
-            <div className="space-y-2.5">
-              {categories.map((cat) => (
-                <button
-                  key={cat.id}
-                  onClick={() => setSelectedCategory(cat.id)}
-                  className={`w-full flex items-center justify-between p-2.5 rounded-2xl transition-all cursor-pointer text-left ${
-                    selectedCategory === cat.id
-                      ? "bg-slate-100/90 ring-1 ring-slate-300 font-black"
-                      : "hover:bg-slate-50 font-bold"
-                  }`}
-                >
-                  <div className="flex items-center gap-2.5">
-                    <span
-                      className="w-3 h-3 rounded-full shrink-0 shadow-2xs"
-                      style={{ backgroundColor: cat.color }}
-                    />
-                    <span className="text-xs text-slate-800">
-                      {isHindi ? cat.titleHi : cat.title}
-                    </span>
-                  </div>
-                  <span className="text-xs font-black text-slate-900">
-                    {Math.round(cat.ratio * cat.weight)}%
-                  </span>
-                </button>
-              ))}
+            {/* 4-Grid Placement (2x2 Grid) */}
+            <div className="grid grid-cols-2 gap-2.5">
+              {categories.map((cat) => {
+                const isSelected = selectedCategory === cat.id;
+                const catScore = Math.round(cat.ratio * cat.weight);
+                return (
+                  <button
+                    key={cat.id}
+                    type="button"
+                    onClick={() => setSelectedCategory(cat.id)}
+                    className={`p-2.5 sm:p-3 rounded-2xl border text-left transition-all cursor-pointer relative overflow-hidden flex flex-col justify-between group ${
+                      isSelected
+                        ? "bg-slate-50/90 shadow-sm ring-2"
+                        : "bg-white hover:bg-slate-50/80 border-slate-200/80"
+                    }`}
+                    style={{
+                      borderColor: isSelected ? cat.color : undefined,
+                    }}
+                  >
+                    <div className="flex items-start justify-between gap-1 mb-2">
+                      <div
+                        className="w-7 h-7 rounded-xl flex items-center justify-center shrink-0 shadow-2xs text-white"
+                        style={{ backgroundColor: cat.color }}
+                      >
+                        {cat.icon}
+                      </div>
+                      <span className="text-xs font-black text-slate-900">
+                        {catScore}%
+                      </span>
+                    </div>
+
+                    <div>
+                      <div className="text-xs font-bold text-slate-800 leading-tight truncate">
+                        {isHindi ? cat.titleHi : cat.title}
+                      </div>
+                      <div className="text-[10px] text-slate-500 font-medium mt-0.5">
+                        {cat.completedCount}/{cat.totalCount} {isHindi ? "पूर्ण" : "done"}
+                      </div>
+                    </div>
+
+                    {/* Mini Progress Bar */}
+                    <div className="w-full h-1.5 bg-slate-100 rounded-full overflow-hidden mt-2">
+                      <div
+                        className="h-full rounded-full transition-all duration-500"
+                        style={{
+                          width: `${Math.round(cat.ratio * 100)}%`,
+                          backgroundColor: cat.color,
+                        }}
+                      />
+                    </div>
+                  </button>
+                );
+              })}
             </div>
           </div>
         </div>

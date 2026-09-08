@@ -1028,6 +1028,7 @@ interface ObservedSignals {
   previousInterventionFailed: boolean;
   dailySignal?: DailySignal;
   managerSignal?: ManagerSignal;
+  structuredEvidence: SnapshotEvidenceItem[];
 }
 
 type RootCauseType =
@@ -1189,6 +1190,125 @@ function observe(input: LoopExecutionInput): ObservedSignals {
         previousRecord.actionOutcome.improved === "no")
     );
 
+  const structuredEvidence: SnapshotEvidenceItem[] = [];
+
+  if (hasWorkEvidence) {
+    structuredEvidence.push({
+      id: `ev-work-uph-${input.dayNumber}`,
+      category: speedGap > 0 ? "work_performance" : "no_meaningful_problem",
+      titleEn: `Pick Rate Performance: ${currentPickRate} UPH`,
+      titleHi: `पिक दर प्रदर्शन: ${currentPickRate} UPH`,
+      metricValue: `${currentPickRate}`,
+      metricUnit: "UPH",
+      contextTextEn: `Target is ${targetPickRate} UPH. Speed gap is ${speedGap} items/hr.`,
+      contextTextHi: `लक्ष्य ${targetPickRate} UPH है।`,
+      badgeEn: speedGap > 0 ? "⚡ Below Target" : "🎯 On Target",
+      badgeHi: speedGap > 0 ? "⚡ लक्ष्य से कम" : "🎯 लक्ष्य पर",
+      iconName: "TrendingUp",
+      themeColor: speedGap > 0 ? "amber" : "emerald",
+      priorityWeight: 90,
+      source: "work_signal",
+      evidenceType: "uph",
+      timestampDay: input.dayNumber,
+      observedValue: currentPickRate,
+      confidence: "high",
+      comparisonToPrevious: previousPickRate !== undefined ? `${currentPickRate >= previousPickRate ? "+" : ""}${currentPickRate - previousPickRate} vs prev` : undefined,
+      direction: speedGap > 0 ? "conflicting" : "supporting",
+    });
+
+    structuredEvidence.push({
+      id: `ev-work-acc-${input.dayNumber}`,
+      category: accuracy < 98 ? "accuracy" : "no_meaningful_problem",
+      titleEn: `Fulfillment Accuracy: ${accuracy}%`,
+      titleHi: `सटीकता दर: ${accuracy}%`,
+      metricValue: `${accuracy}`,
+      metricUnit: "%",
+      contextTextEn: `Observed order picking accuracy rate.`,
+      contextTextHi: `ऑर्डर पिकिंग सटीकता दर।`,
+      badgeEn: accuracy < 98 ? "⚠️ Review Accuracy" : "✓ High Accuracy",
+      badgeHi: accuracy < 98 ? "⚠️ सटीकता जांचें" : "✓ उच्च सटीकता",
+      iconName: "ShieldCheck",
+      themeColor: accuracy < 98 ? "rose" : "emerald",
+      priorityWeight: 89,
+      source: "work_signal",
+      evidenceType: "accuracy",
+      timestampDay: input.dayNumber,
+      observedValue: accuracy,
+      confidence: "high",
+      direction: accuracy < 98 ? "conflicting" : "supporting",
+    });
+  }
+
+  if (helpRequestsCount > 0) {
+    structuredEvidence.push({
+      id: `ev-help-${input.dayNumber}`,
+      category: helpRequestsCount >= 3 ? "repeated_help_dependency" : "capability_gap",
+      titleEn: `Help Requests Logged: ${helpRequestsCount}`,
+      titleHi: `सहायता अनुरोध: ${helpRequestsCount}`,
+      metricValue: `${helpRequestsCount}`,
+      metricUnit: "requests",
+      contextTextEn: `Worker requested assistance during shift execution.`,
+      contextTextHi: `ट्रेनी ने शिफ्ट के दौरान सहायता मांगी।`,
+      badgeEn: "🤝 Buddy Support",
+      badgeHi: "🤝 साथी सहायता",
+      iconName: "HelpCircle",
+      themeColor: helpRequestsCount >= 3 ? "amber" : "blue",
+      priorityWeight: 85,
+      source: "work_signal",
+      evidenceType: "help_request",
+      timestampDay: input.dayNumber,
+      observedValue: helpRequestsCount,
+      confidence: "high",
+      direction: "conflicting",
+    });
+  }
+
+  if (dailySignal) {
+    structuredEvidence.push({
+      id: `ev-daily-${input.dayNumber}`,
+      category: dailySignal.category === "Tool" ? "tool_problem" : dailySignal.category === "Process" ? "safety_issue" : "capability_gap",
+      titleEn: `Daily Check-In: ${dailySignal.category}`,
+      titleHi: `दैनिक चेक-इन: ${dailySignal.category}`,
+      metricValue: dailySignal.category,
+      contextTextEn: dailySignal.rawText || dailySignal.issue || "Worker daily check-in observation.",
+      contextTextHi: dailySignal.rawText || dailySignal.issue || "ट्रेनी दैनिक चेक-इन अवलोकन।",
+      badgeEn: "📝 Daily Signal",
+      badgeHi: "📝 दैनिक सिग्नल",
+      iconName: "BookOpen",
+      themeColor: "purple",
+      priorityWeight: 80,
+      source: "daily_signal",
+      evidenceType: "assessment",
+      timestampDay: input.dayNumber,
+      observedValue: dailySignal.category,
+      confidence: "medium",
+      direction: "neutral",
+    });
+  }
+
+  if (managerSignal) {
+    structuredEvidence.push({
+      id: `ev-mgr-${input.dayNumber}`,
+      category: managerSignal.state === "Struggling" ? "capability_gap" : "no_meaningful_problem",
+      titleEn: `Supervisor Observation: ${managerSignal.state}`,
+      titleHi: `सुपरवाइज़र अवलोकन: ${managerSignal.state}`,
+      metricValue: managerSignal.state,
+      contextTextEn: managerSignal.notes || "Manager shift observation.",
+      contextTextHi: managerSignal.notes || "मैनेजर शिफ्ट अवलोकन।",
+      badgeEn: "👁️ Manager Note",
+      badgeHi: "👁️ मैनेजर नोट",
+      iconName: "UserCheck",
+      themeColor: "indigo",
+      priorityWeight: 82,
+      source: "manager_signal",
+      evidenceType: "manager_observation",
+      timestampDay: input.dayNumber,
+      observedValue: managerSignal.state,
+      confidence: "high",
+      direction: managerSignal.state === "Struggling" ? "conflicting" : "supporting",
+    });
+  }
+
   return {
     currentPickRate,
     targetPickRate,
@@ -1212,7 +1332,46 @@ function observe(input: LoopExecutionInput): ObservedSignals {
     previousInterventionFailed,
     dailySignal,
     managerSignal,
+    structuredEvidence,
   };
+}
+
+// -------------------------------------------------------------
+// INTERNAL HELPER 1.5: linkEvidenceToCapabilities() - Doctor 2 Capability Linkage
+// -------------------------------------------------------------
+function linkEvidenceToCapabilities(
+  evidenceItems: SnapshotEvidenceItem[]
+): Record<number, SnapshotEvidenceItem[]> {
+  const mapping: Record<number, SnapshotEvidenceItem[]> = {};
+
+  for (const ev of evidenceItems) {
+    let targetCaps: number[] = [];
+
+    if (ev.evidenceType === "uph") {
+      targetCaps = [3, 4, 7]; // Zone Navigation, Aisle Coordinates, Pick Rate
+    } else if (ev.evidenceType === "accuracy") {
+      targetCaps = [6]; // Variant Check & Quality
+    } else if (ev.evidenceType === "help_request") {
+      targetCaps = [5]; // Floor Independence
+    } else if (ev.evidenceType === "assessment") {
+      if (ev.category === "tool_problem") targetCaps = [2];
+      else if (ev.category === "safety_issue") targetCaps = [1];
+      else targetCaps = [3, 4];
+    } else if (ev.evidenceType === "manager_observation") {
+      targetCaps = [3, 4, 5, 6];
+    } else {
+      targetCaps = [3];
+    }
+
+    for (const capId of targetCaps) {
+      if (!mapping[capId]) {
+        mapping[capId] = [];
+      }
+      mapping[capId].push(ev);
+    }
+  }
+
+  return mapping;
 }
 
 // -------------------------------------------------------------
@@ -1220,6 +1379,7 @@ function observe(input: LoopExecutionInput): ObservedSignals {
 // -------------------------------------------------------------
 function understand(
   observed: ObservedSignals,
+  linkedEvidence: Record<number, SnapshotEvidenceItem[]>,
   hire: NewHire,
   capabilities: Record<number, CapabilityState>,
   existingAction?: RecommendedAction
@@ -1934,13 +2094,16 @@ function check(stageInput: CheckStageInput): {
  * 6. CHECK     - Evaluates before/after outcome; updates Capability Ledger
  */
 export function executeCoordinationLoop(input: LoopExecutionInput): PatternSynthesisResult {
-  // 1. OBSERVE
+  // 1. OBSERVE (D1: Evidence / Path Lab)
   const observed = observe(input);
 
-  // 2. UNDERSTAND
-  const understood = understand(observed, input.hire, observed.currentCapabilities, input.existingAction);
+  // 2. CAPABILITY LINKAGE (D2: Evidence -> Capability)
+  const linkedEvidence = linkEvidenceToCapabilities(observed.structuredEvidence);
 
-  // 3. CONNECT
+  // 3. UNDERSTAND (D3: Diagnosis)
+  const understood = understand(observed, linkedEvidence, input.hire, observed.currentCapabilities, input.existingAction);
+
+  // 4. CONNECT (D2/D3 Graph & Metadata Connection)
   const connected = connect(understood, input.hire);
 
   // 4. DECIDE
