@@ -98,42 +98,10 @@ export const Header: React.FC<HeaderProps> = ({
       <div className="max-w-md mx-auto px-4 py-2.5">
         {/* Top bar: Brand + Live Tag + Actions */}
         <div className="flex items-center justify-between gap-2">
-          {/* Learner Greeting / Brand Identity */}
+          {/* Brand Identity / Store Header */}
           <div className="flex items-center gap-2 min-w-0">
-            <div className="min-w-0">
-              <div className="flex items-center gap-1.5">
-                {activeTab === "new_hire" ? (
-                  <span className="text-base sm:text-lg font-black text-slate-950 tracking-tight flex items-center gap-1">
-                    <span>{isHindi ? "नमस्ते," : "Hello,"}</span>
-                    <span className="text-violet-700 font-black">{firstName}</span>
-                    <span className="text-sm">👋</span>
-                  </span>
-                ) : (
-                  <span className="text-sm sm:text-base font-black text-slate-900 tracking-tight">
-                    {activeTab === "manager" ? "Supervisor Triage" : "Store Operations"}
-                  </span>
-                )}
-                {hasApiKey ? (
-                  <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-50 text-emerald-700 border border-emerald-200/80 shrink-0">
-                    <Sparkles className="w-2.5 h-2.5 text-emerald-600" />
-                    AI Live
-                  </span>
-                ) : (
-                  <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-bold bg-slate-100 text-slate-600 shrink-0">
-                    Floor Demo
-                  </span>
-                )}
-              </div>
-              <p className="text-[11px] text-slate-400 font-medium truncate mt-0.5">
-                {activeTab === "new_hire"
-                  ? isHindi
-                    ? `फ्लोर पिकर • डार्क स्टोर #104`
-                    : `Floor Companion • Dark Store #104`
-                  : activeTab === "manager"
-                  ? "Floor Triage • Dark Store #104"
-                  : "Store Operations • Dark Store #104"}
-              </p>
-            </div>
+            <Logo variant="compact" size="sm" />
+            <span className="text-[11px] text-slate-400 font-medium truncate">• Dark Store #104</span>
           </div>
 
           {/* Right Action Icons: Language button visible everywhere, menu only on home screen */}
