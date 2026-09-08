@@ -309,7 +309,7 @@ export default function App() {
   return (
     <div
       className={`min-h-screen ${
-        isOnboarding ? "bg-[#e7e3dc]" : "bg-slate-100"
+        isOnboarding ? "bg-[#181324]" : "bg-[#EAE6DF]"
       } text-slate-900 flex flex-col font-sans antialiased transition-colors duration-300 ${
         isFramed ? "md:py-6 md:px-4" : ""
       }`}
@@ -322,8 +322,8 @@ export default function App() {
               ? "max-w-[390px] md:rounded-[44px] md:shadow-[0_24px_60px_rgba(30,10,25,0.25)] md:overflow-hidden min-h-screen md:min-h-[844px] bg-[#181324]"
               : "max-w-md min-h-screen bg-[#181324]"
             : isFramed
-            ? "max-w-md md:rounded-[36px] md:shadow-2xl md:border md:border-slate-300/80 md:overflow-hidden md:ring-8 md:ring-slate-900/5 min-h-screen md:min-h-[850px] bg-slate-50"
-            : "max-w-lg min-h-screen shadow-xs bg-slate-50"
+            ? "max-w-md md:rounded-[36px] md:shadow-2xl md:border md:border-stone-300/80 md:overflow-hidden md:ring-8 md:ring-stone-900/5 min-h-screen md:min-h-[850px] bg-[#F7F6F2]"
+            : "max-w-lg min-h-screen shadow-xs bg-[#F7F6F2]"
         }`}
       >
         {/* Subtle phone speaker notch for framed mobile experience on desktop (only during active shift views) */}

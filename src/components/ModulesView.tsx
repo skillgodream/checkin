@@ -43,6 +43,7 @@ export const ModulesView: React.FC<ModulesViewProps> = ({
   onUpdateHire,
   isHindi = false,
 }) => {
+  const [activeTab, setActiveTab] = useState<"all" | "foundation" | "floor" | "cert">("all");
   const [selectedModuleId, setSelectedModuleId] = useState<string | null>(
     `lms-mod-0${Math.min(10, Math.max(1, (newHire.modulesCompleted || 3) + 1))}`
   );
@@ -140,26 +141,26 @@ export const ModulesView: React.FC<ModulesViewProps> = ({
   };
 
   const getModuleDayIcon = (dayNumber: number) => {
-    const iconClass = "w-6 h-6 sm:w-7 sm:h-7";
+    const iconClass = "w-7 h-7 sm:w-8 sm:h-8";
     switch (dayNumber) {
       case 1:
         return <ShieldCheck className={iconClass} />;
       case 2:
         return <ScanLine className={iconClass} />;
       case 3:
-        return <MapPin className={iconClass} />;
-      case 4:
         return <Snowflake className={iconClass} />;
-      case 5:
-        return <PackageCheck className={iconClass} />;
-      case 6:
-        return <Boxes className={iconClass} />;
-      case 7:
+      case 4:
         return <ShoppingCart className={iconClass} />;
-      case 8:
+      case 5:
+        return <Boxes className={iconClass} />;
+      case 6:
+        return <PackageCheck className={iconClass} />;
+      case 7:
         return <Zap className={iconClass} />;
+      case 8:
+        return <FileCheck className={iconClass} />;
       case 9:
-        return <AlertTriangle className={iconClass} />;
+        return <Target className={iconClass} />;
       case 10:
         return <Trophy className={iconClass} />;
       default:
@@ -169,99 +170,120 @@ export const ModulesView: React.FC<ModulesViewProps> = ({
 
   const getModuleShortLabel = (dayNumber: number, hindiMode: boolean) => {
     const map: Record<number, { en: string; hi: string }> = {
-      1: { en: "Warehouse", hi: "वेयरहाउस" },
-      2: { en: "Scanner", hi: "स्कैनर" },
-      3: { en: "Aisle Racks", hi: "रैक्स" },
-      4: { en: "Cold Room", hi: "कोल्ड रूम" },
-      5: { en: "Single Pick", hi: "सिंगल पिक" },
-      6: { en: "Multi-Tote", hi: "मल्टी-टोट" },
-      7: { en: "Batch Pick", hi: "बैच पिक" },
-      8: { en: "Speed 120", hi: "स्पीड 120" },
-      9: { en: "Quality SKU", hi: "क्वालिटी SKU" },
-      10: { en: "Certify", hi: "सर्टिफिकेशन" },
+      1: { en: "Store Safety & PPE", hi: "सुरक्षा व PPE" },
+      2: { en: "PDA Barcode", hi: "PDA बारकोड" },
+      3: { en: "Cold Chain", hi: "कोल्ड चेन" },
+      4: { en: "High Picking", hi: "हाई पिकिंग" },
+      5: { en: "Multi Totes", hi: "मल्टी टोट्स" },
+      6: { en: "Packaging", hi: "पैकेजिंग" },
+      7: { en: "Speed Drill", hi: "स्पीड ड्रिल" },
+      8: { en: "Quality Check", hi: "क्वालिटी चेक" },
+      9: { en: "Rush Hours", hi: "रश आवर्स" },
+      10: { en: "Certification", hi: "सर्टिफिकेशन" },
     };
     return hindiMode ? map[dayNumber]?.hi || `डे ${dayNumber}` : map[dayNumber]?.en || `Day ${dayNumber}`;
   };
 
+  const filteredModules = MANDATORY_TRAINING_MODULES.filter((mod) => {
+    if (activeTab === "foundation") return mod.dayNumber >= 1 && mod.dayNumber <= 3;
+    if (activeTab === "floor") return mod.dayNumber >= 4 && mod.dayNumber <= 7;
+    if (activeTab === "cert") return mod.dayNumber >= 8 && mod.dayNumber <= 10;
+    return true;
+  });
+
   return (
     <div className="space-y-4 pb-20 animate-in fade-in duration-200 select-none">
       {/* ========================================================= */}
-      {/* 1. HERO BANNER: 10-DAY TRAINING (WHITE CARD IN PURPLE CARD)*/}
+      {/* 1. HERO BANNER (MATCHING ATTACHED SCREENSHOT EXACTLY)     */}
       {/* ========================================================= */}
-      <div className="bg-gradient-to-br from-violet-600 via-purple-600 to-indigo-700 rounded-2xl p-3.5 sm:p-5 shadow-lg shadow-purple-600/20">
-        <div className="bg-white rounded-xl p-4 sm:p-5 space-y-3.5 relative overflow-hidden shadow-sm">
-          {/* Subtle background gradient accent */}
-          <div className="absolute top-0 right-0 w-36 h-36 bg-gradient-to-bl from-purple-100/40 via-violet-50/20 to-transparent rounded-full pointer-events-none -mr-8 -mt-8" />
+      <div className="relative bg-gradient-to-br from-blue-600 via-blue-700 to-indigo-800 rounded-[32px] p-5 sm:p-6 text-white shadow-xl shadow-blue-900/15 overflow-hidden">
+        {/* Background decorative watermark */}
+        <div className="absolute right-[-20px] bottom-[-30px] opacity-10 pointer-events-none select-none text-9xl font-black tracking-widest text-white">
+          LMS
+        </div>
 
-          <div className="flex items-center justify-between gap-3 relative z-10">
-            <div>
-              <h2 className="text-xl sm:text-2xl font-black text-slate-900 tracking-tight leading-tight">
-                {isHindi ? "10-दिवसीय ट्रेनिंग" : "10-Day Training"}
-              </h2>
-            </div>
+        <div className="relative z-10 space-y-4">
+          <div className="inline-block px-3 py-1 rounded-full bg-white/20 backdrop-blur-md text-white text-[10px] font-black uppercase tracking-wider border border-white/25">
+            {isHindi ? "फीचर्ड प्रोग्राम" : "Featured"}
+          </div>
 
-            {/* Right Visual Tile & Count Badge */}
-            <div className="shrink-0 flex items-center gap-2">
-              <div className="w-11 h-11 sm:w-12 sm:h-12 rounded-xl bg-gradient-to-br from-violet-600 via-purple-600 to-indigo-700 text-white flex items-center justify-center shadow-md shadow-purple-500/20">
-                <Boxes className="w-5 h-5 sm:w-6 sm:h-6" />
-              </div>
-              <div className="text-right shrink-0 bg-violet-50/80 border border-violet-100 px-3 py-1.5 rounded-xl">
-                <div className="text-sm sm:text-base font-black text-violet-700 leading-tight">
-                  {modulesCompletedCount} / 10
-                </div>
-                <div className="text-[10px] sm:text-[11px] text-slate-500 font-semibold leading-tight">
-                  {isHindi ? "दिन पूर्ण" : "Done"}
-                </div>
-              </div>
+          <div className="space-y-1">
+            <h2 className="text-xl sm:text-2xl font-black tracking-tight text-white">
+              {isHindi ? "10-दिवसीय ट्रेनिंग और सर्टिफिकेशन" : "Certification & Training"}
+            </h2>
+            <div className="flex items-center gap-2 text-xs sm:text-sm text-blue-100 font-medium">
+              <span>⭐ 4.8</span>
+              <span>•</span>
+              <span>{isHindi ? `${modulesCompletedCount}/10 दिन पूर्ण` : `12k Reviews`}</span>
+              <span>•</span>
+              <span className="text-emerald-300 font-bold">{Math.round((modulesCompletedCount / 10) * 100)}% {isHindi ? "तैयार" : "Ready"}</span>
             </div>
           </div>
 
-          {/* Progress bar */}
-          <div className="space-y-1.5 pt-0.5 relative z-10">
-            <div className="flex items-center justify-between text-xs font-bold text-slate-700">
-              <span>{isHindi ? "पाठ्यक्रम प्रगति" : "Course Progress"}</span>
-              <span className="text-violet-700 font-black">
-                {Math.round((modulesCompletedCount / 10) * 100)}%
-              </span>
-            </div>
-
-            <div className="w-full h-2.5 bg-slate-100 rounded-full overflow-hidden">
-              <div
-                className="h-full bg-gradient-to-r from-violet-600 via-purple-600 to-fuchsia-600 rounded-full transition-all duration-500"
-                style={{ width: `${Math.round((modulesCompletedCount / 10) * 100)}%` }}
-              />
-            </div>
+          {/* Progress bar inside banner */}
+          <div className="w-full h-1.5 bg-white/20 rounded-full overflow-hidden">
+            <div
+              className="h-full bg-emerald-400 rounded-full transition-all duration-500"
+              style={{ width: `${Math.round((modulesCompletedCount / 10) * 100)}%` }}
+            />
           </div>
         </div>
       </div>
 
-      {/* ========================================================= */}
-      {/* 2. SECTION HEADER: EXPLORE LEARNING AREAS                 */}
-      {/* ========================================================= */}
-      <div className="flex items-center justify-between px-1 pt-1">
-        <h3 className="text-base sm:text-lg font-black text-slate-900 tracking-tight">
-          {isHindi ? "सीखने के क्षेत्र एक्सप्लोर करें" : "Explore Learning Areas"}
-        </h3>
+      {/* Action Buttons below banner matching screenshot */}
+      <div className="flex items-center gap-3">
         <button
           type="button"
           onClick={() => {
-            const nextMod =
-              MANDATORY_TRAINING_MODULES.find((m) => m.dayNumber === modulesCompletedCount + 1) ||
-              MANDATORY_TRAINING_MODULES[0];
+            const nextMod = MANDATORY_TRAINING_MODULES.find(m => !completedIds.includes(m.id)) || MANDATORY_TRAINING_MODULES[0];
             setSelectedModuleId(nextMod.id);
             setActiveDetailModule(nextMod);
           }}
-          className="text-xs sm:text-sm font-bold text-blue-600 hover:text-blue-700 cursor-pointer flex items-center gap-0.5"
+          className="flex-1 py-3 px-5 rounded-2xl bg-blue-600 hover:bg-blue-700 text-white font-black text-sm shadow-lg shadow-blue-600/25 flex items-center justify-center gap-2 cursor-pointer transition-all active:scale-98"
         >
-          <span>{isHindi ? "सभी देखें ›" : "View All ›"}</span>
+          <Sparkles className="w-4 h-4" />
+          <span>{isHindi ? "परीक्षा / सीखना शुरू करें" : "Exam / Start Learning"}</span>
+        </button>
+        <button
+          type="button"
+          onClick={() => {}}
+          className="w-12 h-12 rounded-2xl bg-white border border-slate-200/90 text-slate-700 flex items-center justify-center shadow-xs hover:bg-slate-50 cursor-pointer transition-all active:scale-98 shrink-0"
+        >
+          <svg className="w-5 h-5 text-slate-700 fill-current" viewBox="0 0 24 24">
+            <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/>
+          </svg>
         </button>
       </div>
 
       {/* ========================================================= */}
-      {/* 3. 3-COLUMN LEARNING AREA GRID (INSPIRED BY SCREENSHOT)   */}
+      {/* 2. FILTER TABS BAR (FROM SCREENSHOT)                      */}
+      {/* ========================================================= */}
+      <div className="flex items-center gap-1.5 overflow-x-auto pb-1 no-scrollbar pt-1">
+        {[
+          { id: "all", label: isHindi ? "सभी (10)" : "All (10)" },
+          { id: "foundation", label: isHindi ? "फाउंडेशन (D1-3)" : "Foundation (D1-3)" },
+          { id: "floor", label: isHindi ? "फ्लोर पिक (D4-7)" : "Floor Pick (D4-7)" },
+          { id: "cert", label: isHindi ? "सर्टिफिकेशन (D8-10)" : "Certification (D8-10)" },
+        ].map((tab) => (
+          <button
+            key={tab.id}
+            onClick={() => setActiveTab(tab.id as any)}
+            className={`px-3.5 py-1.5 rounded-full text-xs font-bold transition-all cursor-pointer whitespace-nowrap shrink-0 ${
+              activeTab === tab.id
+                ? "bg-purple-600 text-white shadow-xs"
+                : "bg-white text-slate-700 border border-slate-200 hover:bg-slate-50"
+            }`}
+          >
+            {tab.label}
+          </button>
+        ))}
+      </div>
+
+      {/* ========================================================= */}
+      {/* 3. 3-COLUMN LEARNING AREA GRID (EXACT SCREENSHOT STYLE)   */}
       {/* ========================================================= */}
       <div className="grid grid-cols-3 gap-2.5 sm:gap-3.5">
-        {MANDATORY_TRAINING_MODULES.map((mod) => {
+        {filteredModules.map((mod) => {
           const isCompleted = completedIds.includes(mod.id);
           const isCurrent = !isCompleted && mod.dayNumber === modulesCompletedCount + 1;
           const isLocked = !isCompleted && mod.dayNumber > modulesCompletedCount + 1;
@@ -273,56 +295,36 @@ export const ModulesView: React.FC<ModulesViewProps> = ({
                 setSelectedModuleId(mod.id);
                 setActiveDetailModule(mod);
               }}
-              className={`bg-white rounded-xl sm:rounded-2xl p-3 sm:p-3.5 flex flex-col items-center justify-center text-center aspect-square transition-all duration-200 cursor-pointer relative shadow-sm hover:shadow-md active:scale-98 border ${
+              className={`rounded-2xl sm:rounded-3xl p-3 sm:p-4 flex flex-col items-center justify-center text-center aspect-square transition-all duration-200 cursor-pointer relative shadow-sm hover:shadow-md active:scale-98 ${
                 isCurrent
-                  ? "border-violet-300 ring-2 ring-violet-200/80 shadow-md shadow-violet-500/10"
+                  ? "bg-purple-600 text-white shadow-xl shadow-purple-500/40 animate-pulse ring-4 ring-purple-300/60"
                   : isCompleted
-                  ? "border-emerald-200/70 hover:border-emerald-300 bg-white"
-                  : "border-slate-100 bg-slate-50/50 hover:bg-white"
+                  ? "bg-blue-600 text-white shadow-md shadow-blue-500/25"
+                  : "bg-slate-100 hover:bg-slate-200/80 text-slate-900 border border-slate-200/80"
               }`}
             >
-              {/* Central Squircle Icon Container */}
-              <div className="relative my-auto">
+              {/* Central Icon */}
+              <div className="my-auto mb-1">
                 <div
-                  className={`w-12 h-12 sm:w-14 sm:h-14 rounded-xl flex items-center justify-center transition-all ${
-                    isCompleted
-                      ? "bg-gradient-to-br from-emerald-500 to-teal-600 text-white shadow-md shadow-emerald-500/25"
-                      : isCurrent
-                      ? "bg-gradient-to-br from-violet-600 to-purple-600 text-white shadow-lg shadow-violet-600/30 ring-2 ring-white"
-                      : "bg-slate-100/90 text-slate-400"
+                  className={`w-10 h-10 sm:w-12 sm:h-12 rounded-2xl flex items-center justify-center transition-all ${
+                    isCompleted || isCurrent
+                      ? "text-white"
+                      : "text-slate-600"
                   }`}
                 >
                   {getModuleDayIcon(mod.dayNumber)}
                 </div>
-
-                {/* "SOON" Pill for locked modules only (tick and play icons removed) */}
-                {isLocked && (
-                  <span className="absolute -top-1.5 -right-2 bg-blue-100 text-blue-600 font-black text-[8px] sm:text-[9px] px-1.5 py-0.5 rounded-full border border-white shadow-2xs tracking-wider">
-                    {isHindi ? "जल्द" : "SOON"}
-                  </span>
-                )}
               </div>
 
-              {/* Title & Subtitle */}
-              <div className="w-full mt-1.5">
-                <h4 className="text-xs sm:text-sm font-extrabold text-slate-900 truncate leading-tight">
-                  {getModuleShortLabel(mod.dayNumber, isHindi)}
-                </h4>
-                <p
-                  className={`text-[10px] sm:text-[11px] mt-0.5 font-medium truncate ${
-                    isCompleted
-                      ? "text-slate-500"
-                      : isCurrent
-                      ? "text-violet-700 font-bold"
-                      : "text-slate-400"
+              {/* Title */}
+              <div className="w-full mt-auto">
+                <h4
+                  className={`text-xs sm:text-sm font-black truncate leading-tight ${
+                    isCompleted || isCurrent ? "text-white" : "text-slate-900"
                   }`}
                 >
-                  {isCompleted
-                    ? isHindi ? "एक्सप्लोर" : "Explore"
-                    : isCurrent
-                    ? isHindi ? "शुरू करें" : "Explore"
-                    : isHindi ? "जल्द आएगा" : "Soon"}
-                </p>
+                  {getModuleShortLabel(mod.dayNumber, isHindi)}
+                </h4>
               </div>
             </div>
           );

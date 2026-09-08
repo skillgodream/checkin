@@ -10,8 +10,8 @@ import { FloatingGlassMenu, LearnerSection } from "./FloatingGlassMenu";
 import { LearnerJourneyRoadmap } from "./LearnerJourneyRoadmap";
 import { LearnerDailyReportCard } from "./LearnerDailyReportCard";
 import { YesterdayShiftDetailModal } from "./YesterdayShiftDetailModal";
-import {
-  Mic,
+import { TodaysGoalLandingView } from "./TodaysGoalLandingView";
+import {  Mic,
   MicOff,
   Send,
   Volume2,
@@ -32,6 +32,8 @@ import {
   MessageCircle,
   User,
   ArrowRight,
+  ChevronRight,
+  Footprints,
   ShieldCheck,
   PackageCheck,
   RotateCcw,
@@ -95,6 +97,7 @@ export const NewHireView: React.FC<NewHireViewProps> = ({
   // Active quick action modal
   const [activeModal, setActiveModal] = useState<"map" | "buddy" | "scanner" | "target" | "work" | "yesterday_detail" | null>(null);
   const [buddyAlertSent, setBuddyAlertSent] = useState<boolean>(false);
+  const [showTodaysGoalView, setShowTodaysGoalView] = useState<boolean>(false);
 
   // Voice recording & input states
   const [isListening, setIsListening] = useState<boolean>(false);
@@ -405,6 +408,21 @@ export const NewHireView: React.FC<NewHireViewProps> = ({
 
   const status = getStatusContent();
 
+  if (showTodaysGoalView) {
+    return (
+      <TodaysGoalLandingView
+        newHire={newHire}
+        currentDay={currentDay}
+        isHindi={isHindi}
+        onToggleLanguage={() => setIsHindi(!isHindi)}
+        onBack={() => setShowTodaysGoalView(false)}
+        onSelectSection={setActiveSection}
+        onUpdateHire={onUpdateHire}
+        onOpenBuddy={() => setActiveSection("buddy")}
+      />
+    );
+  }
+
   return (
     <div className="max-w-md mx-auto px-4 py-3 space-y-4 pb-28 select-none">
       {/* ========================================================= */}
@@ -412,30 +430,39 @@ export const NewHireView: React.FC<NewHireViewProps> = ({
       {/* ========================================================= */}
       {activeSection === "home" && (
         <div className="space-y-4 animate-in fade-in duration-200">
-          {/* 1. PRIMARY: WHAT DO I NEED TO DO NOW? (DOMINANT PRESCRIPTION CARD) */}
+          {/* 1. HERO BANNER: ONLY SPEAKER TAB, CIRCULAR PERCENTAGE, AND START TAB */}
           <div
             id="todays-focus-card"
-            className="bg-gradient-to-br from-violet-700 via-purple-700 to-fuchsia-700 rounded-[28px] p-5 sm:p-6 text-white shadow-xl shadow-purple-950/15 relative overflow-hidden space-y-4"
+            className="bg-gradient-to-br from-violet-700 via-purple-700 to-fuchsia-700 rounded-[28px] p-5 sm:p-6 text-white shadow-xl shadow-purple-950/15 relative overflow-hidden space-y-5"
           >
-            {/* Top Bar: Badge, Duration, Listen */}
+            {/* Top Bar: Speaker Tab */}
             <div className="flex items-center justify-between">
-              <div className="flex items-center gap-2">
-                <span className="px-3 py-1 rounded-full text-xs font-black tracking-wider uppercase bg-white/20 text-white backdrop-blur-xs">
-                  {status.badge}
-                </span>
-                <span className="px-2.5 py-0.5 rounded-full text-xs font-bold bg-white/15 text-purple-100 backdrop-blur-xs">
-                  ⏱️ {status.duration}
-                </span>
-              </div>
+              <span className="text-xs font-bold text-purple-200 uppercase tracking-wider">
+                {isHindi ? "दैनिक स्कोर प्रगति" : "Daily Score Progress"}
+              </span>
 
               <button
                 type="button"
-                onClick={() =>
+                onClick={() => {
+                  const completedCount = newHire.modulesCompleted ?? 3;
+                  const quizAvg = newHire.quizAverageScore ?? 94;
+                  const actualPace = currentRecord.workSignal?.actualPickRate ?? 35;
+                  const targetPace = currentRecord.workSignal?.targetPickRate ?? 50;
+                  const accuracy = currentRecord.workSignal?.accuracyRate ?? 98;
+                  const ordersCompleted = currentRecord.workSignal?.ordersCompleted ?? 38;
+                  const targetOrders = currentRecord.workSignal?.targetOrders ?? 42;
+                  const trainingScore = Math.min(100, Math.round(((completedCount / 3) * 50 + (quizAvg / 100) * 50)));
+                  const speedScore = Math.min(100, Math.round((actualPace / targetPace) * 100));
+                  const accuracyScore = Math.min(100, Math.round(accuracy));
+                  const ordersScore = Math.min(100, Math.round((ordersCompleted / targetOrders) * 100));
+                  const compositeScore = Math.round(
+                    trainingScore * 0.25 + speedScore * 0.30 + accuracyScore * 0.30 + ordersScore * 0.15
+                  );
                   handlePlayAudio(
                     "status-card",
-                    `${status.action}. ${status.duration}. ${status.shortWhy}. ${status.target || ""}`
-                  )
-                }
+                    isHindi ? `दैनिक स्कोर ${compositeScore} प्रतिशत है।` : `Daily performance score is ${compositeScore} percent.`
+                  );
+                }}
                 className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-white text-slate-950 text-xs font-black shadow-xs cursor-pointer active:scale-95 transition-all"
                 title="Listen aloud"
               >
@@ -448,46 +475,70 @@ export const NewHireView: React.FC<NewHireViewProps> = ({
               </button>
             </div>
 
-            {/* MAIN ACTION: Largest / strongest text */}
-            <div className="space-y-1.5 pt-0.5">
-              <h2 className="text-2xl sm:text-3xl font-black leading-tight tracking-tight text-white">
-                {status.action}
-              </h2>
-              {/* SHORT REASON: Medium text */}
-              <p className="text-base sm:text-lg font-semibold text-purple-100 leading-snug">
-                {status.shortWhy}
-              </p>
-              {/* TARGET: Supporting info */}
-              {status.target && (
-                <p className="text-xs sm:text-sm font-medium text-purple-200/90 pt-0.5">
-                  🎯 {status.target}
-                </p>
-              )}
-            </div>
+            {/* Circular Percentage in the Card */}
+            {(() => {
+              const completedCount = newHire.modulesCompleted ?? 3;
+              const quizAvg = newHire.quizAverageScore ?? 94;
+              const actualPace = currentRecord.workSignal?.actualPickRate ?? 35;
+              const targetPace = currentRecord.workSignal?.targetPickRate ?? 50;
+              const accuracy = currentRecord.workSignal?.accuracyRate ?? 98;
+              const ordersCompleted = currentRecord.workSignal?.ordersCompleted ?? 38;
+              const targetOrders = currentRecord.workSignal?.targetOrders ?? 42;
+              const trainingScore = Math.min(100, Math.round(((completedCount / 3) * 50 + (quizAvg / 100) * 50)));
+              const speedScore = Math.min(100, Math.round((actualPace / targetPace) * 100));
+              const accuracyScore = Math.min(100, Math.round(accuracy));
+              const ordersScore = Math.min(100, Math.round((ordersCompleted / targetOrders) * 100));
+              const compositeScore = Math.round(
+                trainingScore * 0.25 + speedScore * 0.30 + accuracyScore * 0.30 + ordersScore * 0.15
+              );
 
-            {/* START BUTTON: Large, prominent, and clear */}
-            <div className="pt-1 space-y-2.5">
+              return (
+                <div className="flex flex-col items-center justify-center py-2">
+                  <div className="relative w-40 h-40 flex items-center justify-center">
+                    <svg className="w-full h-full transform -rotate-90" viewBox="0 0 100 100">
+                      <circle
+                        cx="50"
+                        cy="50"
+                        r="40"
+                        fill="transparent"
+                        stroke="rgba(255, 255, 255, 0.2)"
+                        strokeWidth="8"
+                      />
+                      <circle
+                        cx="50"
+                        cy="50"
+                        r="40"
+                        fill="transparent"
+                        stroke="#ffffff"
+                        strokeWidth="8"
+                        strokeDasharray={251.2}
+                        strokeDashoffset={251.2 - (251.2 * compositeScore) / 100}
+                        strokeLinecap="round"
+                        className="transition-all duration-1000"
+                      />
+                    </svg>
+                    <div className="absolute inset-0 flex flex-col items-center justify-center text-center">
+                      <span className="text-3xl font-black text-white">{compositeScore}%</span>
+                      <span className="text-[10px] font-bold text-purple-200 uppercase tracking-tight">
+                        {isHindi ? "समग्र स्कोर" : "Composite"}
+                      </span>
+                    </div>
+                  </div>
+                </div>
+              );
+            })()}
+
+            {/* Start Button / Tab */}
+            <div className="pt-1 flex justify-center">
               <button
                 id="home-primary-cta-btn"
                 type="button"
-                onClick={status.primaryAction}
-                className="w-full py-4 px-6 rounded-2xl bg-white text-slate-950 hover:bg-slate-50 font-black text-base sm:text-lg shadow-lg shadow-black/15 active:scale-98 transition-all flex items-center justify-center gap-2.5 cursor-pointer border-2 border-white"
+                onClick={() => setShowTodaysGoalView(true)}
+                className="max-w-[180px] w-full py-2.5 px-4 rounded-xl bg-white text-slate-950 hover:bg-slate-50 font-black text-xs sm:text-sm shadow-md active:scale-98 transition-all flex items-center justify-center gap-1.5 cursor-pointer border border-white/80"
               >
                 <span>{status.primaryBtnText}</span>
-                <ArrowRight className="w-5 h-5 stroke-[2.5]" />
+                <ArrowRight className="w-4 h-4 stroke-[2.5]" />
               </button>
-
-              {status.secondaryBtnText && (
-                <div className="flex justify-center pt-0.5">
-                  <button
-                    type="button"
-                    onClick={status.secondaryAction}
-                    className="text-xs sm:text-sm font-bold text-white/80 hover:text-white underline underline-offset-4 cursor-pointer"
-                  >
-                    {status.secondaryBtnText} →
-                  </button>
-                </div>
-              )}
             </div>
           </div>
 
@@ -502,63 +553,78 @@ export const NewHireView: React.FC<NewHireViewProps> = ({
             onOpenModules={() => setActiveSection("modules")}
           />
 
-          {/* 3. NEED HELP? 1-TAP BUDDY ASSIST */}
+          {/* 3. BUDDY VIKRAM CARD (MATCHING ATTACHMENT) */}
           <div
             onClick={() => setActiveSection("buddy")}
-            className="rounded-[24px] p-4 border border-slate-200/90 shadow-xs flex items-center justify-between gap-3 relative overflow-hidden cursor-pointer group active:scale-[0.99] transition-all"
-            style={{
-              backgroundImage: `url('https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?auto=format&fit=crop&w=800&q=80')`,
-              backgroundSize: "cover",
-              backgroundPosition: "center",
-            }}
+            className="bg-gradient-to-r from-violet-700 via-purple-700 to-fuchsia-700 rounded-[26px] p-4 text-white shadow-xl shadow-purple-950/15 flex items-center justify-between gap-3 cursor-pointer group active:scale-[0.99] transition-all relative overflow-hidden"
           >
-            {/* Dark gradient overlay for perfect readability */}
-            <div className="absolute inset-0 bg-gradient-to-r from-slate-950/90 via-slate-950/75 to-slate-950/40 pointer-events-none group-hover:from-slate-950/95 transition-all" />
-
-            <div className="flex items-center gap-3 min-w-0 relative z-10">
+            <div className="flex items-center gap-3.5 min-w-0">
               <div className="relative shrink-0">
-                <div className="w-12 h-12 rounded-2xl overflow-hidden border-2 border-white/80 shadow-md">
+                <div className="w-14 h-14 rounded-full overflow-hidden border-2 border-white shadow-md">
                   <img
-                    src="https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?auto=format&fit=crop&w=200&q=80"
+                    src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=150&h=150&fit=crop&crop=face"
                     alt={newHire.buddy}
                     className="w-full h-full object-cover"
                   />
                 </div>
-                <span className="absolute -bottom-0.5 -right-0.5 w-3.5 h-3.5 rounded-full bg-emerald-500 border-2 border-slate-950 animate-pulse" />
+                <span className="absolute bottom-0 right-0 w-3.5 h-3.5 rounded-full bg-emerald-500 border-2 border-purple-700 animate-pulse" />
               </div>
               <div className="min-w-0">
                 <div className="flex items-center gap-2">
-                  <h4 className="text-sm font-black text-white truncate">
-                    {isHindi ? `साथी ${newHire.buddy.split(" ")[0]} फ्लोर पर हैं` : `Buddy ${newHire.buddy.split(" ")[0]} is on floor`}
-                  </h4>
-                  <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-500/20 text-emerald-300 border border-emerald-500/30">
+                  <h3 className="text-base font-black tracking-wider text-white uppercase">
+                    VIKRAM
+                  </h3>
+                  <span className="px-2 py-0.5 rounded-full text-[10px] font-black tracking-wider uppercase bg-white/20 text-white backdrop-blur-xs">
                     LIVE
                   </span>
                 </div>
-                <p className="text-xs text-purple-200 truncate font-medium mt-0.5">
-                  {isHindi ? "तुरंत मदद या रैक गाइड के लिए टैप करें" : "Tap for instant guidance & live rack support"}
+                <p className="text-xs text-purple-100 font-semibold mt-0.5">
+                  {isHindi ? "फ्लोर साथी • आइसल 4-8" : "Floor Buddy • Aisle 4-8"}
                 </p>
               </div>
             </div>
 
             <button
+              type="button"
               onClick={(e) => {
                 e.stopPropagation();
                 setActiveSection("buddy");
               }}
-              className="px-4 py-2.5 rounded-xl bg-white text-slate-950 hover:bg-purple-50 text-xs font-black shrink-0 cursor-pointer shadow-md active:scale-95 transition-all relative z-10"
+              className="w-11 h-11 rounded-full bg-white text-purple-900 hover:bg-purple-50 flex items-center justify-center shadow-md shrink-0 cursor-pointer active:scale-95 transition-all"
+              title="Call Buddy"
             >
-              {isHindi ? "पूछें 🗣️" : "Ask 🗣️"}
+              <Phone className="w-5 h-5 stroke-[2.5]" />
             </button>
           </div>
 
-          {/* 4. MY JOB-READY JOURNEY AT THE BOTTOM */}
-          <LearnerJourneyRoadmap
-            newHire={newHire}
-            currentDay={currentDay}
-            isHindi={isHindi}
-            onSelectStage={() => setActiveSection("dashboard")}
-          />
+          {/* 4. JOB READY CARD (MATCHING ATTACHMENT) */}
+          <div
+            onClick={() => setActiveSection("dashboard")}
+            className="bg-gradient-to-r from-violet-700 via-purple-700 to-fuchsia-700 rounded-[26px] p-4 text-white shadow-xl shadow-purple-950/15 flex items-center justify-between gap-3 cursor-pointer group active:scale-[0.99] transition-all relative overflow-hidden"
+          >
+            <div className="flex items-center gap-3.5 min-w-0">
+              <div className="w-12 h-12 rounded-2xl bg-white/20 backdrop-blur-xs flex items-center justify-center text-white shrink-0 shadow-inner border border-white/20">
+                <Footprints className="w-6 h-6 stroke-[2]" />
+              </div>
+              <div className="min-w-0">
+                <div className="flex items-baseline gap-1.5">
+                  <span className="text-xl font-black text-white tracking-tight">
+                    12%
+                  </span>
+                  <span className="text-xs font-bold text-purple-200">
+                    {isHindi ? "तैयार" : "Ready"}
+                  </span>
+                </div>
+                <p className="text-xs text-purple-100 font-semibold mt-0.5">
+                  {isHindi ? "जॉब रेडी स्कोर • 14/20 हुनर" : "Job Ready Score • 14/20 Skills"}
+                </p>
+              </div>
+            </div>
+
+            <div className="w-10 h-10 rounded-full bg-white/20 hover:bg-white/30 text-white flex items-center justify-center shrink-0 border border-white/20 transition-all group-hover:scale-105">
+              <ChevronRight className="w-5 h-5 stroke-[2.5]" />
+            </div>
+          </div>
 
           {/* Quick Access: Revisit Onboarding Welcome Walkthrough */}
           {onOpenOnboarding && (

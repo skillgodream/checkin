@@ -70,6 +70,15 @@ export const YesterdayShiftDetailModal: React.FC<YesterdayShiftDetailModalProps>
   const completedCount = newHire.modulesCompleted ?? 3;
   const quizAvg = newHire.quizAverageScore ?? 94;
 
+  const trainingScore = Math.min(100, Math.round(((completedCount / 3) * 50 + (quizAvg / 100) * 50)));
+  const speedScore = Math.min(100, Math.round((actualPace / targetPace) * 100));
+  const accuracyScore = Math.min(100, Math.round(accuracy));
+  const ordersScore = Math.min(100, Math.round((ordersCompleted / targetOrders) * 100));
+
+  const compositeScore = Math.round(
+    trainingScore * 0.25 + speedScore * 0.30 + accuracyScore * 0.30 + ordersScore * 0.15
+  );
+
   return (
     <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-xs flex items-center justify-center p-3 sm:p-4 overflow-y-auto animate-in fade-in duration-150">
       <div className="bg-slate-50 rounded-[32px] max-w-lg w-full p-4 sm:p-6 space-y-4 max-h-[92vh] overflow-y-auto shadow-2xl border border-slate-200">
@@ -108,6 +117,44 @@ export const YesterdayShiftDetailModal: React.FC<YesterdayShiftDetailModalProps>
           >
             <X className="w-5 h-5" />
           </button>
+        </div>
+
+        {/* COMPOSITE 4-PILLAR SCORE BANNER */}
+        <div className="p-4 rounded-2xl bg-gradient-to-r from-violet-900 via-indigo-900 to-slate-900 text-white shadow-lg space-y-3">
+          <div className="flex items-center justify-between">
+            <div>
+              <span className="text-[10px] font-bold uppercase tracking-wider text-violet-300 block">
+                {isHindi ? "समग्र दैनिक प्रदर्शन स्कोर" : "Composite Daily Performance Score"}
+              </span>
+              <div className="flex items-baseline gap-2 mt-0.5">
+                <span className="text-3xl font-black text-white">{compositeScore}%</span>
+                <span className="text-xs font-bold text-emerald-400 bg-emerald-950/80 px-2 py-0.5 rounded-full border border-emerald-500/30">
+                  {compositeScore >= 80 ? "✓ On Track" : "⚠️ Ramping Steady"}
+                </span>
+              </div>
+            </div>
+            <div className="w-12 h-12 rounded-2xl bg-white/10 border border-white/20 flex items-center justify-center text-xl font-black text-violet-200">
+              🎯
+            </div>
+          </div>
+          <div className="grid grid-cols-4 gap-1.5 pt-2 border-t border-white/10 text-center">
+            <div className="bg-white/5 rounded-xl p-1.5">
+              <span className="text-[9px] text-violet-300 block font-bold">Training 25%</span>
+              <span className="text-xs font-black text-white">{trainingScore}%</span>
+            </div>
+            <div className="bg-white/5 rounded-xl p-1.5">
+              <span className="text-[9px] text-violet-300 block font-bold">Speed 30%</span>
+              <span className="text-xs font-black text-white">{speedScore}%</span>
+            </div>
+            <div className="bg-white/5 rounded-xl p-1.5">
+              <span className="text-[9px] text-violet-300 block font-bold">Accuracy 30%</span>
+              <span className="text-xs font-black text-white">{accuracyScore}%</span>
+            </div>
+            <div className="bg-white/5 rounded-xl p-1.5">
+              <span className="text-[9px] text-violet-300 block font-bold">Orders 15%</span>
+              <span className="text-xs font-black text-white">{ordersScore}%</span>
+            </div>
+          </div>
         </div>
 
         {/* 2. SECTION 1: WORK PERFORMANCE & FLOOR METRICS */}
