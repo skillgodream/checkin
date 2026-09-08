@@ -194,13 +194,16 @@ export const ModulesView: React.FC<ModulesViewProps> = ({
   return (
     <div className="space-y-4 pb-20 animate-in fade-in duration-200 select-none">
       {/* ========================================================= */}
-      {/* 1. HERO BANNER (MATCHING ATTACHED SCREENSHOT EXACTLY)     */}
+      {/* 1. HERO BANNER (FULL BLEED WAREHOUSE BACKGROUND & DARK OVERLAY) */}
       {/* ========================================================= */}
-      <div className="relative bg-gradient-to-br from-blue-600 via-blue-700 to-indigo-800 rounded-[32px] p-5 sm:p-6 text-white shadow-xl shadow-blue-900/15 overflow-hidden">
-        {/* Background decorative watermark */}
-        <div className="absolute right-[-20px] bottom-[-30px] opacity-10 pointer-events-none select-none text-9xl font-black tracking-widest text-white">
-          LMS
-        </div>
+      <div 
+        className="relative rounded-[32px] p-5 sm:p-6 text-white shadow-xl shadow-blue-900/15 overflow-hidden bg-cover bg-center"
+        style={{
+          backgroundImage: `url('https://images.unsplash.com/photo-1586528116311-ad8dd3c8310d?w=1200&auto=format&fit=crop&q=80')`
+        }}
+      >
+        {/* Dark overlay for contrast */}
+        <div className="absolute inset-0 bg-gradient-to-t from-slate-950/90 via-slate-950/60 to-slate-950/40 backdrop-blur-[1px]" />
 
         <div className="relative z-10 space-y-4">
           <div className="inline-block px-3 py-1 rounded-full bg-white/20 backdrop-blur-md text-white text-[10px] font-black uppercase tracking-wider border border-white/25">
@@ -208,22 +211,22 @@ export const ModulesView: React.FC<ModulesViewProps> = ({
           </div>
 
           <div className="space-y-1">
-            <h2 className="text-xl sm:text-2xl font-black tracking-tight text-white">
+            <h2 className="text-xl sm:text-2xl font-black tracking-tight text-white drop-shadow-sm">
               {isHindi ? "10-दिवसीय ट्रेनिंग और सर्टिफिकेशन" : "Certification & Training"}
             </h2>
-            <div className="flex items-center gap-2 text-xs sm:text-sm text-blue-100 font-medium">
+            <div className="flex items-center gap-2 text-xs sm:text-sm text-slate-200 font-medium drop-shadow-xs">
               <span>⭐ 4.8</span>
               <span>•</span>
               <span>{isHindi ? `${modulesCompletedCount}/10 दिन पूर्ण` : `12k Reviews`}</span>
               <span>•</span>
-              <span className="text-emerald-300 font-bold">{Math.round((modulesCompletedCount / 10) * 100)}% {isHindi ? "तैयार" : "Ready"}</span>
+              <span className="text-emerald-400 font-bold">{Math.round((modulesCompletedCount / 10) * 100)}% {isHindi ? "तैयार" : "Ready"}</span>
             </div>
           </div>
 
           {/* Progress bar inside banner */}
-          <div className="w-full h-1.5 bg-white/20 rounded-full overflow-hidden">
+          <div className="w-full h-1.5 bg-white/20 rounded-full overflow-hidden backdrop-blur-xs">
             <div
-              className="h-full bg-emerald-400 rounded-full transition-all duration-500"
+              className="h-full bg-emerald-400 rounded-full transition-all duration-500 shadow-sm"
               style={{ width: `${Math.round((modulesCompletedCount / 10) * 100)}%` }}
             />
           </div>

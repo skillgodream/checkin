@@ -112,14 +112,10 @@ export const JobReadyHumanFigure: React.FC<JobReadyHumanFigureProps> = ({
   const assessRatio = assessCompleted / assessTotal;
   const assessPct = Math.round(assessRatio * 30);
 
-  // Overall readiness percentage matching reference image style
+  // Overall readiness percentage matching the sum of the 4 category pillar scores
   const overallReadiness = Math.min(
     100,
-    typeof newHire.overallReadinessScore === "number"
-      ? (newHire.overallReadinessScore <= 1
-          ? Math.round(newHire.overallReadinessScore * 100)
-          : Math.round(newHire.overallReadinessScore))
-      : learningPct + practicePct + simPct + assessPct
+    learningPct + practicePct + simPct + assessPct
   );
 
   const categories: CapabilityCategory[] = [
