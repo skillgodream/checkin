@@ -20,6 +20,7 @@ import {
   UserCheck,
 } from "lucide-react";
 import { NewHire, TrainingModule } from "../types";
+import { assessReadiness } from "../services/intelligence";
 import { LearnerSection } from "./FloatingGlassMenu";
 
 interface TodaysGoalLandingViewProps {
@@ -70,9 +71,7 @@ export const TodaysGoalLandingView: React.FC<TodaysGoalLandingViewProps> = ({
   const [activeTask, setActiveTask] = useState<CustomTask | null>(null);
 
   // Interactive task completion state
-  const [completedTaskIds] = useState<Record<string, boolean>>({
-    task_1: true,
-  });
+  const [completedTaskIds] = useState<Record<string, boolean>>({});
 
   const [drillStarted, setDrillStarted] = useState<boolean>(false);
 
@@ -108,10 +107,23 @@ export const TodaysGoalLandingView: React.FC<TodaysGoalLandingViewProps> = ({
       ? newHire.overallReadinessScore <= 1
         ? Math.round(newHire.overallReadinessScore * 100)
         : Math.round(newHire.overallReadinessScore)
-      : Math.round((newHire.rampProgress || 0.74) * 100);
+      : (newHire.capabilities ? assessReadiness(newHire.capabilities, newHire) : 0);
 
   const tasksBonus = Object.values(completedTaskIds).filter(Boolean).length * 2;
   const liveReadinessPct = Math.min(100, baseReadiness + tasksBonus);
+
+  // Today's shift performance / daily progress score matching Home page
+  const completedCount = newHire.modulesCompleted ?? 3;
+  const quizAvg = newHire.quizAverageScore ?? 94;
+  const ordersCompleted = currentRecord.workSignal?.ordersCompleted ?? 38;
+  const targetOrders = currentRecord.workSignal?.targetOrders ?? 42;
+  const trainingScore = Math.min(100, Math.round(((completedCount / 3) * 50 + (quizAvg / 100) * 50)));
+  const speedScore = Math.min(100, Math.round((actualPickRate / targetPickRate) * 100));
+  const accuracyScore = Math.min(100, Math.round(accuracyRate));
+  const ordersScore = Math.min(100, Math.round((ordersCompleted / targetOrders) * 100));
+  const dailyShiftProgress = Math.round(
+    trainingScore * 0.25 + speedScore * 0.30 + accuracyScore * 0.30 + ordersScore * 0.15
+  );
 
   // Concise Doctor's suggestion for today
   const doctorDiagnosis = isHindi
@@ -220,7 +232,7 @@ export const TodaysGoalLandingView: React.FC<TodaysGoalLandingViewProps> = ({
   const radius = 96;
   const center = 130;
   const strokeWidth = 10;
-  const progressRatio = Math.max(0.1, Math.min(1, liveReadinessPct / 100));
+  const progressRatio = Math.max(0.1, Math.min(1, dailyShiftProgress / 100));
 
   const startAngle = -135;
   const totalSweep = 270;
@@ -438,18 +450,18 @@ export const TodaysGoalLandingView: React.FC<TodaysGoalLandingViewProps> = ({
               <div className="absolute inset-0 flex flex-col items-center justify-center pt-3 pointer-events-none">
                 <div className="flex items-baseline gap-0.5">
                   <span className="text-5xl sm:text-6xl font-black text-white tracking-tighter leading-none">
-                    {liveReadinessPct}
+                    {dailyShiftProgress}
                   </span>
                   <span className="text-2xl font-black text-blue-400">
                     %
                   </span>
                 </div>
                 <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400 mt-1">
-                  {isHindi ? "करियर रेडीनेस स्कोर" : "Career Readiness"}
+                  {isHindi ? "दैनिक प्रगति स्कोर" : "Daily Shift Progress"}
                 </span>
                 <div className="mt-1 px-2.5 py-0.5 rounded-full bg-blue-500/10 border border-blue-500/20 text-[10px] font-bold text-blue-400 flex items-center gap-1">
                   <span className="w-1.5 h-1.5 rounded-full bg-blue-400 animate-pulse" />
-                  <span>{liveReadinessPct >= 80 ? "Ready for Floor" : "Onboarding Ramp"}</span>
+                  <span>{isHindi ? `दिन ${currentDay} स्कोर` : `Day ${currentDay} Score`}</span>
                 </div>
               </div>
             </div>
@@ -457,8 +469,8 @@ export const TodaysGoalLandingView: React.FC<TodaysGoalLandingViewProps> = ({
             {/* Simple Live Progress Bar (High Visual Contrast) */}
             <div className="w-full mt-1 bg-[#090e18] border border-[#1e293b] rounded-2xl p-3.5 space-y-1.5 shadow-inner">
               <div className="flex items-center justify-between text-[11px] font-bold text-slate-300">
-                <span>{isHindi ? "लाइव प्रगति ट्रैकर" : "Live Progress Bar"}</span>
-                <span className="text-blue-400 font-mono font-black">{liveReadinessPct}% / 85% Target</span>
+                <span>{isHindi ? "कुल करियर रेडीनेस (लक्ष्य: 85%+)" : "Overall Role Readiness (Target: 85%+)"}</span>
+                <span className="text-blue-400 font-mono font-black">{liveReadinessPct}%</span>
               </div>
               <div className="w-full h-2.5 bg-[#101726] border border-white/5 rounded-full overflow-hidden p-0.5">
                 <div

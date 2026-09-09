@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { NewHire, DailySignal, DARK_STORE_CAPABILITIES } from "../types";
-import { analyzeDailyReport } from "../services/intelligence";
+import { analyzeDailyReport, assessReadiness } from "../services/intelligence";
 import { speakMessage, stopSpeaking } from "../utils/speech";
 import { CircularDialWidget } from "./CircularDialWidget";
 import { StoreZonesGrid } from "./StoreZonesGrid";
@@ -43,6 +43,8 @@ import {  Mic,
   Compass,
   Eye,
   Globe,
+  ChevronDown,
+  Check,
 } from "lucide-react";
 
 interface NewHireViewProps {
@@ -58,6 +60,9 @@ interface NewHireViewProps {
   activeSection?: LearnerSection;
   onSelectSection?: (section: LearnerSection) => void;
   onOpenOnboarding?: () => void;
+  onOpenManagerConsole?: () => void;
+  newHires?: NewHire[];
+  onSelectHire?: (hireId: string) => void;
 }
 
 export const NewHireView: React.FC<NewHireViewProps> = ({
@@ -71,6 +76,9 @@ export const NewHireView: React.FC<NewHireViewProps> = ({
   activeSection: propActiveSection,
   onSelectSection: propOnSelectSection,
   onOpenOnboarding,
+  onOpenManagerConsole,
+  newHires,
+  onSelectHire,
 }) => {
   // Current day record from authoritative state
   const currentRecord = newHire.daysHistory.find((d) => d.dayNumber === currentDay) || {
@@ -97,6 +105,31 @@ export const NewHireView: React.FC<NewHireViewProps> = ({
   const [localActiveSection, setLocalActiveSection] = useState<LearnerSection>("home");
   const activeSection = propActiveSection !== undefined ? propActiveSection : localActiveSection;
   const setActiveSection = propOnSelectSection || setLocalActiveSection;
+
+  // Learner Switcher Dropdown local states
+  const [isLearnerDropdownOpen, setIsLearnerDropdownOpen] = useState<boolean>(false);
+  const learnerDropdownRef = React.useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      const buttonEl = document.getElementById("home-learner-dropdown-btn");
+      const popoverEl = document.getElementById("home-learner-dropdown-popover");
+      if (
+        buttonEl?.contains(event.target as Node) || 
+        popoverEl?.contains(event.target as Node) ||
+        (learnerDropdownRef.current && learnerDropdownRef.current.contains(event.target as Node))
+      ) {
+        return;
+      }
+      setIsLearnerDropdownOpen(false);
+    };
+    if (isLearnerDropdownOpen) {
+      document.addEventListener("mousedown", handleClickOutside);
+    }
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, [isLearnerDropdownOpen]);
 
   // Active quick action modal
   const [activeModal, setActiveModal] = useState<"map" | "buddy" | "scanner" | "target" | "work" | "yesterday_detail" | null>(null);
@@ -148,6 +181,11 @@ export const NewHireView: React.FC<NewHireViewProps> = ({
     replyText: string;
     timestamp: string;
   } | null>(null);
+
+  // Authoritative Overall Job Readiness calculation
+  const authoritativeReadiness = typeof newHire.overallReadinessScore === "number"
+    ? (newHire.overallReadinessScore <= 1 ? Math.round(newHire.overallReadinessScore * 100) : Math.round(newHire.overallReadinessScore))
+    : (newHire.capabilities ? assessReadiness(newHire.capabilities, newHire) : undefined);
 
   // Derive simple human state from existing intelligence ledger
   const isSupportCompleted = Boolean(
@@ -518,70 +556,131 @@ export const NewHireView: React.FC<NewHireViewProps> = ({
           {/* 1. HERO BANNER: FULL BLEED FROM TOP AND SIDES, ROUNDED AT THE BOTTOM */}
           <div
             id="todays-focus-card"
-            className="moving-dark-gradient rounded-b-[32px] p-5 sm:p-6 text-white shadow-xl border-b border-white/10 relative overflow-hidden space-y-5"
+            className="moving-dark-gradient rounded-b-[32px] p-5 sm:p-6 text-white shadow-xl border-b border-white/10 relative space-y-5"
           >
             {/* Real-time moving/flowing dark visual and halftone mesh dots as requested */}
-            <div className="absolute inset-0 dotted-halftone-pattern pointer-events-none opacity-85 z-0" />
+            <div className="absolute inset-0 dotted-halftone-pattern rounded-b-[32px] pointer-events-none opacity-85 z-0" />
             
             {/* Subtle premium accent glow to lift the look */}
             <div className="absolute -top-16 -left-16 w-56 h-56 bg-cyan-500/15 rounded-full blur-3xl pointer-events-none z-0" />
             <div className="absolute -bottom-16 -right-16 w-56 h-56 bg-blue-600/10 rounded-full blur-3xl pointer-events-none z-0" />
 
-            {/* Top Bar: Onboarding Walkthrough, Language Toggle, & Speaker Tab */}
-            <div className="flex items-center justify-end relative z-10 gap-2">
-              {onOpenOnboarding && (
+            {/* Top Bar: Profile Selector (Left) & Actions (Right) */}
+            <div className="flex items-center justify-between relative z-30 gap-2">
+              {/* Profile selector dropdown */}
+              <div className="relative" ref={learnerDropdownRef}>
                 <button
                   type="button"
-                  onClick={onOpenOnboarding}
-                  className="p-1.5 rounded-full bg-white/10 hover:bg-white/20 text-white cursor-pointer active:scale-95 transition-all"
-                  title="View Walkthrough"
+                  id="home-learner-dropdown-btn"
+                  onClick={() => setIsLearnerDropdownOpen((prev) => !prev)}
+                  className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-white/10 hover:bg-white/20 border border-white/10 text-white cursor-pointer active:scale-95 transition-all text-xs font-black shadow-xs shrink-0"
                 >
-                  <Eye className="w-4 h-4 text-cyan-400" />
+                  <div className="w-5 h-5 rounded-full overflow-hidden border border-white/40 shrink-0">
+                    <img
+                      src={newHire.avatar || "https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150&auto=format&fit=crop&q=80"}
+                      alt={newHire.name}
+                      className="w-full h-full object-cover"
+                      referrerPolicy="no-referrer"
+                    />
+                  </div>
+                  <span className="truncate max-w-[85px]">{newHire.name.split(" ")[0]}</span>
+                  <ChevronDown className="w-3.5 h-3.5 text-cyan-400 shrink-0" />
                 </button>
-              )}
 
-              <button
-                type="button"
-                onClick={() => setIsHindi(!isHindi)}
-                className="px-2.5 py-1 rounded-full bg-white/10 hover:bg-white/20 text-white cursor-pointer active:scale-95 transition-all flex items-center gap-1 font-bold text-[11px]"
-                title="Toggle Language"
-              >
-                <Globe className="w-3.5 h-3.5 text-cyan-400" />
-                <span>{isHindi ? "EN" : "HI"}</span>
-              </button>
+                {isLearnerDropdownOpen && newHires && (
+                  <div
+                    id="home-learner-dropdown-popover"
+                    className="absolute left-0 mt-2 w-48 rounded-2xl bg-[#1b1e26] border border-white/10 shadow-2xl py-1.5 z-50 text-white text-xs font-bold animate-in fade-in zoom-in-95 duration-150"
+                  >
+                    <div className="px-3 py-1.5 text-[9px] font-black uppercase tracking-wider text-slate-400 border-b border-white/5 mb-1.5">
+                      {isHindi ? "प्रोफ़ाइल बदलें" : "Switch Profile"}
+                    </div>
+                    {newHires.map((hire) => (
+                      <button
+                        key={hire.id}
+                        type="button"
+                        onClick={() => {
+                          if (onSelectHire) onSelectHire(hire.id);
+                          setIsLearnerDropdownOpen(false);
+                        }}
+                        className={`w-full text-left px-3 py-2 flex items-center justify-between hover:bg-white/5 transition-all cursor-pointer ${
+                          hire.id === newHire.id ? "text-cyan-400 font-bold" : "text-slate-300 font-medium"
+                        }`}
+                      >
+                        <div className="flex items-center gap-2 min-w-0">
+                          <div className="w-5 h-5 rounded-full overflow-hidden border border-white/20 shrink-0">
+                            <img
+                              src={hire.avatar}
+                              alt={hire.name}
+                              className="w-full h-full object-cover"
+                              referrerPolicy="no-referrer"
+                            />
+                          </div>
+                          <span className="truncate">{hire.name}</span>
+                        </div>
+                        {hire.id === newHire.id && <Check className="w-3.5 h-3.5 text-cyan-400 shrink-0 stroke-[3]" />}
+                      </button>
+                    ))}
+                  </div>
+                )}
+              </div>
 
-              <button
-                type="button"
-                onClick={() => {
-                  const completedCount = newHire.modulesCompleted ?? 3;
-                  const quizAvg = newHire.quizAverageScore ?? 94;
-                  const actualPace = currentRecord.workSignal?.actualPickRate ?? 35;
-                  const targetPace = currentRecord.workSignal?.targetPickRate ?? 50;
-                  const accuracy = currentRecord.workSignal?.accuracyRate ?? 98;
-                  const ordersCompleted = currentRecord.workSignal?.ordersCompleted ?? 38;
-                  const targetOrders = currentRecord.workSignal?.targetOrders ?? 42;
-                  const trainingScore = Math.min(100, Math.round(((completedCount / 3) * 50 + (quizAvg / 100) * 50)));
-                  const speedScore = Math.min(100, Math.round((actualPace / targetPace) * 100));
-                  const accuracyScore = Math.min(100, Math.round(accuracy));
-                  const ordersScore = Math.min(100, Math.round((ordersCompleted / targetOrders) * 100));
-                  const compositeScore = Math.round(
-                    trainingScore * 0.25 + speedScore * 0.30 + accuracyScore * 0.30 + ordersScore * 0.15
-                  );
-                  handlePlayAudio(
-                    "status-card",
-                    isHindi ? `दैनिक स्कोर ${compositeScore} प्रतिशत है।` : `Daily performance score is ${compositeScore} percent.`
-                  );
-                }}
-                className="flex items-center gap-1 px-2.5 py-1 rounded-full bg-white text-slate-950 text-xs font-black shadow-xs cursor-pointer active:scale-95 transition-all"
-                title="Listen aloud"
-              >
-                <Volume2
-                  className={`w-3.5 h-3.5 ${
-                    playingAudioId === "status-card" ? "text-purple-600 animate-bounce" : "text-slate-800"
-                  }`}
-                />
-                <span>{isHindi ? "सुनिए" : "Listen"}</span>
-              </button>
+              {/* Action Buttons */}
+              <div className="flex items-center gap-1.5 shrink-0">
+                {onOpenManagerConsole && (
+                  <button
+                    type="button"
+                    onClick={onOpenManagerConsole}
+                    className="p-1.5 rounded-full bg-white/10 hover:bg-white/20 text-white cursor-pointer active:scale-95 transition-all"
+                    title={isHindi ? "मैनेजर कंसोल" : "Manager Console"}
+                  >
+                    <Eye className="w-4 h-4 text-cyan-400" />
+                  </button>
+                )}
+
+                <button
+                  type="button"
+                  onClick={() => setIsHindi(!isHindi)}
+                  className="px-2.5 py-1.5 rounded-full bg-white/10 hover:bg-white/20 text-white cursor-pointer active:scale-95 transition-all flex items-center gap-1 font-bold text-[11px]"
+                  title="Toggle Language"
+                >
+                  <Globe className="w-3.5 h-3.5 text-cyan-400" />
+                  <span>{isHindi ? "EN" : "HI"}</span>
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() => {
+                    const completedCount = newHire.modulesCompleted ?? 3;
+                    const quizAvg = newHire.quizAverageScore ?? 94;
+                    const actualPace = currentRecord.workSignal?.actualPickRate ?? 35;
+                    const targetPace = currentRecord.workSignal?.targetPickRate ?? 50;
+                    const accuracy = currentRecord.workSignal?.accuracyRate ?? 98;
+                    const ordersCompleted = currentRecord.workSignal?.ordersCompleted ?? 38;
+                    const targetOrders = currentRecord.workRecord || currentRecord.workSignal?.targetOrders || 42;
+                    const trainingScore = Math.min(100, Math.round(((completedCount / 3) * 50 + (quizAvg / 100) * 50)));
+                    const speedScore = Math.min(100, Math.round((actualPace / targetPace) * 100));
+                    const accuracyScore = Math.min(100, Math.round(accuracy));
+                    const ordersScore = Math.min(100, Math.round((ordersCompleted / Number(targetOrders)) * 100));
+                    const compositeScore = Math.round(
+                      trainingScore * 0.25 + speedScore * 0.30 + accuracyScore * 0.30 + ordersScore * 0.15
+                    );
+                    handlePlayAudio(
+                      "status-card",
+                      isHindi ? `दैनिक स्कोर ${compositeScore} प्रतिशत है।` : `Daily performance score is ${compositeScore} percent.`
+                    );
+                  }}
+                  className="flex items-center gap-1 px-2.5 py-1 rounded-full bg-white text-slate-950 text-xs font-black shadow-xs cursor-pointer active:scale-95 transition-all"
+                  title="Listen aloud"
+                >
+                  <Volume2
+                    className={`w-3.5 h-3.5 ${
+                      playingAudioId === "status-card" ? "text-purple-600 animate-bounce" : "text-slate-800"
+                    }`}
+                  />
+                  <span>{isHindi ? "सुनिए" : "Listen"}</span>
+                </button>
+              </div>
             </div>
 
             {/* Circular Percentage in the Card */}
@@ -621,15 +720,15 @@ export const NewHireView: React.FC<NewHireViewProps> = ({
                         stroke="#22d3ee" // dynamic glowing color (cyan) for outstanding readability
                         strokeWidth="8"
                         strokeDasharray={251.2}
-                        strokeDashoffset={251.2 - (251.2 * compositeScore) / 100}
+                        strokeDashoffset={251.2 - (251.2 * (authoritativeReadiness ?? 22)) / 100}
                         strokeLinecap="round"
                         className="transition-all duration-1000 drop-shadow-[0_0_6px_rgba(34,211,238,0.4)]"
                       />
                     </svg>
                     <div className="absolute inset-0 flex flex-col items-center justify-center text-center">
-                      <span className="text-3xl font-black text-white">{compositeScore}%</span>
+                      <span className="text-3xl font-black text-white">{authoritativeReadiness ?? 22}%</span>
                       <span className="text-[10px] font-bold text-slate-300 uppercase tracking-tight">
-                        {isHindi ? "समग्र स्कोर" : "Composite"}
+                        {isHindi ? "करियर प्रगति" : "Career Progress"}
                       </span>
                     </div>
                   </div>
@@ -761,7 +860,7 @@ export const NewHireView: React.FC<NewHireViewProps> = ({
             pickRate={currentRecord.workSignal?.actualPickRate ?? 35}
             targetPickRate={currentRecord.workSignal?.targetPickRate ?? 50}
             accuracyRate={currentRecord.workSignal?.accuracyRate ?? 98}
-            readinessScore={newHire.readinessScore ?? 74}
+            readinessScore={authoritativeReadiness}
             onCallBuddy={() => setActiveSection("buddy")}
             onScannerFix={() => setActiveModal("scanner")}
             onAisleMap={() => setActiveModal("map")}
@@ -1000,7 +1099,7 @@ export const NewHireView: React.FC<NewHireViewProps> = ({
           <div className="bg-[#1b1e26] rounded-[28px] p-4 border border-white/10 shadow-xl flex items-center justify-between">
             <div className="flex items-center gap-3">
               <img
-                src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=150&h=150&fit=crop&crop=face"
+                src="/Vikram%20Pic.jpeg"
                 alt="Buddy Vikram"
                 className="w-12 h-12 rounded-full object-cover border-2 border-emerald-500 shadow-xs"
               />
@@ -1391,7 +1490,7 @@ export const NewHireView: React.FC<NewHireViewProps> = ({
 
             <div className="flex flex-col items-center">
               <img
-                src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=150&h=150&fit=crop&crop=face"
+                src="/Vikram%20Pic.jpeg"
                 alt="Buddy Vikram"
                 className="w-20 h-20 rounded-full object-cover border-4 border-emerald-500 shadow-md mb-2"
               />
@@ -1701,7 +1800,7 @@ export const NewHireView: React.FC<NewHireViewProps> = ({
               pickRate={currentRecord.pickRate || 35}
               targetPickRate={50}
               accuracyRate={currentRecord.errorRate === 0 ? 100 : Math.max(88, Math.round(100 - (currentRecord.errorRate || 2) * 4))}
-              readinessScore={Math.round((newHire.rampProgress || 0.65) * 100)}
+              readinessScore={authoritativeReadiness}
               onCallBuddy={() => setActiveModal("buddy")}
               onScannerFix={() => setActiveModal("scanner")}
               onAisleMap={() => setActiveModal("map")}

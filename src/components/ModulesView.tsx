@@ -301,7 +301,21 @@ export const ModulesView: React.FC<ModulesViewProps> = ({
                 {modulesCompletedCount >= 3 ? "✓ Completed" : "In Progress"}
               </span>
             </div>
-            <p className="text-[11px] text-slate-300 font-medium truncate mt-0.5">
+            
+            {/* Explicit Actual Completed Day vs Ideal Target Day Indicators */}
+            <div className="flex items-center gap-2 mt-1">
+              <span className="text-[10px] font-bold text-slate-350">
+                {isHindi ? "वास्तविक प्रगति: " : "Actual Completed: "}
+                <span className="text-pink-400 font-black">Day {modulesCompletedCount}</span>
+              </span>
+              <span className="text-[10px] text-slate-500">•</span>
+              <span className="text-[10px] font-bold text-slate-350">
+                {isHindi ? "निर्धारित आदर्श: " : "Ideal Target: "}
+                <span className="text-cyan-400 font-black">Day {newHire.currentDay || 3}</span>
+              </span>
+            </div>
+
+            <p className="text-[11px] text-slate-300 font-medium truncate mt-1">
               {isHindi ? "फास्ट बारकोड स्कैनर एलाइनमेंट और शेल्फ नेविगेशन" : "Fast Barcode Scanner Alignment & Shelf Navigation"}
             </p>
           </div>

@@ -399,6 +399,9 @@ export default function App() {
                   activeSection={learnerSection}
                   onSelectSection={setLearnerSection}
                   onOpenOnboarding={() => setIsOnboarding(true)}
+                  onOpenManagerConsole={() => setActiveTab("manager")}
+                  newHires={newHires}
+                  onSelectHire={setActiveHireId}
                 />
               )}
 

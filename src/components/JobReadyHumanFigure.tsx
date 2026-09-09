@@ -22,7 +22,7 @@ import {
   CapabilityState,
   DARK_STORE_CAPABILITIES,
 } from "../types";
-import { evaluateDay10Outcome } from "../services/intelligence";
+import { evaluateDay10Outcome, assessReadiness } from "../services/intelligence";
 
 interface JobReadyHumanFigureProps {
   newHire: NewHire;
@@ -56,6 +56,9 @@ export const JobReadyHumanFigure: React.FC<JobReadyHumanFigureProps> = ({
   const [selectedCategory, setSelectedCategory] = useState<
     "learning" | "practice" | "simulation" | "assessment"
   >("practice");
+
+  const [activePillarModal, setActivePillarModal] = useState<CapabilityCategory | null>(null);
+  const [activeCriteriaModal, setActiveCriteriaModal] = useState<any | null>(null);
 
   const capabilities = newHire.capabilities || {};
   const currentCapId = newHire.currentCapabilityId || 3;
@@ -112,11 +115,10 @@ export const JobReadyHumanFigure: React.FC<JobReadyHumanFigureProps> = ({
   const assessRatio = assessCompleted / assessTotal;
   const assessPct = Math.round(assessRatio * 30);
 
-  // Overall readiness percentage matching the sum of the 4 category pillar scores
-  const overallReadiness = Math.min(
-    100,
-    learningPct + practicePct + simPct + assessPct
-  );
+  // Authoritative Overall Job Readiness calculation
+  const overallReadiness = typeof newHire.overallReadinessScore === "number"
+    ? (newHire.overallReadinessScore <= 1 ? Math.round(newHire.overallReadinessScore * 100) : Math.round(newHire.overallReadinessScore))
+    : assessReadiness(capabilities, newHire);
 
   const categories: CapabilityCategory[] = [
     {
@@ -188,6 +190,217 @@ export const JobReadyHumanFigure: React.FC<JobReadyHumanFigureProps> = ({
       totalCount: assessTotal,
     },
   ];
+
+  const getPillarModalDetails = (id: string, score: number) => {
+    switch (id) {
+      case "learning":
+        return {
+          statusText: score >= 25 ? (isHindi ? "🏆 उत्कृष्ट प्रगति" : "🏆 Excellent Progress") : (isHindi ? "⚠️ ध्यान देने की आवश्यकता" : "⚠️ Needs Focus"),
+          statusColor: score >= 25 ? "text-emerald-400 bg-emerald-500/10" : "text-amber-405 text-amber-400 bg-amber-500/10 border border-amber-500/20",
+          onTrack: score >= 25 ? (isHindi ? "ट्रैक पर" : "ON TRACK") : (isHindi ? "सुधार आवश्यक" : "NEEDS IMPROVEMENT"),
+          onTrackColor: score >= 25 ? "bg-emerald-500/20 text-emerald-300" : "bg-amber-500/20 text-amber-300",
+          desc: isHindi 
+            ? "यह श्रेणी आपके सिद्धांत और वीडियो-आधारित एलएमएस मॉड्यूल प्रगति को मापती है।"
+            : "This category measures your digital micro-module completion in our learning system (LMS).",
+          currentStats: isHindi
+            ? `आपके 3/10 मॉड्यूल्स पूरे हैं, जिससे आपका स्कोर 9% (कुल वेटेज: 20%) है।`
+            : `You have completed 3 of 10 micro-modules, giving you a 6% score (out of 20% category weight).`,
+          targetStats: isHindi
+            ? "सर्टिफिकेशन के लिए न्यूनतम 8 मॉड्यूल्स (16% स्कोर) आवश्यक हैं।"
+            : "Target requires at least 8 completed modules (16% score) to clear Day 10 handover.",
+          guidance: isHindi
+            ? "कृपया रोज़ाना 1 वीडियो मॉड्यूल पूरा करने पर ध्यान दें। शेल्फ और स्कैनर केयर गाइड को प्राथमिकता दें।"
+            : "Focus on completing 1 learning module per day. Prioritize Shelf Alignment and Scanner Care guides to stay on track."
+        };
+      case "practice":
+        return {
+          statusText: score >= 20 ? (isHindi ? "🏆 उत्कृष्ट" : "🏆 Excellent") : (isHindi ? "⚠️ सुधार की आवश्यकता" : "⚠️ Needs Focus"),
+          statusColor: score >= 20 ? "text-emerald-400 bg-emerald-500/10" : "text-amber-400 bg-amber-500/10",
+          onTrack: score >= 20 ? (isHindi ? "ट्रैक पर" : "ON TRACK") : (isHindi ? "ट्रैक से बाहर" : "NOT ON TRACK"),
+          onTrackColor: score >= 20 ? "bg-emerald-500/20 text-emerald-300" : "bg-amber-500/20 text-amber-300",
+          desc: isHindi
+            ? "यह आपके फ्लोर पिकिंग गति और बारकोड स्कैनिंग सटीकता अभ्यास को मापता है।"
+            : "This monitors your actual floor picking pace, transit accuracy, and scan success rates during exercises.",
+          currentStats: isHindi
+            ? `आप 114 PPH (पिक्स प्रति घंटा) की शानदार गति बनाए हुए हैं, जिससे आपका स्कोर 23% (कुल वेटेज: 25%) है।`
+            : `You are averaging an outstanding 114 PPH (Picks Per Hour), giving you a 23% score (out of 25% category weight).`,
+          targetStats: isHindi
+            ? "लक्ष्य: 110+ पिक्स प्रति घंटा।"
+            : "Target: Average above 110 picks per hour comfortably.",
+          guidance: isHindi
+            ? "आप पहले से ही बेहतरीन प्रदर्शन कर रहे हैं! Aisles 4-8 में सामान ढूंढते वक्त अपनी गति पर थोड़ा और ध्यान दें।"
+            : "Your floor navigation is clean. Keep practicing in cold room zones to reduce searching lag even further."
+        };
+      case "simulation":
+        return {
+          statusText: score >= 15 ? (isHindi ? "🏆 अच्छा प्रदर्शन" : "🏆 Good Progress") : (isHindi ? "⚠️ अभ्यास करें" : "⚠️ Needs Focus"),
+          statusColor: score >= 15 ? "text-cyan-300 bg-cyan-500/10" : "text-amber-400 bg-amber-500/10",
+          onTrack: score >= 15 ? (isHindi ? "ट्रैक पर" : "ON TRACK") : (isHindi ? "ट्रैक से बाहर" : "NOT ON TRACK"),
+          onTrackColor: score >= 15 ? "bg-cyan-500/20 text-cyan-300" : "bg-amber-500/20 text-amber-300",
+          desc: isHindi
+            ? "यह श्रेणी आपके सिम्युलेटेड वॉकथ्रू और मॉक ऑर्डर्स को पूरा करने को दर्शाती है।"
+            : "This tracks simulated shelf alignment, complex orders, and virtual system diagnostics walkthroughs.",
+          currentStats: isHindi
+            ? `आपके 5/8 सिमुलेशन लैब अभ्यास पूरे हैं, जिससे आपका स्कोर 16% (कुल वेटेज: 25%) है।`
+            : `You have cleared 5 of 8 simulation lab challenges, giving you a 16% score (out of 25% category weight).`,
+          targetStats: isHindi
+            ? "लक्ष्य: कम से कम 6 सिमुलेशन पूरे करना।"
+            : "Target: Reach at least 6 completed simulations.",
+          guidance: isHindi
+            ? "अगला सिमुलेशन 'कठिन रैक और भारी सामान' पर आधारित है। इसे आज ही पूरा करें।"
+            : "Your next simulation is 'Heavy Goods & High-Racks' navigation. Complete it today to boost this further."
+        };
+      case "assessment":
+        return {
+          statusText: score >= 15 ? (isHindi ? "🏆 स्वीकृत" : "🏆 Qualified") : (isHindi ? "⚠️ अधूरा" : "⚠️ Incomplete"),
+          statusColor: score >= 15 ? "text-emerald-400 bg-emerald-500/10" : "text-rose-400 bg-rose-500/10 border border-rose-500/20",
+          onTrack: score >= 15 ? (isHindi ? "ट्रैक पर" : "ON TRACK") : (isHindi ? "कार्रवाई आवश्यक" : "ACTION REQUIRED"),
+          onTrackColor: score >= 15 ? "bg-emerald-500/20 text-emerald-300" : "bg-rose-500/20 text-rose-300",
+          desc: isHindi
+            ? "यह श्रेणी आपकी मुख्य क्विज़ और floor buddy द्वारा किए गए लाइव आकलन को ट्रैक करती है।"
+            : "This reflects your scores on core quizzes and floor-buddy signoffs for solo shift readiness.",
+          currentStats: isHindi
+            ? `आपका स्कोर 10% (कुल वेटेज: 30%) है। 1 क्विज़ लंबित है।`
+            : `Your score is 10% (out of 30% weight) because you have 1 pending device assessment.`,
+          targetStats: isHindi
+            ? "लक्ष्य: 85% से अधिक औसत अंक।"
+            : "Target: Average above 85% score in all tests and buddy signoffs.",
+          guidance: isHindi
+            ? "स्कैनर बैटरी केयर और होल्स्टर सेफ्टी क्विज़ को आज पूरा करें ताकि इस श्रेणी में प्रगति बढ़ सके।"
+            : "Complete the pending scanner care quiz today. This is the only hurdle preventing your Assessment certification."
+        };
+      default:
+        return null;
+    }
+  };
+
+  const getCriteriaModalDetails = (critName: string) => {
+    switch (critName) {
+      case "Attendance":
+      case "शिफ्ट अटेंडेंस":
+        return {
+          name: isHindi ? "शिफ्ट अटेंडेंस" : "Shift Attendance",
+          status: "Completed ✓",
+          statusColor: "text-emerald-400 bg-emerald-500/10 border border-emerald-500/20",
+          onTrack: "ON TRACK",
+          onTrackColor: "bg-emerald-500/20 text-emerald-300",
+          desc: isHindi
+            ? "10-दिवसीय ऑनबोर्डिंग कार्यक्रम के दौरान आपकी शिफ्ट में उपस्थिति दर्ज की गई।"
+            : "Attendance track during your 10-day training onboarding phase.",
+          metrics: isHindi ? "उपस्थिति: 100% (लक्ष्य: >95%)" : "Attendance: 100% (Target: >95%)",
+          guidance: isHindi
+            ? "शानदार! आपने कोई शिफ्ट मिस नहीं की है। इसी तरह अनुशासन बनाए रखें।"
+            : "Excellent! You have had zero missed shifts or late check-ins. Keep up this perfect discipline!"
+        };
+      case "Device Care":
+      case "उपकरण की देखभाल":
+        return {
+          name: isHindi ? "उपकरण की देखभाल" : "Standard Device Care",
+          status: "Completed ✓",
+          statusColor: "text-emerald-400 bg-emerald-500/10 border border-emerald-500/20",
+          onTrack: "ON TRACK",
+          onTrackColor: "bg-emerald-500/20 text-emerald-300",
+          desc: isHindi
+            ? "ज़ेबरा स्कैनर डिवाइस को सही ढंग से संभालने और चार्जिंग डॉक पर लगाने की क्षमता।"
+            : "Demonstrated safe handling of Zebra barcode scanning terminals, holsters, and proper battery dock checkouts.",
+          metrics: isHindi ? "स्थिति: स्वीकृत (Passed)" : "Status: Verified & Passed",
+          guidance: isHindi
+            ? "आप डिवाइस को बहुत अच्छी तरह संभाल रहे हैं। काम समाप्त होने पर इसे डॉक करना न भूलें।"
+            : "Device checkout and docking protocols are fully met. Continue using the safety holster at all times."
+        };
+      case "Pace Target":
+      case "गति का लक्ष्य":
+        return {
+          name: isHindi ? "गति का लक्ष्य" : "Pace Target (Speed)",
+          status: "Action Required ⚠️",
+          statusColor: "text-amber-400 bg-amber-500/10 border border-amber-500/20",
+          onTrack: "NOT ON TRACK",
+          onTrackColor: "bg-amber-500/20 text-amber-300",
+          desc: isHindi
+            ? "प्रति घंटे किए गए औसत पिक का न्यूनतम लक्ष्य।"
+            : "Your average picking speed measured over active mock shifts.",
+          metrics: isHindi ? "वर्तमान गति: 114 PPH (लक्ष्य: 115 PPH)" : "Current: 114 PPH (Target: 115 PPH)",
+          guidance: isHindi
+            ? "आप लक्ष्य के बहुत करीब हैं! Aisles 4-8 (आटा और भारी रैक) में अपनी गति को थोड़ा बढ़ाने से यह लक्ष्य पार हो जाएगा।"
+            : "You are exceptionally close! Spend a little more time navigating Aisles 4-8 to push past the 115 PPH benchmark."
+        };
+      case "Scan Accuracy":
+      case "स्कैन सटीकता":
+        return {
+          name: isHindi ? "स्कैन सटीकता" : "Scan Accuracy",
+          status: "Completed ✓",
+          statusColor: "text-emerald-400 bg-emerald-500/10 border border-emerald-500/20",
+          onTrack: "ON TRACK",
+          onTrackColor: "bg-emerald-500/20 text-emerald-300",
+          desc: isHindi
+            ? "पिकिंग के दौरान बिना किसी गलत स्कैन के सही सामान चुनने की दर।"
+            : "The percentage of items scanned and picked successfully on the first attempt without mis-scans.",
+          metrics: isHindi ? "आपकी सटीकता: 99.1% (लक्ष्य: >99%)" : "Accuracy: 99.1% (Target: >99.0%)",
+          guidance: isHindi
+            ? "प्रशंसनीय सटीकता! आप लगभग कोई गलती नहीं कर रहे हैं। इसे इसी तरह बनाए रखें।"
+            : "Superb! Your scan accuracy exceeds the operational threshold, keeping customer orders perfect."
+        };
+      case "Safety Record":
+      case "सुरक्षा रिकॉर्ड":
+        return {
+          name: isHindi ? "सुरक्षा रिकॉर्ड" : "Safety Compliance",
+          status: "Completed ✓",
+          statusColor: "text-emerald-400 bg-emerald-500/10 border border-emerald-500/20",
+          onTrack: "ON TRACK",
+          onTrackColor: "bg-emerald-500/20 text-emerald-300",
+          desc: isHindi
+            ? "फ्लोर पर ट्रॉली ले जाने और भारी वजन उठाने की सुरक्षा गाइडलाइंस का पालन।"
+            : "Adherence to dark store floor safety, trolley handling, and safe lifting/bending guidelines.",
+          metrics: isHindi ? "सुरक्षा उल्लंघन: 0 (शून्य)" : "Violations: 0 (Zero)",
+          guidance: isHindi
+            ? "सुरक्षित काम ही सही काम है। परफेक्ट सुरक्षा रिकॉर्ड!"
+            : "Perfect score! You've maintained safe warehouse posture and trolley discipline. Keep yourself safe!"
+        };
+      case "LMS Progress":
+      case "LMS प्रोग्रेस":
+        return {
+          name: isHindi ? "LMS प्रोग्रेस" : "LMS Progress",
+          status: "Action Required ⚠️",
+          statusColor: "text-rose-400 bg-rose-500/10 border border-rose-500/20",
+          onTrack: "ACTION REQUIRED",
+          onTrackColor: "bg-rose-500/20 text-rose-300",
+          desc: isHindi
+            ? "10-दिवसीय ऑनबोर्डिंग कोर्स में आपके पूरे किए गए वीडियो कोर्स।"
+            : "Your overall digital course micro-module completions in the LMS.",
+          metrics: isHindi ? "पूर्ण: 3/10 (लक्ष्य: कम से कम 8)" : "Completed: 3/10 (Target: At least 8)",
+          guidance: isHindi
+            ? "सर्टिफिकेशन से पहले आपको कम से कम 8 मॉड्यूल्स पूरे करने होंगे। आज ही 1 नया मॉड्यूल पूरा करें।"
+            : "LMS completion is your primary certification blocker. Please clear outstanding micro-modules to resolve."
+        };
+      case "Buddy Feedback":
+      case "बडी फीडबैक":
+        return {
+          name: isHindi ? "बडी फीडबैक" : "Floor Buddy Feedback",
+          status: "Completed ✓",
+          statusColor: "text-emerald-400 bg-emerald-500/10 border border-emerald-500/20",
+          onTrack: "ON TRACK",
+          onTrackColor: "bg-emerald-500/20 text-emerald-300",
+          desc: isHindi
+            ? "सीनियर गाइड (विक्रम भैया) द्वारा आपकी संचार, टीमवर्क और फ्लोर व्यवहार पर रेटिंग।"
+            : "Live floor assessment feedback and signoff from senior guide Vikram bhaiya.",
+          metrics: isHindi ? "बडी फीडबैक: स्वीकृत (Passed)" : "Feedback: Verified & Signed Off",
+          guidance: isHindi
+            ? "विक्रम भैया आपके संवाद और फ्लोर व्यवहार से बहुत खुश हैं! आप पूरी तरह से रेडी हैं।"
+            : "Vikram signed off on your communication, aisle behavior, and readiness to pick independently. Great teamwork!"
+        };
+      default:
+        return {
+          name: critName,
+          status: "Check Status",
+          statusColor: "text-cyan-400 bg-cyan-500/10 border border-cyan-500/20",
+          onTrack: "ON TRACK",
+          onTrackColor: "bg-cyan-500/20 text-cyan-300",
+          desc: "Review this criteria to stay on track for Day 10 Certification.",
+          metrics: "Target Met",
+          guidance: "Continue your excellent effort across all dark store zones."
+        };
+    }
+  };
 
   // Learning journey stages matching reference image bottom bar
   const journeyStages = [
@@ -372,7 +585,10 @@ export const JobReadyHumanFigure: React.FC<JobReadyHumanFigureProps> = ({
               return (
                 <div
                   key={cat.id}
-                  onClick={() => setSelectedCategory(cat.id)}
+                  onClick={() => {
+                    setSelectedCategory(cat.id);
+                    setActivePillarModal(cat);
+                  }}
                   className={`p-2.5 sm:p-3 rounded-2xl border transition-all duration-200 cursor-pointer relative flex flex-col items-center text-center justify-between active:scale-95 select-none ${
                     isSelected
                       ? "bg-gradient-to-br from-cyan-400 to-blue-600 border-transparent shadow-lg shadow-cyan-950/15 text-slate-950 ring-2 ring-cyan-400/40 font-bold"
@@ -458,7 +674,8 @@ export const JobReadyHumanFigure: React.FC<JobReadyHumanFigureProps> = ({
               {day10Audit.verifiedCriteria.map((crit, idx) => (
                 <div
                   key={idx}
-                  className={`p-2.5 rounded-2xl border flex items-start gap-2 ${
+                  onClick={() => setActiveCriteriaModal(crit)}
+                  className={`p-2.5 rounded-2xl border flex items-start gap-2 cursor-pointer transition-all duration-200 active:scale-95 select-none hover:bg-white/10 hover:border-white/20 ${
                     crit.met
                       ? "bg-white/10 border-white/10 text-slate-200"
                       : "bg-rose-500/10 border-rose-500/20 text-rose-200"
@@ -555,6 +772,189 @@ export const JobReadyHumanFigure: React.FC<JobReadyHumanFigureProps> = ({
           ))}
         </div>
       </div>
+
+      {/* ========================================== */}
+      {/* 1. PILLAR (CATEGORY) DRILLDOWN POPUP TAB   */}
+      {/* ========================================== */}
+      {activePillarModal && (() => {
+        const catScore = Math.round(activePillarModal.ratio * activePillarModal.weight);
+        const details = getPillarModalDetails(activePillarModal.id, catScore);
+        if (!details) return null;
+        return (
+          <div className="fixed inset-0 bg-slate-950/80 backdrop-blur-md z-50 flex items-center justify-center p-4">
+            <div className="bg-[#181b21] border border-white/10 p-5 sm:p-6 rounded-[28px] max-w-sm w-full space-y-5 shadow-2xl relative overflow-hidden text-white animate-in zoom-in-95 duration-200">
+              {/* Top Decor Glow */}
+              <div className="absolute -top-12 -left-12 w-24 h-24 bg-cyan-500/20 rounded-full blur-2xl" />
+
+              <div className="flex items-center justify-between border-b border-white/5 pb-3">
+                <div className="flex items-center gap-2">
+                  <div className="w-8 h-8 rounded-lg bg-white/5 text-cyan-400 flex items-center justify-center">
+                    {activePillarModal.icon}
+                  </div>
+                  <div>
+                    <h4 className="text-sm font-black text-white">
+                      {isHindi ? activePillarModal.titleHi : activePillarModal.title}
+                    </h4>
+                    <span className="text-[10px] text-slate-400 font-semibold uppercase tracking-wider">
+                      {isHindi ? `वेटेज: ${activePillarModal.weight}%` : `Weight: ${activePillarModal.weight}%`}
+                    </span>
+                  </div>
+                </div>
+                <button
+                  onClick={() => setActivePillarModal(null)}
+                  className="w-7 h-7 rounded-full bg-white/5 hover:bg-white/10 text-slate-400 hover:text-white flex items-center justify-center font-bold text-xs transition-colors"
+                >
+                  ✕
+                </button>
+              </div>
+
+              {/* Status Header Block */}
+              <div className="flex items-center justify-between gap-3 bg-white/5 p-3 rounded-2xl border border-white/5">
+                <div>
+                  <span className="text-[10px] text-slate-400 font-bold block uppercase tracking-wider">
+                    {isHindi ? "वर्तमान स्कोर" : "Current Score"}
+                  </span>
+                  <span className="text-2xl font-black text-cyan-400">{catScore}%</span>
+                </div>
+                <div className="text-right">
+                  <span className="text-[10px] text-slate-400 font-bold block uppercase tracking-wider">
+                    {isHindi ? "ट्रैक स्थिति" : "Track Status"}
+                  </span>
+                  <span className={`text-[10px] px-2 py-0.5 rounded-full font-black uppercase inline-block ${details.onTrackColor}`}>
+                    {details.onTrack}
+                  </span>
+                </div>
+              </div>
+
+              {/* Description */}
+              <div className="space-y-2.5 text-xs text-slate-200">
+                <div>
+                  <strong className="text-slate-400 block font-bold">
+                    {isHindi ? "विवरण:" : "Description:"}
+                  </strong>
+                  <p className="font-medium leading-relaxed">{details.desc}</p>
+                </div>
+
+                <div>
+                  <strong className="text-slate-400 block font-bold">
+                    {isHindi ? "स्थिति विश्लेषण:" : "Status Analysis:"}
+                  </strong>
+                  <p className="font-semibold text-cyan-300 leading-relaxed">{details.currentStats}</p>
+                  <p className="text-[11px] text-slate-400 mt-0.5">{details.targetStats}</p>
+                </div>
+
+                <div className="p-3 bg-amber-500/10 border border-amber-500/20 rounded-xl text-[11px]">
+                  <strong className={`font-black uppercase tracking-wider block mb-1 ${details.statusColor}`}>
+                    {details.statusText}
+                  </strong>
+                  <p className="font-semibold text-slate-200 leading-relaxed">{details.guidance}</p>
+                </div>
+              </div>
+
+              <div className="pt-1">
+                <button
+                  onClick={() => setActivePillarModal(null)}
+                  className="w-full py-2.5 rounded-2xl bg-gradient-to-r from-cyan-400 to-blue-500 text-slate-950 text-xs font-black hover:opacity-90 active:scale-95 transition-all uppercase tracking-wider"
+                >
+                  {isHindi ? "ठीक है, समझ गया!" : "Alright, Got It!"}
+                </button>
+              </div>
+            </div>
+          </div>
+        );
+      })()}
+
+      {/* ========================================== */}
+      {/* 2. CRITERIA DRILLDOWN POPUP TAB            */}
+      {/* ========================================== */}
+      {activeCriteriaModal && (() => {
+        const details = getCriteriaModalDetails(activeCriteriaModal.name);
+        return (
+          <div className="fixed inset-0 bg-slate-950/80 backdrop-blur-md z-50 flex items-center justify-center p-4">
+            <div className="bg-[#181b21] border border-white/10 p-5 sm:p-6 rounded-[28px] max-w-sm w-full space-y-5 shadow-2xl relative overflow-hidden text-white animate-in zoom-in-95 duration-200">
+              {/* Top Decor Glow */}
+              <div className="absolute -top-12 -left-12 w-24 h-24 bg-purple-500/20 rounded-full blur-2xl" />
+
+              <div className="flex items-center justify-between border-b border-white/5 pb-3">
+                <div className="flex items-center gap-2">
+                  <div className={`w-8 h-8 rounded-lg flex items-center justify-center ${
+                    activeCriteriaModal.met ? "bg-emerald-500/10 text-emerald-400" : "bg-rose-500/10 text-rose-400"
+                  }`}>
+                    {activeCriteriaModal.met ? <CheckCircle2 className="w-4 h-4" /> : <AlertTriangle className="w-4 h-4" />}
+                  </div>
+                  <div>
+                    <h4 className="text-sm font-black text-white leading-tight">
+                      {details.name}
+                    </h4>
+                    <span className="text-[10px] text-slate-400 font-semibold uppercase tracking-wider">
+                      {isHindi ? "व्यावसायिक ऑडिट" : "Core Operational Criteria"}
+                    </span>
+                  </div>
+                </div>
+                <button
+                  onClick={() => setActiveCriteriaModal(null)}
+                  className="w-7 h-7 rounded-full bg-white/5 hover:bg-white/10 text-slate-400 hover:text-white flex items-center justify-center font-bold text-xs transition-colors"
+                >
+                  ✕
+                </button>
+              </div>
+
+              {/* Status Header Block */}
+              <div className="flex items-center justify-between gap-3 bg-white/5 p-3 rounded-2xl border border-white/5">
+                <div>
+                  <span className="text-[10px] text-slate-400 font-bold block uppercase tracking-wider">
+                    {isHindi ? "ऑडिट स्थिति" : "Audit Status"}
+                  </span>
+                  <span className={`text-sm font-black ${activeCriteriaModal.met ? "text-emerald-400" : "text-rose-400"}`}>
+                    {details.status}
+                  </span>
+                </div>
+                <div className="text-right">
+                  <span className="text-[10px] text-slate-400 font-bold block uppercase tracking-wider">
+                    {isHindi ? "ट्रैक स्थिति" : "Track Status"}
+                  </span>
+                  <span className={`text-[10px] px-2 py-0.5 rounded-full font-black uppercase inline-block ${details.onTrackColor}`}>
+                    {details.onTrack}
+                  </span>
+                </div>
+              </div>
+
+              {/* Description */}
+              <div className="space-y-3 text-xs text-slate-200">
+                <div>
+                  <strong className="text-slate-400 block font-bold">
+                    {isHindi ? "मापदंड विवरण:" : "Criterion Standard:"}
+                  </strong>
+                  <p className="font-medium leading-relaxed">{details.desc}</p>
+                </div>
+
+                <div>
+                  <strong className="text-slate-400 block font-bold">
+                    {isHindi ? "आपका वास्तविक प्रदर्शन:" : "Your Measured Performance:"}
+                  </strong>
+                  <p className="font-bold text-purple-300 leading-relaxed text-sm">{details.metrics}</p>
+                </div>
+
+                <div className="p-3 bg-[#111317]/50 border border-white/5 rounded-xl space-y-1">
+                  <strong className="text-[10px] text-slate-400 font-black uppercase tracking-wider block">
+                    {isHindi ? "सुझाव व अगला कदम:" : "Coach Guidance & Next Step:"}
+                  </strong>
+                  <p className="font-semibold text-slate-200 leading-relaxed text-[11px]">{details.guidance}</p>
+                </div>
+              </div>
+
+              <div className="pt-1">
+                <button
+                  onClick={() => setActiveCriteriaModal(null)}
+                  className="w-full py-2.5 rounded-2xl bg-gradient-to-r from-purple-500 to-indigo-600 text-white text-xs font-black hover:opacity-90 active:scale-95 transition-all uppercase tracking-wider"
+                >
+                  {isHindi ? "ठीक है, बंद करें" : "Alright, Close"}
+                </button>
+              </div>
+            </div>
+          </div>
+        );
+      })()}
     </section>
   );
 };

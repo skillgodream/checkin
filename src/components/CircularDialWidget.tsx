@@ -29,7 +29,7 @@ export const CircularDialWidget: React.FC<CircularDialWidgetProps> = ({
   pickRate = 35,
   targetPickRate = 50,
   accuracyRate = 98,
-  readinessScore = 74,
+  readinessScore,
   onCallBuddy,
   onScannerFix,
   onAisleMap,
@@ -54,11 +54,13 @@ export const CircularDialWidget: React.FC<CircularDialWidgetProps> = ({
     modeLabel = isHindi ? "स्कैन एक्यूरेसी" : "Scan Accuracy";
     statusBadge = accuracyRate >= 95 ? "Excellent (98%)" : "Needs Care";
   } else if (mode === "readiness") {
-    currentValue = readinessScore;
+    currentValue = readinessScore ?? 0;
     targetValue = 100;
-    unit = "% ready";
+    unit = readinessScore !== undefined ? "% ready" : (isHindi ? "अनुपलब्ध" : "Unavailable");
     modeLabel = isHindi ? "फ्लोर रेडीनेस" : "Floor Readiness";
-    statusBadge = readinessScore >= 70 ? "On Track" : "Attention";
+    statusBadge = readinessScore !== undefined
+      ? (readinessScore >= 70 ? "On Track" : "Attention")
+      : (isHindi ? "पर्याप्त साक्ष्य नहीं" : "Not enough evidence");
   }
 
   // Calculate angle for SVG arc (240 degree sweep from -120 to +120 or full 360)
@@ -274,8 +276,8 @@ export const CircularDialWidget: React.FC<CircularDialWidgetProps> = ({
             className="font-black text-3xl tracking-tight"
             style={{ fontWeight: 900 }}
           >
-            {currentValue}
-            {mode === "accuracy" || mode === "readiness" ? "%" : ""}
+            {mode === "readiness" && readinessScore === undefined ? "N/A" : currentValue}
+            {(mode === "accuracy" || (mode === "readiness" && readinessScore !== undefined)) ? "%" : ""}
           </text>
           <text
             x="100"

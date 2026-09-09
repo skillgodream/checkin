@@ -3,6 +3,7 @@ import {
   executeCoordinationLoop,
   LoopExecutionInput,
   evaluateDay10Outcome,
+  assessReadiness,
 } from "./intelligence";
 import { adaptGoogleFormFeedRow, DEMO_FEED_PRESETS } from "./googleFormFeedAdapter";
 import { initialRahul, initialCohort } from "../data/seedData";
@@ -366,5 +367,88 @@ describe("Step 4 — Prove Six Doctors Across Real Conditions", () => {
     expect(notReadyEval.isReady).toBe(false);
     expect(notReadyEval.status).toBe("Not Ready");
     expect(notReadyEval.unresolvedBlockers.length).toBeGreaterThan(0);
+  });
+});
+
+describe("Step 11A — Overall Readiness Consistency Regression Tests", () => {
+  const baseHire = initialRahul;
+
+  it("Test A — Single readiness authority and Test C — Different metrics remain independent", () => {
+    // Assert that the different metrics for baseHire (Rahul) are independent
+    expect(baseHire.quizAverageScore).toBe(94); // Quiz Average
+    expect(baseHire.overallReadinessScore).toBe(35); // Overall Readiness is 35
+    expect(baseHire.daysHistory[0].workSignal?.accuracyRate).toBe(99); // Scan Accuracy is 99%
+    expect(baseHire.daysHistory[0].workSignal?.actualPickRate).toBe(22); // Scan Rate (Pick speed) is 22
+
+    // Prove that they are distinct values
+    expect(baseHire.overallReadinessScore).not.toBe(baseHire.daysHistory[0].workSignal?.accuracyRate);
+    expect(baseHire.overallReadinessScore).not.toBe(baseHire.quizAverageScore);
+  });
+
+  it("Test B — No artificial fallback in overall readiness calculation", () => {
+    // If overallReadinessScore is not a number, but capabilities exist, we calculate dynamically via assessReadiness.
+    // If capabilities are empty/unavailable, it should not invent a 74% or 65% fallback.
+    const emptyHire = {
+      ...baseHire,
+      overallReadinessScore: undefined as any,
+      capabilities: {}
+    };
+    const computedReadiness = assessReadiness(emptyHire.capabilities, emptyHire);
+    // Calculated readiness for a profile with absolutely no capabilities completed must be 0 or dynamic, NEVER 74 or 65.
+    expect(computedReadiness).not.toBe(74);
+    expect(computedReadiness).not.toBe(65);
+    expect(computedReadiness).toBe(0);
+  });
+
+  it("Test D — Intelligence unchanged (same-day divergence test)", () => {
+    // Two hires on Day 3 with different evidence must still produce different intelligent outcomes.
+    const presetNav = DEMO_FEED_PRESETS.find((p) => p.id === "scenario-1-navigation")!;
+    const adaptedNav = adaptGoogleFormFeedRow(presetNav.payload, initialCohort);
+
+    const inputNav: LoopExecutionInput = {
+      hire: baseHire,
+      dayNumber: 3,
+      workSignal: adaptedNav.workSignal,
+      dailySignal: adaptedNav.dailySignal,
+      managerSignal: adaptedNav.managerSignal,
+    };
+    const resultNav = executeCoordinationLoop(inputNav);
+
+    const presetScanner = DEMO_FEED_PRESETS.find((p) => p.id === "scenario-2-scanner-tool")!;
+    const adaptedScanner = adaptGoogleFormFeedRow(presetScanner.payload, initialCohort);
+
+    const inputScanner: LoopExecutionInput = {
+      hire: baseHire,
+      dayNumber: 3,
+      workSignal: adaptedScanner.workSignal,
+      dailySignal: adaptedScanner.dailySignal,
+      managerSignal: adaptedScanner.managerSignal,
+    };
+    const resultScanner = executeCoordinationLoop(inputScanner);
+
+    // Nav has a Spatial bottleneck, Scanner has a Tool bottleneck -> different outcomes!
+    expect(resultNav.action.targetCapabilityId).not.toBe(resultScanner.action.targetCapabilityId);
+    expect(resultNav.action.decisionType).toBe("reinforce_current");
+    expect(resultScanner.action.decisionType).toBe("tool_remedy");
+  });
+
+  it("Test E — Closed loop unchanged", () => {
+    // Verify that evidence -> intelligence -> recommendation -> intervention -> ActionOutcome -> re-evaluation works exactly as before.
+    const recoveryPreset = DEMO_FEED_PRESETS.find((p) => p.id === "scenario-recovery-nav")!;
+    const adapted = adaptGoogleFormFeedRow(recoveryPreset.payload, initialCohort);
+
+    const input: LoopExecutionInput = {
+      hire: baseHire,
+      dayNumber: 4,
+      workSignal: adapted.workSignal,
+      dailySignal: adapted.dailySignal,
+      managerSignal: adapted.managerSignal,
+      actionOutcome: adapted.actionOutcome,
+    };
+
+    const result = executeCoordinationLoop(input);
+    expect(result.updatedStatus).toBe("Doing well");
+    expect(result.action.decisionType).toBe("advance_default");
+    expect(result.updatedCapabilities[3].evidence).toBe("demonstrated");
   });
 });

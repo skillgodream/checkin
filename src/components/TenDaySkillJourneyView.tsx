@@ -25,6 +25,7 @@ import {
   CapabilityState,
   WorkSignal,
 } from "../types";
+import { assessReadiness } from "../services/intelligence";
 
 export interface MilestoneDefinition {
   dayNumber: number;
@@ -214,6 +215,11 @@ export const TenDaySkillJourneyView: React.FC<TenDaySkillJourneyViewProps> = ({
   const modulesCompleted = activeHire.modulesCompleted ?? 3;
   const isBehind = activeHire.status === "At risk" || activeHire.status === "Needs attention" || modulesCompleted < learnerDay - 1;
 
+  // Authoritative Overall Job Readiness calculation
+  const authoritativeReadiness = typeof activeHire.overallReadinessScore === "number"
+    ? (activeHire.overallReadinessScore <= 1 ? Math.round(activeHire.overallReadinessScore * 100) : Math.round(activeHire.overallReadinessScore))
+    : (activeHire.capabilities ? assessReadiness(activeHire.capabilities, activeHire) : 0);
+
   const [expandedLevel, setExpandedLevel] = useState<number | null>(learnerDay <= 3 ? 3 : learnerDay <= 5 ? 5 : learnerDay <= 7 ? 7 : learnerDay <= 9 ? 9 : 10);
 
   const currentMilestoneDef = getMilestoneForDay(learnerDay) || CANONICAL_MILESTONES[0];
@@ -287,6 +293,20 @@ export const TenDaySkillJourneyView: React.FC<TenDaySkillJourneyViewProps> = ({
                 : "Your personalized path to full certification, guided step-by-step by Dean."}
             </p>
           </div>
+
+          {/* Simple Live Progress Bar (High Visual Contrast) */}
+          <div className="w-full mt-4 bg-black/20 border border-white/10 rounded-2xl p-3.5 space-y-1.5 backdrop-blur-md">
+            <div className="flex items-center justify-between text-[11px] font-bold text-slate-300">
+              <span>{isHindi ? "कुल करियर रेडीनेस (लक्ष्य: 85%+)" : "Overall Role Readiness (Target: 85%+)"}</span>
+              <span className="text-cyan-400 font-mono font-black">{authoritativeReadiness}%</span>
+            </div>
+            <div className="w-full h-2.5 bg-black/40 border border-white/5 rounded-full overflow-hidden p-0.5">
+              <div
+                className="h-full bg-gradient-to-r from-cyan-400 via-cyan-500 to-blue-500 rounded-full transition-all duration-500"
+                style={{ width: `${authoritativeReadiness}%` }}
+              />
+            </div>
+          </div>
         </div>
       </div>
 
@@ -326,14 +346,14 @@ export const TenDaySkillJourneyView: React.FC<TenDaySkillJourneyViewProps> = ({
       )}
 
       {/* 3. WHERE I STAND VS IDEAL (FLATTENED ELITE METRICS) */}
-      <div className={`p-6 rounded-[28px] border transition-all backdrop-blur-sm ${
+      <div className={`p-5 rounded-[24px] border transition-all backdrop-blur-sm flex flex-col gap-4 ${
         isBehind 
           ? "bg-[#1d1414] border-red-500/20 shadow-lg shadow-red-950/10" 
           : "bg-white/5 border-white/10 shadow-lg"
       }`}>
-        <div className="flex items-center justify-between border-b border-white/5 pb-3.5">
+        <div className="flex items-center justify-between">
           <div className="flex items-center gap-3">
-            <div className={`p-2.5 rounded-xl shrink-0 ${
+            <div className={`p-2 rounded-xl shrink-0 ${
               isBehind ? "bg-red-500/15 text-red-400" : "bg-cyan-500/10 text-cyan-400"
             }`}>
               {isBehind ? <AlertTriangle className="w-4 h-4" /> : <Sparkles className="w-4 h-4" />}
@@ -342,7 +362,7 @@ export const TenDaySkillJourneyView: React.FC<TenDaySkillJourneyViewProps> = ({
               <h3 className="text-xs font-black uppercase tracking-wider text-white">
                 {isHindi ? "मेरी वर्तमान स्थिति" : "Standing vs Pro Target"}
               </h3>
-              <p className="text-[10px] text-slate-400 font-mono">Day {learnerDay} Status Check</p>
+              <p className="text-[10px] text-slate-400 font-mono mt-0.5">Day {learnerDay} Status Check</p>
             </div>
           </div>
           <span className={`px-2.5 py-1 rounded-full text-[10px] font-black uppercase tracking-wider border ${
@@ -354,26 +374,26 @@ export const TenDaySkillJourneyView: React.FC<TenDaySkillJourneyViewProps> = ({
           </span>
         </div>
 
-        {/* Flat stats with no nested grey background boxes */}
-        <div className="grid grid-cols-2 gap-4 py-4 text-center">
-          <div className="border-r border-white/5">
-            <span className="block text-[10px] font-bold uppercase tracking-wider text-slate-400 mb-1">
-              {isHindi ? "निर्धारित गति" : "IDEAL PACE"}
-            </span>
-            <span className="font-black text-white text-base">Day {learnerDay} Module</span>
-          </div>
-          <div>
-            <span className="block text-[10px] font-bold uppercase tracking-wider text-slate-400 mb-1">
-              {isHindi ? "आपकी प्रगति" : "YOUR PROGRESS"}
-            </span>
-            <span className={`font-black text-base ${isBehind ? "text-amber-400" : "text-emerald-400"}`}>
-              {modulesCompleted} {isHindi ? "मॉड्यूल पूर्ण" : "Modules Done"}
-            </span>
-          </div>
+        <div className="flex bg-black/20 rounded-xl p-3.5 items-center justify-between border border-white/5">
+           <div className="flex flex-col">
+              <span className="text-[9px] font-bold uppercase tracking-wider text-slate-400 mb-0.5">
+                {isHindi ? "निर्धारित गति" : "IDEAL PACE"}
+              </span>
+              <span className="font-bold text-white text-sm">Day {learnerDay} Module</span>
+           </div>
+           <div className="w-[1px] h-8 bg-white/10" />
+           <div className="flex flex-col text-right">
+              <span className="text-[9px] font-bold uppercase tracking-wider text-slate-400 mb-0.5">
+                {isHindi ? "आपकी प्रगति" : "YOUR PROGRESS"}
+              </span>
+              <span className={`font-bold text-sm ${isBehind ? "text-amber-400" : "text-emerald-400"}`}>
+                {modulesCompleted} {isHindi ? "मॉड्यूल पूर्ण" : "Modules Done"}
+              </span>
+           </div>
         </div>
 
         {isBehind && (
-          <div className="mt-3 pl-3.5 border-l-2 border-amber-500 text-xs text-amber-300 font-semibold leading-relaxed animate-in fade-in duration-200">
+          <div className="pl-3.5 border-l-2 border-amber-500 text-xs text-amber-300 font-medium leading-relaxed">
             <strong className="text-white">Dean's Note:</strong> You are slightly behind due to aisle navigation friction on Day 3. Dean has automatically redistributed your tasks.
           </div>
         )}
@@ -420,9 +440,6 @@ export const TenDaySkillJourneyView: React.FC<TenDaySkillJourneyViewProps> = ({
                   <h4 className="text-sm sm:text-base font-black text-white mt-1.5 group-hover:text-cyan-300 leading-snug">
                     {idx + 1}. {action.title}
                   </h4>
-                  <p className="text-xs text-slate-300 mt-1 leading-relaxed">
-                    {action.desc}
-                  </p>
                 </div>
               </div>
               <div className="p-1.5 rounded-full bg-slate-950/25 text-slate-400 group-hover:text-cyan-300 group-hover:bg-slate-950/50 shrink-0 border border-white/5 transition-all">
