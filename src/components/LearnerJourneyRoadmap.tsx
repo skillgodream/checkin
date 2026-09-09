@@ -208,20 +208,20 @@ export const LearnerJourneyRoadmap: React.FC<LearnerJourneyRoadmapProps> = ({
   return (
     <div
       id="learner-job-ready-roadmap-card"
-      className="bg-white/10 backdrop-blur-md rounded-[26px] p-4 sm:p-5 border border-white/20 shadow-xl space-y-3.5 select-none"
+      className="bg-gradient-to-br from-cyan-500 to-blue-600 rounded-[26px] p-4 sm:p-5 border border-white/20 shadow-xl shadow-cyan-500/10 space-y-3.5 select-none"
     >
       {/* CARD HEADER: WHERE AM I? */}
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-2.5">
-          <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-violet-600 to-fuchsia-600 text-white flex items-center justify-center shadow-xs">
+          <div className="w-9 h-9 rounded-xl bg-white/20 text-white flex items-center justify-center shadow-xs">
             <Sparkles className="w-4 h-4" />
           </div>
           <div>
             <div className="flex items-center gap-2">
-              <span className="text-xs font-black uppercase tracking-wider text-violet-300 bg-violet-500/20 px-2.5 py-0.5 rounded-full border border-violet-500/30">
+              <span className="text-xs font-black uppercase tracking-wider text-white bg-white/25 px-2.5 py-0.5 rounded-full border border-white/10">
                 {isHindi ? "जॉब-रेडी सफर" : "Job-Ready Journey"}
               </span>
-              <span className="text-xs font-bold text-slate-300">
+              <span className="text-xs font-bold text-white/90">
                 {currentStage.stageNumber}/6
               </span>
             </div>
@@ -235,10 +235,10 @@ export const LearnerJourneyRoadmap: React.FC<LearnerJourneyRoadmapProps> = ({
           <button
             type="button"
             onClick={handlePlayAudio}
-            className="p-2 rounded-full bg-white/10 hover:bg-white/20 text-purple-300 transition-colors cursor-pointer"
+            className="p-2 rounded-full bg-white/15 hover:bg-white/25 text-white transition-colors cursor-pointer"
             title="Listen aloud"
           >
-            <Volume2 className={`w-4 h-4 ${playingAudio ? "animate-bounce text-purple-300" : ""}`} />
+            <Volume2 className={`w-4 h-4 ${playingAudio ? "animate-bounce" : ""}`} />
           </button>
         </div>
       </div>
@@ -246,9 +246,9 @@ export const LearnerJourneyRoadmap: React.FC<LearnerJourneyRoadmapProps> = ({
       {/* 6-STAGE VISUAL PROGRESSION TRACK */}
       <div className="relative pt-2 pb-1">
         {/* Connection line */}
-        <div className="absolute top-6 left-4 right-4 h-1 bg-white/10 rounded-full z-0">
+        <div className="absolute top-6 left-4 right-4 h-1 bg-white/20 rounded-full z-0">
           <div
-            className="h-full bg-gradient-to-r from-violet-500 via-purple-500 to-fuchsia-500 rounded-full transition-all duration-700"
+            className="h-full bg-white rounded-full transition-all duration-700 shadow-xs"
             style={{
               width: `${(currentStageIndex / (stages.length - 1)) * 100}%`,
             }}
@@ -273,23 +273,23 @@ export const LearnerJourneyRoadmap: React.FC<LearnerJourneyRoadmapProps> = ({
                 <div
                   className={`w-8 h-8 rounded-full flex items-center justify-center transition-all ${
                     isCompleted
-                      ? "bg-emerald-600 text-white shadow-xs"
+                      ? "bg-emerald-400 text-slate-900 shadow-xs"
                       : isCurrent
-                      ? "bg-gradient-to-tr from-violet-600 to-fuchsia-600 text-white ring-4 ring-white/10 shadow-md scale-110"
-                      : "bg-white/10 border-2 border-white/10 text-slate-300 group-hover:border-white/20"
+                      ? "bg-white text-blue-600 ring-4 ring-white/25 shadow-md scale-110"
+                      : "bg-white/15 border-2 border-white/15 text-white/90 group-hover:border-white/25"
                   }`}
                 >
                   {isCompleted ? (
                     <CheckCircle2 className="w-4 h-4 stroke-[2.5]" />
                   ) : isCurrent ? (
-                    <div className="w-2.5 h-2.5 rounded-full bg-white animate-pulse" />
+                    <div className="w-2.5 h-2.5 rounded-full bg-blue-600 animate-pulse" />
                   ) : (
                     <span className="text-xs font-black">{stage.stageNumber}</span>
                   )}
                 </div>
                 <span
                   className={`text-[11px] sm:text-xs mt-1.5 font-bold truncate max-w-[56px] text-center ${
-                    isCurrent ? "text-cyan-400 font-black" : isCompleted ? "text-emerald-400" : "text-slate-300"
+                    isCurrent ? "text-white font-black drop-shadow-xs" : isCompleted ? "text-emerald-300" : "text-white/70"
                   }`}
                 >
                   {label}

@@ -985,6 +985,7 @@ export const NewHireView: React.FC<NewHireViewProps> = ({
           onSelectHire={() => {}}
           currentDay={currentDay}
           isLearnerMode={true}
+          isHindi={isHindi}
           onNavigateToSection={(sec) => setActiveSection(sec)}
           onOpenTodaysGoal={() => setShowTodaysGoalView(true)}
         />
@@ -1218,38 +1219,38 @@ export const NewHireView: React.FC<NewHireViewProps> = ({
           />
 
           {/* Quick Bridge Card to Floor Shift & Training Modules */}
-          <div className="grid grid-cols-2 gap-3">
-            <div className="bg-slate-900 rounded-[26px] p-4 text-white shadow-md border border-slate-800 space-y-2 flex flex-col justify-between">
+          <div className="grid grid-cols-2 gap-3.5">
+            <div className="bg-white/10 rounded-[28px] p-5 text-white shadow-xl border border-white/10 space-y-3 flex flex-col justify-between backdrop-blur-md">
               <div>
-                <div className="flex items-center gap-1.5 text-blue-400 text-xs font-bold">
+                <div className="flex items-center gap-1.5 text-cyan-300 text-xs font-black uppercase tracking-wider">
                   <Briefcase className="w-3.5 h-3.5" />
                   <span>{isHindi ? "शिफ्ट टूल्स" : "Floor Shift"}</span>
                 </div>
-                <p className="text-xs text-slate-300 mt-1 font-medium leading-tight">
+                <p className="text-xs text-slate-350 mt-2 font-semibold leading-relaxed">
                   {isHindi ? "पिक रेट डायल, स्टोर मैप व गाइड" : "Pick dial, store zone map & guides"}
                 </p>
               </div>
               <button
                 onClick={() => setActiveModal("work")}
-                className="w-full py-2 rounded-xl bg-white text-slate-900 text-xs font-bold cursor-pointer shadow-xs active:scale-95 transition-transform hover:bg-slate-100"
+                className="w-full py-2.5 rounded-2xl bg-cyan-400 text-slate-950 text-xs font-black cursor-pointer shadow-md shadow-cyan-950/10 active:scale-95 transition-all hover:bg-cyan-300 uppercase tracking-wider"
               >
                 {isHindi ? "टूल्स खोलें 🛠️" : "Floor Tools 🛠️"}
               </button>
             </div>
 
-            <div className="bg-violet-900 rounded-[26px] p-4 text-white shadow-md border border-violet-800 space-y-2 flex flex-col justify-between">
+            <div className="bg-white/10 rounded-[28px] p-5 text-white shadow-xl border border-white/10 space-y-3 flex flex-col justify-between backdrop-blur-md">
               <div>
-                <div className="flex items-center gap-1.5 text-violet-300 text-xs font-bold">
+                <div className="flex items-center gap-1.5 text-purple-300 text-xs font-black uppercase tracking-wider">
                   <BookOpen className="w-3.5 h-3.5" />
                   <span>{isHindi ? "एलएमएस मॉड्यूल" : "LMS Training"}</span>
                 </div>
-                <p className="text-xs text-violet-200 mt-1 font-medium leading-tight">
+                <p className="text-xs text-slate-350 mt-2 font-semibold leading-relaxed">
                   {newHire.modulesCompleted ?? 3}/10 {isHindi ? "मॉड्यूल पूरे" : "Modules done"}
                 </p>
               </div>
               <button
                 onClick={() => setActiveSection("modules")}
-                className="w-full py-2 rounded-xl bg-white text-violet-950 text-xs font-bold cursor-pointer shadow-xs active:scale-95 transition-transform hover:bg-violet-50"
+                className="w-full py-2.5 rounded-2xl bg-purple-500 text-white text-xs font-black cursor-pointer shadow-md shadow-purple-950/10 active:scale-95 transition-all hover:bg-purple-400 uppercase tracking-wider"
               >
                 {isHindi ? "मॉड्यूल देखें 📚" : "View Modules 📚"}
               </button>

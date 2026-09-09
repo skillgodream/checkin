@@ -255,7 +255,7 @@ export const JobReadyHumanFigure: React.FC<JobReadyHumanFigureProps> = ({
   return (
     <section
       id="job-ready-human-dashboard"
-      className="bg-white rounded-[32px] p-4 sm:p-6 border border-slate-200/90 shadow-lg shadow-purple-950/5 space-y-6 select-none"
+      className="bg-white/10 border border-white/10 text-white rounded-[32px] p-4 sm:p-6 shadow-xl space-y-6 select-none backdrop-blur-md"
     >
       {/* =========================================================== */}
       {/* HERO BANNER & PROGRESS BREAKDOWN (MATCHING SCREENSHOT)      */}
@@ -347,17 +347,17 @@ export const JobReadyHumanFigure: React.FC<JobReadyHumanFigureProps> = ({
         <div className="space-y-3.5 pt-2">
           <div className="flex items-center justify-between px-1">
             <div>
-              <h3 className="text-base sm:text-lg font-black text-slate-900 tracking-tight">
+              <h3 className="text-base sm:text-lg font-black text-white tracking-tight">
                 {isHindi ? "श्रेणियां" : "Categories"}
               </h3>
-              <p className="text-xs text-slate-500 font-medium">
+              <p className="text-xs text-slate-400 font-semibold">
                 {isHindi ? "4 मुख्य सीखने के स्तंभ" : "4 Core Learning Pillars"}
               </p>
             </div>
             <button
               type="button"
               onClick={() => {}}
-              className="text-xs sm:text-sm font-bold text-purple-600 hover:text-purple-700 cursor-pointer"
+              className="text-xs sm:text-sm font-bold text-cyan-400 hover:text-cyan-300 cursor-pointer"
             >
               {isHindi ? "सभी देखें ›" : "View All ›"}
             </button>
@@ -373,24 +373,32 @@ export const JobReadyHumanFigure: React.FC<JobReadyHumanFigureProps> = ({
                 <div
                   key={cat.id}
                   onClick={() => setSelectedCategory(cat.id)}
-                  className={`p-2.5 sm:p-3 rounded-2xl border transition-all cursor-pointer relative flex flex-col items-center text-center justify-between bg-slate-100/80 hover:bg-slate-100 ${
+                  className={`p-2.5 sm:p-3 rounded-2xl border transition-all duration-200 cursor-pointer relative flex flex-col items-center text-center justify-between active:scale-95 select-none ${
                     isSelected
-                      ? "border-2 border-purple-600 ring-2 ring-purple-600/10 shadow-sm bg-white"
-                      : "border-slate-200/90"
+                      ? "bg-gradient-to-br from-cyan-400 to-blue-600 border-transparent shadow-lg shadow-cyan-950/15 text-slate-950 ring-2 ring-cyan-400/40 font-bold"
+                      : "bg-white/5 border-white/10 text-slate-300 hover:bg-white/10 hover:border-white/20"
                   }`}
                 >
-                  <div className="w-8 h-8 rounded-xl bg-white shadow-xs flex items-center justify-center text-purple-600 shrink-0 mb-1.5">
+                  <div className={`w-8 h-8 rounded-xl flex items-center justify-center shrink-0 mb-1.5 transition-all ${
+                    isSelected ? "bg-slate-950/10 text-slate-950" : "bg-white/10 text-cyan-300 shadow-xs"
+                  }`}>
                     {cat.icon}
                   </div>
 
-                  <div className="text-xs sm:text-sm font-black text-slate-900 mb-1.5">
+                  <div className={`text-xs sm:text-sm font-black mb-1.5 leading-none ${
+                    isSelected ? "text-slate-950" : "text-white"
+                  }`}>
                     {catScore}%
                   </div>
 
                   {/* Progress Bar */}
-                  <div className="w-full h-1 bg-slate-200/80 rounded-full overflow-hidden">
+                  <div className={`w-full h-1 rounded-full overflow-hidden ${
+                    isSelected ? "bg-slate-950/20" : "bg-white/10"
+                  }`}>
                     <div
-                      className="h-full rounded-full transition-all duration-500 bg-purple-600"
+                      className={`h-full rounded-full transition-all duration-500 ${
+                        isSelected ? "bg-slate-950" : "bg-cyan-400"
+                      }`}
                       style={{
                         width: `${Math.round(cat.ratio * 100)}%`,
                       }}
@@ -409,18 +417,18 @@ export const JobReadyHumanFigure: React.FC<JobReadyHumanFigureProps> = ({
       {(() => {
         const day10Audit = evaluateDay10Outcome(newHire);
         return (
-          <div className="bg-white rounded-3xl p-4 sm:p-5 border border-slate-200/90 shadow-2xs space-y-3">
+          <div className="bg-white/5 rounded-3xl p-4 sm:p-5 border border-white/10 shadow-md space-y-3">
             {/* Clean Header Card */}
-            <div className="bg-gradient-to-r from-violet-50/70 via-purple-50/40 to-fuchsia-50/30 rounded-2xl p-3 sm:p-3.5 border border-purple-200/60 shadow-2xs flex items-center justify-between gap-3">
+            <div className="bg-gradient-to-br from-cyan-400/10 via-blue-500/5 to-transparent rounded-2xl p-3 sm:p-3.5 border border-cyan-400/20 shadow-2xs flex items-center justify-between gap-3">
               <div className="flex items-center gap-3">
-                <div className="p-2 rounded-xl bg-violet-600 text-white shadow-xs shrink-0">
+                <div className="p-2 rounded-xl bg-cyan-500/20 text-cyan-300 border border-cyan-500/30 shadow-xs shrink-0">
                   <Award className="w-4 h-4" />
                 </div>
                 <div>
-                  <h3 className="text-xs sm:text-sm font-black text-slate-900 tracking-tight">
+                  <h3 className="text-xs sm:text-sm font-black text-white tracking-tight">
                     {isHindi ? "डे 10 कमर्शियल सर्टिफिकेशन (7 क्राइटेरिया)" : "Day 10 Commercial Certification"}
                   </h3>
-                  <p className="text-[10px] text-slate-500 font-bold uppercase tracking-wider mt-0.5">
+                  <p className="text-[10px] text-slate-350 font-bold uppercase tracking-wider mt-0.5">
                     {isHindi ? "7 आवश्यक व्यावसायिक मानदंड" : "7 Core Operational Criteria Audit"}
                   </p>
                 </div>
@@ -428,20 +436,20 @@ export const JobReadyHumanFigure: React.FC<JobReadyHumanFigureProps> = ({
 
               <div className="shrink-0">
                 {day10Audit.isReady ? (
-                  <div className="flex items-center gap-1.5 px-3 py-1 rounded-full bg-emerald-100 text-emerald-800 border border-emerald-300 text-xs font-black uppercase tracking-wider shadow-2xs">
-                    <CheckCircle2 className="w-3.5 h-3.5 text-emerald-700" />
+                  <div className="flex items-center gap-1.5 px-3 py-1 rounded-full bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 text-xs font-black uppercase tracking-wider shadow-2xs">
+                    <CheckCircle2 className="w-3.5 h-3.5 text-emerald-400" />
                     <span>{isHindi ? "जॉब रेडी" : "JOB READY"}</span>
                   </div>
                 ) : (
-                  <div className="flex items-center gap-1.5 px-3 py-1 rounded-full bg-rose-100 text-rose-800 border border-rose-300 text-xs font-black uppercase tracking-wider shadow-2xs">
-                    <AlertTriangle className="w-3.5 h-3.5 text-rose-700" />
+                  <div className="flex items-center gap-1.5 px-3 py-1 rounded-full bg-rose-500/20 text-rose-300 border border-rose-500/30 text-xs font-black uppercase tracking-wider shadow-2xs">
+                    <AlertTriangle className="w-3.5 h-3.5 text-rose-400" />
                     <span>{isHindi ? "नॉट रेडी" : "NOT READY"}</span>
                   </div>
                 )}
               </div>
             </div>
 
-            <p className="text-xs text-slate-600 leading-relaxed font-medium">
+            <p className="text-xs text-slate-200 leading-relaxed font-semibold">
               {day10Audit.summary}
             </p>
 
@@ -452,28 +460,28 @@ export const JobReadyHumanFigure: React.FC<JobReadyHumanFigureProps> = ({
                   key={idx}
                   className={`p-2.5 rounded-2xl border flex items-start gap-2 ${
                     crit.met
-                      ? "bg-slate-50/80 border-slate-200/80 text-slate-800"
-                      : "bg-rose-50/80 border-rose-200/90 text-rose-950"
+                      ? "bg-white/10 border-white/10 text-slate-200"
+                      : "bg-rose-500/10 border-rose-500/20 text-rose-200"
                   }`}
                 >
                   <div className="mt-0.5 shrink-0">
                     {crit.met ? (
-                      <CheckCircle2 className="w-4 h-4 text-emerald-600 fill-emerald-50" />
+                      <CheckCircle2 className="w-4 h-4 text-emerald-400 fill-emerald-500/10" />
                     ) : (
-                      <AlertTriangle className="w-4 h-4 text-rose-600" />
+                      <AlertTriangle className="w-4 h-4 text-rose-400" />
                     )}
                   </div>
                   <div className="min-w-0">
                     <div className="font-bold text-xs">{crit.name}</div>
-                    <div className="text-[11px] text-slate-500 font-medium">{crit.detail}</div>
+                    <div className="text-[11px] text-slate-400 font-semibold">{crit.detail}</div>
                   </div>
                 </div>
               ))}
             </div>
 
             {!day10Audit.isReady && day10Audit.unresolvedBlockers.length > 0 && (
-              <div className="p-3 bg-amber-50/90 border border-amber-200/90 rounded-2xl text-xs text-amber-900 font-medium">
-                <div className="font-black text-amber-950 mb-0.5">
+              <div className="p-3 bg-amber-500/10 border border-amber-500/20 rounded-2xl text-xs text-amber-200 font-semibold">
+                <div className="font-black text-amber-300 mb-0.5">
                   {isHindi ? "मुख्य रुकावट → आवश्यक अगला कदम:" : "Main blocker → Required next action:"}
                 </div>
                 <div>
@@ -488,29 +496,35 @@ export const JobReadyHumanFigure: React.FC<JobReadyHumanFigureProps> = ({
       {/* ------------------------------------------------------------- */}
       {/* BOTTOM SECTION: "Your Learning Journey" (Slim Compact Bar)      */}
       {/* ------------------------------------------------------------- */}
-      <div className="bg-slate-50/90 rounded-2xl p-3 border border-slate-200/80 space-y-2">
+      <div className="bg-white/5 rounded-2xl p-3 border border-white/10 space-y-2">
         <div className="flex items-center justify-between">
-          <h3 className="text-xs font-black text-slate-900 tracking-tight">
+          <h3 className="text-xs font-black text-white tracking-tight">
             {isHindi ? "आपकी लर्निंग जर्नी" : "Your Learning Journey"}
           </h3>
-          <span className="text-[10px] text-slate-400 font-medium">7 Stages</span>
+          <span className="text-[10px] text-slate-400 font-bold">7 Stages</span>
         </div>
 
         {/* Slim Horizontal Scrollable Stage Steps */}
-        <div className="flex items-center gap-2 overflow-x-auto pb-1 pt-0.5 no-scrollbar">
+        <div className="flex items-center gap-2 overflow-x-auto pb-1 pt-0.5 scrollbar-none">
           {journeyStages.map((stage, idx) => (
             <React.Fragment key={stage.id}>
               <div
                 className={`px-3 py-2 rounded-xl border transition-all shrink-0 flex items-center gap-2.5 ${
                   stage.status === "completed"
-                    ? "bg-white border-emerald-200 text-slate-900 shadow-2xs"
+                    ? "bg-white/10 border-emerald-500/30 text-slate-200 hover:bg-white/15 shadow-2xs"
                     : stage.status === "active"
-                    ? "bg-white border-purple-500 ring-2 ring-purple-500/20 text-slate-900 shadow-xs"
-                    : "bg-slate-100/70 border-slate-200 text-slate-400 opacity-70"
+                    ? "bg-gradient-to-br from-cyan-400/20 to-blue-500/20 border-cyan-400 text-white ring-2 ring-cyan-400/30 shadow-xs font-bold"
+                    : "bg-[#111317]/40 border-white/5 text-slate-500 opacity-60"
                 }`}
               >
                 <div
-                  className={`w-6 h-6 rounded-lg flex items-center justify-center font-bold text-xs shrink-0 ${stage.color}`}
+                  className={`w-6 h-6 rounded-lg flex items-center justify-center font-bold text-xs shrink-0 ${
+                    stage.status === "completed"
+                      ? "bg-emerald-500/20 text-emerald-300"
+                      : stage.status === "active"
+                      ? "bg-cyan-500/20 text-cyan-300"
+                      : "bg-slate-950/20 text-slate-500"
+                  }`}
                 >
                   {stage.icon}
                 </div>
@@ -518,18 +532,24 @@ export const JobReadyHumanFigure: React.FC<JobReadyHumanFigureProps> = ({
                   <div className="text-[11px] font-black truncate leading-tight">
                     {stage.title}
                   </div>
-                  <div className="text-[9px] font-semibold truncate">
+                  <div className={`text-[9px] font-black uppercase tracking-wider ${
+                    stage.status === "completed"
+                      ? "text-emerald-400"
+                      : stage.status === "active"
+                      ? "text-cyan-300"
+                      : "text-slate-500"
+                  }`}>
                     {stage.status === "completed"
                       ? (isHindi ? "पूर्ण" : "Completed")
                       : stage.status === "active"
-                      ? (isHindi ? "प्रगति पर" : "In Progress")
+                      ? (isHindi ? "सक्रिय" : "In Progress")
                       : (isHindi ? "आगामी" : "Upcoming")}
                   </div>
                 </div>
               </div>
 
               {idx < journeyStages.length - 1 && (
-                <div className="w-3 h-0.5 bg-slate-200 shrink-0" />
+                <div className="w-3 h-0.5 bg-white/10 shrink-0" />
               )}
             </React.Fragment>
           ))}
