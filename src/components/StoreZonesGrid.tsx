@@ -100,12 +100,12 @@ export const StoreZonesGrid: React.FC<StoreZonesGridProps> = ({
   };
 
   return (
-    <div className="space-y-3 select-none">
+    <div className="space-y-3 select-none text-white">
       <div className="flex items-center justify-between px-1">
-        <span className="text-xs font-bold uppercase tracking-wider text-slate-500">
+        <span className="text-xs font-bold uppercase tracking-wider text-slate-300">
           {isHindi ? "डार्क स्टोर ज़ोन" : "Dark Store Zones"}
         </span>
-        <span className="text-xs text-purple-700 font-bold">
+        <span className="text-xs text-cyan-400 font-bold">
           {isHindi ? "टैप करके दिशा देखें" : "Tap for guidance"}
         </span>
       </div>
@@ -120,8 +120,8 @@ export const StoreZonesGrid: React.FC<StoreZonesGridProps> = ({
               onClick={() => handleCardClick(zone)}
               className={`flex flex-col items-center justify-center p-4 rounded-[26px] transition-all duration-200 cursor-pointer text-center relative active:scale-96 ${
                 isActive
-                  ? "bg-gradient-to-br from-violet-600 to-fuchsia-600 text-white shadow-lg shadow-purple-950/15 ring-2 ring-purple-400/40"
-                  : "bg-white text-slate-800 border border-slate-200/80 hover:border-slate-300 hover:bg-slate-50/80 shadow-2xs"
+                  ? "bg-gradient-to-br from-cyan-400 to-blue-600 text-slate-950 shadow-lg shadow-cyan-950/15 ring-2 ring-cyan-400/40 font-bold"
+                  : "bg-white/10 text-white border border-white/20 hover:border-white/30 hover:bg-white/20 shadow-2xs"
               }`}
             >
               {/* Red blinking circle or active badge */}
@@ -139,7 +139,7 @@ export const StoreZonesGrid: React.FC<StoreZonesGridProps> = ({
               {/* Icon */}
               <div
                 className={`mb-2 transition-transform ${
-                  isActive ? "text-white scale-105" : "text-slate-700"
+                  isActive ? "text-slate-950 scale-105" : "text-white"
                 }`}
               >
                 {zone.icon}
@@ -148,7 +148,7 @@ export const StoreZonesGrid: React.FC<StoreZonesGridProps> = ({
               {/* Zone Name */}
               <span
                 className={`text-sm font-black tracking-tight leading-tight block ${
-                  isActive ? "text-white" : "text-slate-900"
+                  isActive ? "text-slate-950" : "text-white"
                 }`}
               >
                 {isHindi ? zone.nameHindi : zone.name}
@@ -156,8 +156,8 @@ export const StoreZonesGrid: React.FC<StoreZonesGridProps> = ({
 
               {/* Subtitle */}
               <span
-                className={`text-xs mt-1 font-medium block truncate max-w-[140px] ${
-                  isActive ? "text-purple-100 font-bold" : "text-slate-500"
+                className={`text-[10px] mt-1 font-medium block truncate max-w-[140px] ${
+                  isActive ? "text-slate-900 font-bold" : "text-slate-300"
                 }`}
               >
                 {isHindi ? zone.subtitleHindi : zone.subtitle}

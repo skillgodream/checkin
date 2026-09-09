@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import {
   ChevronLeft,
   ChevronDown,
+  ChevronRight,
   Zap,
   Sparkles,
   CheckCircle2,
@@ -32,6 +33,8 @@ interface TodaysGoalLandingViewProps {
   onSelectSection?: (section: LearnerSection) => void;
   onUpdateHire?: (updatedHire: NewHire) => void;
   onOpenBuddy?: () => void;
+  onSelectModuleWithId?: (modId: string) => void;
+  onSelectFloorTask?: (modalType: "buddy" | "scanner" | "work" | "target" | "map") => void;
 }
 
 export const TodaysGoalLandingView: React.FC<TodaysGoalLandingViewProps> = ({
@@ -43,6 +46,8 @@ export const TodaysGoalLandingView: React.FC<TodaysGoalLandingViewProps> = ({
   onSelectSection,
   onUpdateHire,
   onOpenBuddy,
+  onSelectModuleWithId,
+  onSelectFloorTask,
 }) => {
   // Role selector dropdown state
   const [selectedRole, setSelectedRole] = useState<string>("Dark Store Picker • Zone A");
@@ -53,9 +58,17 @@ export const TodaysGoalLandingView: React.FC<TodaysGoalLandingViewProps> = ({
     task_1: true, // One pre-checked to show progress
   });
 
-  // Action feedback
   const [drillStarted, setDrillStarted] = useState<boolean>(false);
-  const [completedModuleIds, setCompletedModuleIds] = useState<Record<string, boolean>>({});
+
+  const handleStartDrill = () => {
+    setDrillStarted(true);
+    setTimeout(() => {
+      setDrillStarted(false);
+      if (onSelectSection) {
+        onSelectSection("dial");
+      }
+    }, 1500);
+  };
 
   // Live floor performance data
   const currentRecord = (newHire?.daysHistory || []).find((d) => d.dayNumber === currentDay) || {
@@ -83,8 +96,8 @@ export const TodaysGoalLandingView: React.FC<TodaysGoalLandingViewProps> = ({
 
   // Dynamic bonus for tasks checked today
   const tasksBonus = Object.values(completedTaskIds).filter(Boolean).length * 2;
-  const modulesBonus = Object.values(completedModuleIds).filter(Boolean).length * 3;
-  const liveReadinessPct = Math.min(100, baseReadiness + tasksBonus + modulesBonus);
+  const modulesBonus = 0;
+  const liveReadinessPct = Math.min(100, baseReadiness + tasksBonus);
 
   // Doctor's suggestion for today
   const doctorDiagnosis = isHindi
@@ -153,33 +166,30 @@ export const TodaysGoalLandingView: React.FC<TodaysGoalLandingViewProps> = ({
     },
   ];
 
-  const handleToggleTask = (taskId: string) => {
-    setCompletedTaskIds((prev) => ({
-      ...prev,
-      [taskId]: !prev[taskId],
-    }));
-  };
-
-  const handleToggleModule = (modId: string) => {
-    setCompletedModuleIds((prev) => ({
-      ...prev,
-      [modId]: !prev[modId],
-    }));
-  };
-
-  const handleStartDrill = () => {
-    setDrillStarted(true);
-    // Mark first pending task complete for immediate interactive joy
-    const pendingTask = todaysTasks.find((t) => !completedTaskIds[t.id]);
-    if (pendingTask) {
-      setCompletedTaskIds((prev) => ({
-        ...prev,
-        [pendingTask.id]: true,
-      }));
+  const handleStartModule = (modId: string) => {
+    if (onSelectModuleWithId) {
+      onSelectModuleWithId(modId);
+    } else if (onSelectSection) {
+      onSelectSection("modules");
     }
-    setTimeout(() => {
-      setDrillStarted(false);
-    }, 2500);
+  };
+
+  const handleOpenTaskDestination = (taskId: string, taskCategory: string) => {
+    if (onSelectFloorTask) {
+      if (taskId === "task_1") {
+        onSelectFloorTask("map");
+      } else if (taskId === "task_2") {
+        onSelectFloorTask("scanner");
+      } else if (taskId === "task_3") {
+        onSelectFloorTask("work");
+      } else if (taskId === "task_4") {
+        onSelectFloorTask("target");
+      } else {
+        onSelectFloorTask("work");
+      }
+    } else if (onSelectSection) {
+      onSelectSection("dial");
+    }
   };
 
   // Math for circular progress arc matching Screenshot 2026-09-08 at 12.58.01 PM.png
@@ -439,7 +449,7 @@ export const TodaysGoalLandingView: React.FC<TodaysGoalLandingViewProps> = ({
               />
             </div>
             <div className="flex justify-between text-[10px] text-slate-400 font-medium">
-              <span>Training: {Object.values(completedModuleIds).filter(Boolean).length + 2}/10</span>
+              <span>Training: 3/10</span>
               <span>Speed: {actualPickRate} / {targetPickRate} picks/hr</span>
               <span>Accuracy: {accuracyRate}%</span>
             </div>
@@ -554,15 +564,11 @@ export const TodaysGoalLandingView: React.FC<TodaysGoalLandingViewProps> = ({
 
           <div className="space-y-2.5">
             {todaysPrescribedModules.map((mod) => {
-              const isDone = completedModuleIds[mod.id];
               return (
                 <div
                   key={mod.id}
-                  className={`p-3.5 rounded-2xl border transition-all ${
-                    isDone
-                      ? "bg-emerald-50/60 border-emerald-200"
-                      : "bg-white border-slate-200 hover:border-purple-300 shadow-2xs"
-                  }`}
+                  onClick={() => handleStartModule(mod.id)}
+                  className="p-3.5 rounded-2xl border bg-white border-slate-200 hover:border-purple-300 shadow-2xs transition-all cursor-pointer group active:scale-98"
                 >
                   <div className="flex items-start justify-between gap-3">
                     <div className="space-y-1 min-w-0">
@@ -574,14 +580,8 @@ export const TodaysGoalLandingView: React.FC<TodaysGoalLandingViewProps> = ({
                           <Clock className="w-3 h-3" />
                           {mod.durationMinutes} min
                         </span>
-                        {isDone && (
-                          <span className="text-[10px] font-black text-emerald-700 bg-emerald-100 px-2 py-0.5 rounded-full flex items-center gap-1">
-                            <Check className="w-3 h-3 stroke-[3]" />
-                            {isHindi ? "पूर्ण" : "Completed"}
-                          </span>
-                        )}
                       </div>
-                      <h3 className="text-xs sm:text-sm font-black text-slate-900 leading-snug">
+                      <h3 className="text-xs sm:text-sm font-black text-slate-900 leading-snug group-hover:text-purple-700 transition-colors">
                         {isHindi ? mod.titleHi : mod.title}
                       </h3>
                       <p className="text-[11px] text-slate-500 line-clamp-2">
@@ -594,28 +594,11 @@ export const TodaysGoalLandingView: React.FC<TodaysGoalLandingViewProps> = ({
                       </div>
                     </div>
 
-                    {/* Interactive Start / Complete Button */}
-                    <button
-                      type="button"
-                      onClick={() => handleToggleModule(mod.id)}
-                      className={`shrink-0 px-3 py-1.5 rounded-xl font-black text-xs transition-all active:scale-95 cursor-pointer flex items-center gap-1 ${
-                        isDone
-                          ? "bg-emerald-600 hover:bg-emerald-700 text-white shadow-xs"
-                          : "bg-gradient-to-r from-violet-600 to-purple-600 hover:from-violet-500 hover:to-purple-500 text-white shadow-sm"
-                      }`}
-                    >
-                      {isDone ? (
-                        <>
-                          <Check className="w-3.5 h-3.5 stroke-[3]" />
-                          <span>{isHindi ? "हो गया" : "Done"}</span>
-                        </>
-                      ) : (
-                        <>
-                          <Play className="w-3 h-3 fill-white" />
-                          <span>{isHindi ? "शुरू करें" : "Start"}</span>
-                        </>
-                      )}
-                    </button>
+                    {/* Navigation Button */}
+                    <div className="shrink-0 px-3 py-1.5 rounded-xl font-black text-xs bg-gradient-to-r from-violet-600 to-purple-600 text-white shadow-sm flex items-center gap-1 group-hover:scale-105 transition-transform">
+                      <Play className="w-3 h-3 fill-white" />
+                      <span>{isHindi ? "शुरू करें" : "Open Module"}</span>
+                    </div>
                   </div>
                 </div>
               );
@@ -624,7 +607,7 @@ export const TodaysGoalLandingView: React.FC<TodaysGoalLandingViewProps> = ({
         </div>
 
         {/* ========================================================= */}
-        {/* 6. TODAY'S FLOOR TASKS (PRACTICAL & ACTIONABLE)           */}
+        {/* 6. TODAY'S FLOOR TASKS (DEEP-LINK NAVIGATION TO ORIGIN)  */}
         {/* ========================================================= */}
         <div className="space-y-3 pt-1">
           <div className="flex items-center justify-between">
@@ -637,37 +620,24 @@ export const TodaysGoalLandingView: React.FC<TodaysGoalLandingViewProps> = ({
               </h2>
             </div>
             <span className="text-[10px] font-bold text-slate-500">
-              {Object.values(completedTaskIds).filter(Boolean).length} / {todaysTasks.length} {isHindi ? "पूरे हुए" : "Done"}
+              {isHindi ? "मूल लैंडिंग पर नेविगेट करें" : "Tap to open origin"}
             </span>
           </div>
 
           <div className="space-y-2">
             {todaysTasks.map((task) => {
-              const isChecked = completedTaskIds[task.id];
               return (
                 <div
                   key={task.id}
-                  onClick={() => handleToggleTask(task.id)}
-                  className={`p-3 rounded-2xl border transition-all flex items-center justify-between gap-3 cursor-pointer select-none active:scale-98 ${
-                    isChecked
-                      ? "bg-emerald-50/70 border-emerald-200 text-slate-800"
-                      : "bg-white border-slate-200 hover:border-slate-300 text-slate-800 shadow-2xs"
-                  }`}
+                  onClick={() => handleOpenTaskDestination(task.id, task.category)}
+                  className="p-3.5 rounded-2xl border bg-white border-slate-200 hover:border-violet-300 text-slate-800 shadow-2xs transition-all flex items-center justify-between gap-3 cursor-pointer select-none active:scale-98 group"
                 >
                   <div className="flex items-center gap-3 min-w-0">
-                    <button
-                      type="button"
-                      aria-label="Toggle task"
-                      className={`w-5 h-5 rounded-lg flex items-center justify-center transition-all ${
-                        isChecked
-                          ? "bg-emerald-600 text-white"
-                          : "border-2 border-slate-300 text-transparent hover:border-slate-400"
-                      }`}
-                    >
-                      <Check className="w-3.5 h-3.5 stroke-[3]" />
-                    </button>
+                    <div className="w-8 h-8 rounded-xl bg-violet-50 text-violet-700 flex items-center justify-center shrink-0 border border-violet-100 group-hover:bg-violet-600 group-hover:text-white transition-colors">
+                      <ChevronRight className="w-4 h-4" />
+                    </div>
                     <div className="min-w-0">
-                      <p className={`text-xs font-bold leading-snug ${isChecked ? "line-through text-slate-400" : "text-slate-800"}`}>
+                      <p className="text-xs font-black leading-snug text-slate-900 group-hover:text-violet-950 transition-colors">
                         {task.title}
                       </p>
                       <div className="flex items-center gap-2 text-[10px] text-slate-400 font-medium mt-0.5">
@@ -678,8 +648,8 @@ export const TodaysGoalLandingView: React.FC<TodaysGoalLandingViewProps> = ({
                     </div>
                   </div>
 
-                  <span className="text-xs font-black shrink-0 text-slate-400">
-                    {isChecked ? "✓" : "+2%"}
+                  <span className="text-xs font-black shrink-0 text-purple-600 bg-purple-50 px-2.5 py-1 rounded-lg border border-purple-100 group-hover:bg-purple-600 group-hover:text-white transition-colors">
+                    {isHindi ? "खोलें" : "Open →"}
                   </span>
                 </div>
               );

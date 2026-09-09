@@ -32,22 +32,40 @@ import {
 import { NewHire, TrainingModule, ModuleActivity, DARK_STORE_CAPABILITIES } from "../types";
 import { MANDATORY_TRAINING_MODULES } from "../data/modulesData";
 
+export function checkDeanModuleGate(mod: TrainingModule, newHire: NewHire): { isGated: boolean; reason: string; correctiveAction: string } {
+  const capabilities = newHire.capabilities || {};
+  if (newHire.status === "At risk" || newHire.status === "Needs attention") {
+    if (mod.dayNumber >= (newHire.currentDay || 3) + 1) {
+      return {
+        isGated: true,
+        reason: `Dean's True Adaptive Hold: Day ${mod.dayNumber} (${mod.code}) is gated because ongoing telemetry indicates active floor friction and unmastered prerequisites.`,
+        correctiveAction: `Manager / Buddy Corrective Action: Execute targeted 15-minute 1:1 floor walkthrough before unlocking Day ${mod.dayNumber}.`,
+      };
+    }
+  }
+  return { isGated: false, reason: "", correctiveAction: "" };
+}
+
 interface ModulesViewProps {
   newHire: NewHire;
   onUpdateHire?: (updatedHire: NewHire) => void;
   isHindi?: boolean;
+  initialModuleId?: string | null;
 }
 
 export const ModulesView: React.FC<ModulesViewProps> = ({
   newHire,
   onUpdateHire,
   isHindi = false,
+  initialModuleId = null,
 }) => {
   const [activeTab, setActiveTab] = useState<"all" | "foundation" | "floor" | "cert">("all");
   const [selectedModuleId, setSelectedModuleId] = useState<string | null>(
-    `lms-mod-0${Math.min(10, Math.max(1, (newHire.modulesCompleted || 3) + 1))}`
+    initialModuleId || `lms-mod-0${Math.min(10, Math.max(1, (newHire.modulesCompleted || 3) + 1))}`
   );
-  const [activeDetailModule, setActiveDetailModule] = useState<TrainingModule | null>(null);
+  const [activeDetailModule, setActiveDetailModule] = useState<TrainingModule | null>(
+    initialModuleId ? MANDATORY_TRAINING_MODULES.find((m) => m.id === initialModuleId) || null : null
+  );
   const [activeActivityModal, setActiveActivityModal] = useState<{
     module: TrainingModule;
     activity: ModuleActivity;
@@ -192,12 +210,12 @@ export const ModulesView: React.FC<ModulesViewProps> = ({
   });
 
   return (
-    <div className="space-y-4 pb-20 animate-in fade-in duration-200 select-none">
+    <div className="animate-in fade-in duration-200 select-none pb-20">
       {/* ========================================================= */}
       {/* 1. HERO BANNER (FULL BLEED WAREHOUSE BACKGROUND & DARK OVERLAY) */}
       {/* ========================================================= */}
       <div 
-        className="relative rounded-[32px] p-5 sm:p-6 text-white shadow-xl shadow-blue-900/15 overflow-hidden bg-cover bg-center"
+        className="relative rounded-b-[32px] rounded-t-none pt-10 pb-7 px-5 sm:px-6 text-white shadow-xl shadow-blue-900/15 overflow-hidden bg-cover bg-center"
         style={{
           backgroundImage: `url('https://images.unsplash.com/photo-1586528116311-ad8dd3c8310d?w=1200&auto=format&fit=crop&q=80')`
         }}
@@ -233,28 +251,43 @@ export const ModulesView: React.FC<ModulesViewProps> = ({
         </div>
       </div>
 
-      {/* Action Buttons below banner matching screenshot */}
-      <div className="flex items-center gap-3">
+      {/* Main content wrapped in padding div to keep aligned */}
+      <div className="px-4 pt-4 space-y-4">
+
+
+      {/* ========================================================= */}
+      {/* TODAY'S TRAINING GOAL SUMMARY CARD                         */}
+      {/* ========================================================= */}
+      <div className="bg-black/35 backdrop-blur-md border border-white/20 rounded-2xl p-4 shadow-xl flex items-center justify-between gap-3 text-white">
+        <div className="flex items-center gap-3 min-w-0">
+          <div className="w-10 h-10 rounded-xl bg-cyan-950 text-cyan-400 border border-cyan-800/30 flex items-center justify-center shrink-0 font-black shadow-xs">
+            {modulesCompletedCount >= 3 ? <Check className="w-5 h-5 stroke-[3]" /> : "L3"}
+          </div>
+          <div className="min-w-0">
+            <div className="flex items-center gap-2">
+              <h4 className="text-xs font-black text-white uppercase tracking-wide">
+                {isHindi ? "आज का निर्धारित LMS मॉड्यूल लक्ष्य" : "Today's Prescribed LMS Goal"}
+              </h4>
+              <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full ${modulesCompletedCount >= 3 ? "bg-emerald-500/20 text-emerald-300 border border-emerald-500/30" : "bg-amber-500/20 text-amber-300 border border-amber-500/30"}`}>
+                {modulesCompletedCount >= 3 ? "✓ Completed" : "In Progress"}
+              </span>
+            </div>
+            <p className="text-[11px] text-slate-300 font-medium truncate mt-0.5">
+              {isHindi ? "फास्ट बारकोड स्कैनर एलाइनमेंट और शेल्फ नेविगेशन" : "Fast Barcode Scanner Alignment & Shelf Navigation"}
+            </p>
+          </div>
+        </div>
+
         <button
           type="button"
           onClick={() => {
-            const nextMod = MANDATORY_TRAINING_MODULES.find(m => !completedIds.includes(m.id)) || MANDATORY_TRAINING_MODULES[0];
-            setSelectedModuleId(nextMod.id);
-            setActiveDetailModule(nextMod);
+            const targetMod = MANDATORY_TRAINING_MODULES.find(m => m.id === "lms-mod-03") || MANDATORY_TRAINING_MODULES[2];
+            setSelectedModuleId(targetMod.id);
+            setActiveDetailModule(targetMod);
           }}
-          className="flex-1 py-3 px-5 rounded-2xl bg-blue-600 hover:bg-blue-700 text-white font-black text-sm shadow-lg shadow-blue-600/25 flex items-center justify-center gap-2 cursor-pointer transition-all active:scale-98"
+          className="shrink-0 px-3 py-2 rounded-xl bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-400 hover:to-blue-500 text-white font-black text-xs shadow-xs active:scale-95 transition-all cursor-pointer flex items-center gap-1 border border-white/10"
         >
-          <Sparkles className="w-4 h-4" />
-          <span>{isHindi ? "परीक्षा / सीखना शुरू करें" : "Exam / Start Learning"}</span>
-        </button>
-        <button
-          type="button"
-          onClick={() => {}}
-          className="w-12 h-12 rounded-2xl bg-white border border-slate-200/90 text-slate-700 flex items-center justify-center shadow-xs hover:bg-slate-50 cursor-pointer transition-all active:scale-98 shrink-0"
-        >
-          <svg className="w-5 h-5 text-slate-700 fill-current" viewBox="0 0 24 24">
-            <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/>
-          </svg>
+          <span>{isHindi ? "खोलें" : "Open →"}</span>
         </button>
       </div>
 
@@ -271,10 +304,10 @@ export const ModulesView: React.FC<ModulesViewProps> = ({
           <button
             key={tab.id}
             onClick={() => setActiveTab(tab.id as any)}
-            className={`px-3.5 py-1.5 rounded-full text-xs font-bold transition-all cursor-pointer whitespace-nowrap shrink-0 ${
+            className={`px-3.5 py-1.5 rounded-full text-xs font-bold transition-all cursor-pointer whitespace-nowrap shrink-0 border ${
               activeTab === tab.id
-                ? "bg-purple-600 text-white shadow-xs"
-                : "bg-white text-slate-700 border border-slate-200 hover:bg-slate-50"
+                ? "bg-gradient-to-r from-cyan-500 to-blue-600 text-white border-transparent shadow-md"
+                : "bg-black/30 text-slate-200 border-white/10 hover:bg-white/10 hover:text-white"
             }`}
           >
             {tab.label}
@@ -285,11 +318,39 @@ export const ModulesView: React.FC<ModulesViewProps> = ({
       {/* ========================================================= */}
       {/* 3. 3-COLUMN LEARNING AREA GRID (EXACT SCREENSHOT STYLE)   */}
       {/* ========================================================= */}
-      <div className="grid grid-cols-3 gap-2.5 sm:gap-3.5">
+      <div className="grid grid-cols-3 gap-3 sm:gap-4 pb-4">
         {filteredModules.map((mod) => {
           const isCompleted = completedIds.includes(mod.id);
-          const isCurrent = !isCompleted && mod.dayNumber === modulesCompletedCount + 1;
-          const isLocked = !isCompleted && mod.dayNumber > modulesCompletedCount + 1;
+          const gateResult = checkDeanModuleGate(mod, newHire);
+          const isGatedByDean = gateResult.isGated;
+          const isCurrent = !isCompleted && !isGatedByDean && mod.dayNumber === modulesCompletedCount + 1;
+          const isLocked = !isCompleted && (mod.dayNumber > modulesCompletedCount + 1 || isGatedByDean);
+
+          // Premium frosted glass color identities with subtle glow borders matching the dashboard
+          let cardBgClass = "bg-gradient-to-br from-cyan-500/20 to-blue-600/20 backdrop-blur-md border-cyan-400/40 text-white shadow-lg shadow-cyan-500/10 hover:border-cyan-400/75";
+          let padBgClass = "bg-cyan-950/80 border-cyan-500/30 shadow-inner";
+          let iconColorClass = "text-cyan-400";
+          let textColorClass = "text-white";
+
+          if (isLocked && !isGatedByDean) {
+            // Sleek translucent dark-glass layout for locked modules
+            cardBgClass = "bg-white/5 backdrop-blur-md border-white/10 text-slate-400 opacity-60 shadow-inner cursor-not-allowed";
+            padBgClass = "bg-black/30 border-white/5";
+            iconColorClass = "text-slate-500";
+            textColorClass = "text-slate-400";
+          } else if (isGatedByDean) {
+            // Amber-orange warning glass gradient for Gated modules
+            cardBgClass = "bg-gradient-to-br from-amber-500/20 to-orange-600/20 backdrop-blur-md border-amber-400/40 text-white shadow-lg shadow-amber-500/10 animate-pulse hover:border-amber-400/75";
+            padBgClass = "bg-amber-950/80 border-amber-500/30 shadow-inner";
+            iconColorClass = "text-amber-400";
+            textColorClass = "text-white";
+          } else if (isCompleted) {
+            // Radiant emerald-green glass gradient for Completed modules
+            cardBgClass = "bg-gradient-to-br from-emerald-500/20 to-teal-600/20 backdrop-blur-md border-emerald-400/40 text-white shadow-lg shadow-emerald-500/10 hover:border-emerald-400/75";
+            padBgClass = "bg-emerald-950/80 border-emerald-500/30 shadow-inner";
+            iconColorClass = "text-emerald-400";
+            textColorClass = "text-white";
+          }
 
           return (
             <div
@@ -298,37 +359,57 @@ export const ModulesView: React.FC<ModulesViewProps> = ({
                 setSelectedModuleId(mod.id);
                 setActiveDetailModule(mod);
               }}
-              className={`rounded-2xl sm:rounded-3xl p-3 sm:p-4 flex flex-col items-center justify-center text-center aspect-square transition-all duration-200 cursor-pointer relative shadow-sm hover:shadow-md active:scale-98 ${
-                isCurrent
-                  ? "bg-purple-600 text-white shadow-xl shadow-purple-500/40 animate-pulse ring-4 ring-purple-300/60"
-                  : isCompleted
-                  ? "bg-blue-600 text-white shadow-md shadow-blue-500/25"
-                  : "bg-slate-100 hover:bg-slate-200/80 text-slate-900 border border-slate-200/80"
-              }`}
+              className={`relative aspect-square rounded-[30px] p-2 sm:p-3 flex flex-col items-center justify-between text-center transition-all duration-300 hover:-translate-y-1 hover:shadow-xl active:scale-95 border cursor-pointer select-none overflow-hidden ${cardBgClass}`}
             >
-              {/* Central Icon */}
-              <div className="my-auto mb-1">
-                <div
-                  className={`w-10 h-10 sm:w-12 sm:h-12 rounded-2xl flex items-center justify-center transition-all ${
-                    isCompleted || isCurrent
-                      ? "text-white"
-                      : "text-slate-600"
-                  }`}
-                >
+              {/* Top Row: Day marker + Complete checkbox check */}
+              <div className="w-full flex items-center justify-between text-[9px] font-bold px-1 select-none z-10">
+                <span className={`px-1.5 py-0.5 rounded-full ${
+                  isLocked && !isGatedByDean
+                    ? "bg-black/30 text-slate-400 border border-white/5"
+                    : "bg-white/10 text-white border border-white/10 backdrop-blur-xs"
+                }`}>
+                  Day {mod.dayNumber}
+                </span>
+
+                {isCompleted && (
+                  <span className="w-4 h-4 rounded-full bg-emerald-500/20 text-emerald-300 flex items-center justify-center shadow-xs border border-emerald-500/40 font-black text-[10px]">
+                    ✓
+                  </span>
+                )}
+                {isGatedByDean && (
+                  <span className="w-4 h-4 rounded-full bg-amber-500/20 text-amber-300 flex items-center justify-center shadow-xs border border-amber-500/40 font-black text-[10px]">
+                    !
+                  </span>
+                )}
+                {isCurrent && !isCompleted && !isGatedByDean && (
+                  <span className="w-1.5 h-1.5 rounded-full bg-cyan-400 animate-ping shadow-[0_0_6px_rgba(34,211,238,0.7)]" />
+                )}
+              </div>
+
+              {/* Central Elevated Glossy Square Pad (3D Skeuomorphic Glass) */}
+              <div className={`w-12 h-12 sm:w-14 sm:h-14 rounded-[18px] flex items-center justify-center border transition-all duration-300 relative z-10 ${padBgClass} ${
+                !isLocked ? "shadow-md hover:scale-105 active:scale-95" : ""
+              }`}>
+                {/* 3D beveled inner reflex boundary */}
+                <div className="absolute inset-0.5 rounded-[16px] border border-white/10 pointer-events-none" />
+                
+                {/* Render Lucide icon inside */}
+                <div className={`w-6 h-6 flex items-center justify-center transition-all ${iconColorClass}`}>
                   {getModuleDayIcon(mod.dayNumber)}
                 </div>
               </div>
 
-              {/* Title */}
-              <div className="w-full mt-auto">
-                <h4
-                  className={`text-xs sm:text-sm font-black truncate leading-tight ${
-                    isCompleted || isCurrent ? "text-white" : "text-slate-900"
-                  }`}
-                >
+              {/* Module Short Title bottom aligned */}
+              <div className="w-full z-10">
+                <p className={`text-[10px] sm:text-[11px] font-black truncate leading-tight select-none ${textColorClass}`}>
                   {getModuleShortLabel(mod.dayNumber, isHindi)}
-                </h4>
+                </p>
               </div>
+
+              {/* Glossy diagonal light reflections crossing card for premium glass shine effect */}
+              {!isLocked && (
+                <div className="absolute -inset-y-1/2 -left-1/2 w-full h-[200%] bg-gradient-to-r from-transparent via-white/10 to-transparent rotate-[35deg] pointer-events-none mix-blend-overlay z-0" />
+              )}
             </div>
           );
         })}
@@ -385,6 +466,21 @@ export const ModulesView: React.FC<ModulesViewProps> = ({
                   .join(", ")}
               </span>
             </div>
+
+            {checkDeanModuleGate(activeDetailModule, newHire).isGated && (
+              <div className="p-3.5 rounded-2xl bg-amber-50 border border-amber-200 text-amber-950 space-y-2">
+                <div className="flex items-center gap-2">
+                  <AlertTriangle className="w-4 h-4 text-amber-600 shrink-0" />
+                  <span className="text-xs font-black uppercase tracking-wider">Dean Pit-Stop Rule & Gating Active</span>
+                </div>
+                <p className="text-xs leading-relaxed font-medium">
+                  {checkDeanModuleGate(activeDetailModule, newHire).reason}
+                </p>
+                <div className="p-2 rounded-xl bg-white/90 border border-amber-200 text-[11px] font-bold text-amber-900">
+                  {checkDeanModuleGate(activeDetailModule, newHire).correctiveAction}
+                </div>
+              </div>
+            )}
 
             {/* 5 Activities */}
             <div className="space-y-2 pt-1">
@@ -669,6 +765,7 @@ export const ModulesView: React.FC<ModulesViewProps> = ({
           </div>
         </div>
       )}
+      </div>
     </div>
   );
 };

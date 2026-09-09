@@ -2,11 +2,12 @@ import React from "react";
 import {
   Home,
   BookOpen,
+  Milestone,
   Gauge,
   User,
 } from "lucide-react";
 
-export type LearnerSection = "home" | "modules" | "dial" | "dashboard" | "buddy";
+export type LearnerSection = "home" | "modules" | "journey" | "dial" | "dashboard" | "buddy";
 
 interface FloatingGlassMenuProps {
   activeSection: LearnerSection;
@@ -42,6 +43,12 @@ export const FloatingGlassMenu: React.FC<FloatingGlassMenuProps> = ({
       labelEn: "Modules",
       labelHi: "पाठ्यक्रम",
       icon: <BookOpen className="w-4 h-4 stroke-[2.2]" />,
+    },
+    {
+      id: "journey",
+      labelEn: "Journey",
+      labelHi: "सफर",
+      icon: <Milestone className="w-4 h-4 stroke-[2.2]" />,
     },
     {
       id: "dial",
@@ -97,4 +104,3 @@ export const FloatingGlassMenu: React.FC<FloatingGlassMenuProps> = ({
     </div>
   );
 };
-

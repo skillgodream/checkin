@@ -344,32 +344,34 @@ export default function App() {
         ) : (
           <>
             {/* Global Mobile Header (Only during active shift views) */}
-            <Header
-              activeTab={activeTab}
-              setActiveTab={setActiveTab}
-              currentDay={currentDay}
-              onSelectDay={handleSelectDay}
-              onResetDemo={handleResetDemo}
-              onOpenLoopModal={() => setIsLoopModalOpen(true)}
-              onOpenTelemetryDial={() => setIsTelemetryModalOpen(true)}
-              onOpenBuddy={() => {
-                setActiveTab("new_hire");
-                setLearnerSection("buddy");
-              }}
-              onOpenOnboarding={() => setIsOnboarding(true)}
-              onOpenFeedModal={() => setIsFeedModalOpen(true)}
-              onOpenClientDemo={() => setIsClientDemoModalOpen(true)}
-              hasApiKey={hasApiKey}
-              doingWellCount={doingWellCount}
-              needsAttentionCount={needsAttentionCount}
-              atRiskCount={atRiskCount}
-              isFramed={isFramed}
-              isHindi={isHindi}
-              onToggleLanguage={() => setIsHindi((prev) => !prev)}
-              isHomeScreen={activeTab === "new_hire" && learnerSection === "home"}
-              learnerName={activeHire.name}
-              buddyName={activeHire.buddy}
-            />
+            {!(activeTab === "new_hire" && learnerSection === "modules") && (
+              <Header
+                activeTab={activeTab}
+                setActiveTab={setActiveTab}
+                currentDay={currentDay}
+                onSelectDay={handleSelectDay}
+                onResetDemo={handleResetDemo}
+                onOpenLoopModal={() => setIsLoopModalOpen(true)}
+                onOpenTelemetryDial={() => setIsTelemetryModalOpen(true)}
+                onOpenBuddy={() => {
+                  setActiveTab("new_hire");
+                  setLearnerSection("buddy");
+                }}
+                onOpenOnboarding={() => setIsOnboarding(true)}
+                onOpenFeedModal={() => setIsFeedModalOpen(true)}
+                onOpenClientDemo={() => setIsClientDemoModalOpen(true)}
+                hasApiKey={hasApiKey}
+                doingWellCount={doingWellCount}
+                needsAttentionCount={needsAttentionCount}
+                atRiskCount={atRiskCount}
+                isFramed={isFramed}
+                isHindi={isHindi}
+                onToggleLanguage={() => setIsHindi((prev) => !prev)}
+                isHomeScreen={activeTab === "new_hire" && learnerSection === "home"}
+                learnerName={activeHire.name}
+                buddyName={activeHire.buddy}
+              />
+            )}
 
             {/* Chatbot Pull-Out Button docked on the right side of the screen (hidden pull-out) */}
             <ChatBotPullout

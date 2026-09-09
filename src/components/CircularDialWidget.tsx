@@ -86,19 +86,19 @@ export const CircularDialWidget: React.FC<CircularDialWidgetProps> = ({
   return (
     <div
       id="circular-telemetry-dial-widget"
-      className="bg-white rounded-[28px] p-4 sm:p-5 border border-purple-100/80 shadow-md shadow-purple-900/5 space-y-4 select-none relative overflow-hidden"
+      className="bg-white/10 backdrop-blur-md rounded-[28px] p-4 sm:p-5 border border-white/20 shadow-xl space-y-4 select-none relative overflow-hidden text-white"
     >
       {/* Background ambient glow */}
-      <div className="absolute top-0 right-0 w-36 h-36 bg-gradient-to-bl from-fuchsia-400/10 via-purple-500/5 to-transparent rounded-full blur-2xl pointer-events-none" />
+      <div className="absolute top-0 right-0 w-36 h-36 bg-gradient-to-bl from-cyan-400/10 via-purple-500/10 to-transparent rounded-full blur-2xl pointer-events-none" />
 
-      {/* 1. Mode Pill Selector (Matching "Temperature" pill from reference) */}
-      <div className="flex items-center justify-center gap-1.5 bg-slate-100/90 p-1 rounded-full max-w-xs mx-auto">
+      {/* 1. Mode Pill Selector */}
+      <div className="flex items-center justify-center gap-1.5 bg-black/30 p-1 rounded-full max-w-xs mx-auto border border-white/10">
         <button
           onClick={() => setMode("speed")}
           className={`flex-1 py-1 px-2.5 rounded-full text-xs font-bold transition-all cursor-pointer truncate ${
             mode === "speed"
-              ? "bg-gradient-to-r from-violet-600 to-fuchsia-600 text-white shadow-xs"
-              : "text-slate-600 hover:text-slate-900"
+              ? "bg-gradient-to-r from-cyan-500 to-blue-600 text-white shadow-xs"
+              : "text-slate-200 hover:text-white"
           }`}
         >
           {isHindi ? "⚡ स्पीड" : "⚡ Speed"}
@@ -107,8 +107,8 @@ export const CircularDialWidget: React.FC<CircularDialWidgetProps> = ({
           onClick={() => setMode("accuracy")}
           className={`flex-1 py-1 px-2.5 rounded-full text-xs font-bold transition-all cursor-pointer truncate ${
             mode === "accuracy"
-              ? "bg-gradient-to-r from-violet-600 to-fuchsia-600 text-white shadow-xs"
-              : "text-slate-600 hover:text-slate-900"
+              ? "bg-gradient-to-r from-cyan-500 to-blue-600 text-white shadow-xs"
+              : "text-slate-200 hover:text-white"
           }`}
         >
           {isHindi ? "🎯 एक्यूरेसी" : "🎯 Accuracy"}
@@ -117,15 +117,15 @@ export const CircularDialWidget: React.FC<CircularDialWidgetProps> = ({
           onClick={() => setMode("readiness")}
           className={`flex-1 py-1 px-2.5 rounded-full text-xs font-bold transition-all cursor-pointer truncate ${
             mode === "readiness"
-              ? "bg-gradient-to-r from-violet-600 to-fuchsia-600 text-white shadow-xs"
-              : "text-slate-600 hover:text-slate-900"
+              ? "bg-gradient-to-r from-cyan-500 to-blue-600 text-white shadow-xs"
+              : "text-slate-200 hover:text-white"
           }`}
         >
           {isHindi ? "📈 रेडीनेस" : "📈 Readiness"}
         </button>
       </div>
 
-      {/* 2. Four Quick Action Circular Buttons (Light, Lock/Scanner, Dial/Pace, Fan/Buddy) */}
+      {/* 2. Four Quick Action Circular Buttons */}
       <div className="flex items-center justify-center gap-4 pt-1">
         {/* Action 1: Aisle Light / Map */}
         <button
@@ -136,8 +136,8 @@ export const CircularDialWidget: React.FC<CircularDialWidgetProps> = ({
           title={isHindi ? "आइसल मैप" : "Aisle Guide"}
           className={`w-10 h-10 rounded-full flex items-center justify-center border transition-all cursor-pointer ${
             activeCircleAction === "light"
-              ? "bg-gradient-to-br from-violet-600 to-fuchsia-600 text-white border-transparent shadow-md shadow-purple-500/30 scale-105"
-              : "bg-white text-slate-600 border-slate-200 hover:border-purple-300 hover:bg-purple-50/50"
+              ? "bg-gradient-to-br from-cyan-400 to-blue-600 text-slate-950 border-transparent shadow-md shadow-cyan-500/30 scale-105 font-bold"
+              : "bg-white/10 text-white border-white/10 hover:border-white/30 hover:bg-white/20"
           }`}
         >
           <Lightbulb className="w-4 h-4" />
@@ -152,8 +152,8 @@ export const CircularDialWidget: React.FC<CircularDialWidgetProps> = ({
           title={isHindi ? "स्कैनर चेक" : "Scanner Terminal"}
           className={`w-10 h-10 rounded-full flex items-center justify-center border transition-all cursor-pointer ${
             activeCircleAction === "scanner"
-              ? "bg-gradient-to-br from-violet-600 to-fuchsia-600 text-white border-transparent shadow-md shadow-purple-500/30 scale-105"
-              : "bg-white text-slate-600 border-slate-200 hover:border-purple-300 hover:bg-purple-50/50"
+              ? "bg-gradient-to-br from-cyan-400 to-blue-600 text-slate-950 border-transparent shadow-md shadow-cyan-500/30 scale-105 font-bold"
+              : "bg-white/10 text-white border-white/10 hover:border-white/30 hover:bg-white/20"
           }`}
         >
           <ScanLine className="w-4 h-4" />
@@ -168,8 +168,8 @@ export const CircularDialWidget: React.FC<CircularDialWidgetProps> = ({
           title={isHindi ? "पिक टारगेट" : "Ramp Target"}
           className={`w-10 h-10 rounded-full flex items-center justify-center border transition-all cursor-pointer ${
             activeCircleAction === "gauge"
-              ? "bg-gradient-to-br from-violet-600 to-fuchsia-600 text-white border-transparent shadow-md shadow-purple-500/30 scale-105"
-              : "bg-white text-slate-600 border-slate-200 hover:border-purple-300 hover:bg-purple-50/50"
+              ? "bg-gradient-to-br from-cyan-400 to-blue-600 text-slate-950 border-transparent shadow-md shadow-cyan-500/30 scale-105 font-bold"
+              : "bg-white/10 text-white border-white/10 hover:border-white/30 hover:bg-white/20"
           }`}
         >
           <Target className="w-4 h-4" />
@@ -184,15 +184,15 @@ export const CircularDialWidget: React.FC<CircularDialWidgetProps> = ({
           title={isHindi ? "विक्रम भैया को बुलाएं" : "Call Floor Buddy"}
           className={`w-10 h-10 rounded-full flex items-center justify-center border transition-all cursor-pointer ${
             activeCircleAction === "buddy"
-              ? "bg-gradient-to-br from-violet-600 to-fuchsia-600 text-white border-transparent shadow-md shadow-purple-500/30 scale-105"
-              : "bg-white text-slate-600 border-slate-200 hover:border-purple-300 hover:bg-purple-50/50"
+              ? "bg-gradient-to-br from-cyan-400 to-blue-600 text-slate-950 border-transparent shadow-md shadow-cyan-500/30 scale-105 font-bold"
+              : "bg-white/10 text-white border-white/10 hover:border-white/30 hover:bg-white/20"
           }`}
         >
           <Phone className="w-4 h-4" />
         </button>
       </div>
 
-      {/* 3. The Circular Dial / Gauge (Thermostat-style with radial ticks) */}
+      {/* 3. The Circular Dial / Gauge */}
       <div className="relative flex items-center justify-center py-2">
         <svg
           viewBox="0 0 200 200"
@@ -200,16 +200,15 @@ export const CircularDialWidget: React.FC<CircularDialWidgetProps> = ({
         >
           <defs>
             <linearGradient id="purplePinkGradient" x1="0%" y1="0%" x2="100%" y2="100%">
-              <stop offset="0%" stopColor="#7c3aed" />
-              <stop offset="50%" stopColor="#a855f7" />
-              <stop offset="100%" stopColor="#ec4899" />
+              <stop offset="0%" stopColor="#22d3ee" />
+              <stop offset="100%" stopColor="#2563eb" />
             </linearGradient>
             <linearGradient id="centerCircleGradient" x1="0%" y1="0%" x2="100%" y2="100%">
-              <stop offset="0%" stopColor="#8b5cf6" />
-              <stop offset="100%" stopColor="#d946ef" />
+              <stop offset="0%" stopColor="#0891b2" />
+              <stop offset="100%" stopColor="#1d4ed8" />
             </linearGradient>
             <filter id="purpleGlow" x="-20%" y="-20%" width="140%" height="140%">
-              <feDropShadow dx="0" dy="4" stdDeviation="6" floodColor="#a855f7" floodOpacity="0.35" />
+              <feDropShadow dx="0" dy="4" stdDeviation="6" floodColor="#06b6d4" floodOpacity="0.35" />
             </filter>
           </defs>
 
@@ -221,7 +220,7 @@ export const CircularDialWidget: React.FC<CircularDialWidgetProps> = ({
               y1={tick.y1}
               x2={tick.x2}
               y2={tick.y2}
-              stroke={tick.isActive ? "#9333ea" : "#e2e8f0"}
+              stroke={tick.isActive ? "#22d3ee" : "rgba(255, 255, 255, 0.15)"}
               strokeWidth={tick.isActive ? "2.5" : "1.8"}
               strokeLinecap="round"
               className="transition-all duration-300"
@@ -234,7 +233,7 @@ export const CircularDialWidget: React.FC<CircularDialWidgetProps> = ({
             cy="100"
             r={radius}
             fill="none"
-            stroke="#f1f5f9"
+            stroke="rgba(255, 255, 255, 0.1)"
             strokeWidth="5"
             strokeDasharray={`${(sweepDegree / 360) * circumference} ${circumference}`}
             transform="rotate(130 100 100)"
@@ -283,31 +282,31 @@ export const CircularDialWidget: React.FC<CircularDialWidgetProps> = ({
             y="118"
             textAnchor="middle"
             dominantBaseline="central"
-            fill="#fae8ff"
-            className="text-xs font-bold tracking-wider uppercase"
+            fill="#e0f2fe"
+            className="text-[9px] font-bold tracking-wider uppercase"
           >
             {unit}
           </text>
         </svg>
 
         {/* Floating Indicator Pill at Bottom */}
-        <div className="absolute bottom-1 bg-white/95 backdrop-blur-md px-3.5 py-1.5 rounded-full border border-purple-200/80 shadow-xs flex items-center gap-1.5 text-xs font-bold text-purple-900">
-          <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
+        <div className="absolute bottom-1 bg-white/20 backdrop-blur-md px-3.5 py-1.5 rounded-full border border-white/10 shadow-xs flex items-center gap-1.5 text-xs font-bold text-white">
+          <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
           <span>{statusBadge}</span>
         </div>
       </div>
 
-      {/* 4. Terminal / Station Connection Row with Purple Toggle (Matching Bosch AC from reference) */}
-      <div className="bg-slate-50/90 rounded-2xl p-3.5 border border-slate-200/80 flex items-center justify-between">
+      {/* 4. Terminal / Station Connection Row with Purple Toggle */}
+      <div className="bg-black/30 rounded-2xl p-3.5 border border-white/10 flex items-center justify-between">
         <div className="flex items-center gap-2.5 min-w-0">
-          <div className="w-9 h-9 rounded-xl bg-purple-100 text-purple-700 flex items-center justify-center shrink-0">
+          <div className="w-9 h-9 rounded-xl bg-cyan-950 text-cyan-400 flex items-center justify-center shrink-0 border border-cyan-800/30">
             <Radio className="w-4 h-4" />
           </div>
           <div className="min-w-0">
-            <h4 className="text-xs sm:text-sm font-bold text-slate-900 truncate leading-tight">
+            <h4 className="text-xs sm:text-sm font-bold text-white truncate leading-tight">
               {isHindi ? "हैंडहेल्ड टर्मिनल #104" : "Zebra Terminal #104"}
             </h4>
-            <p className="text-xs text-slate-500 font-medium mt-0.5">
+            <p className="text-xs text-slate-300 font-medium mt-0.5">
               {terminalConnected
                 ? isHindi
                   ? "फ्लोर वाई-फाई कनेक्टेड"
@@ -325,8 +324,8 @@ export const CircularDialWidget: React.FC<CircularDialWidgetProps> = ({
           onClick={() => setTerminalConnected(!terminalConnected)}
           className={`w-12 h-6.5 rounded-full transition-colors relative p-0.5 cursor-pointer ${
             terminalConnected
-              ? "bg-gradient-to-r from-violet-600 to-fuchsia-500"
-              : "bg-slate-300"
+              ? "bg-gradient-to-r from-cyan-400 to-blue-500"
+              : "bg-slate-700"
           }`}
         >
           <div

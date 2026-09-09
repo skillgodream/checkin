@@ -6,11 +6,13 @@ import { CircularDialWidget } from "./CircularDialWidget";
 import { StoreZonesGrid } from "./StoreZonesGrid";
 import { JobReadyHumanFigure } from "./JobReadyHumanFigure";
 import { ModulesView } from "./ModulesView";
+import { TenDaySkillJourneyView } from "./TenDaySkillJourneyView";
 import { FloatingGlassMenu, LearnerSection } from "./FloatingGlassMenu";
 import { LearnerJourneyRoadmap } from "./LearnerJourneyRoadmap";
 import { LearnerDailyReportCard } from "./LearnerDailyReportCard";
 import { YesterdayShiftDetailModal } from "./YesterdayShiftDetailModal";
 import { TodaysGoalLandingView } from "./TodaysGoalLandingView";
+import { DailyCoachReportView } from "./DailyCoachReportView";
 import {  Mic,
   MicOff,
   Send,
@@ -98,6 +100,38 @@ export const NewHireView: React.FC<NewHireViewProps> = ({
   const [activeModal, setActiveModal] = useState<"map" | "buddy" | "scanner" | "target" | "work" | "yesterday_detail" | null>(null);
   const [buddyAlertSent, setBuddyAlertSent] = useState<boolean>(false);
   const [showTodaysGoalView, setShowTodaysGoalView] = useState<boolean>(false);
+  const [showDailyCoachReport, setShowDailyCoachReport] = useState<boolean>(false);
+  const [selectedDeepLinkModuleId, setSelectedDeepLinkModuleId] = useState<string | null>(null);
+  const [activeFloorTaskId, setActiveFloorTaskId] = useState<string | null>("t1");
+  const [completedFloorTasks, setCompletedFloorTasks] = useState<Record<string, boolean>>({
+    "t1_sub1": false,
+    "t1_sub2": false,
+    "t1_sub3": false,
+    "t2_sub1": false,
+    "t2_sub2": false,
+    "t2_sub3": false,
+    "t3_sub1": false,
+    "t3_sub2": false,
+    "t3_sub3": false,
+    "t4_sub1": false,
+    "t4_sub2": false,
+  });
+
+  const [completedWorkChecklist, setCompletedWorkChecklist] = useState<Record<string, boolean>>({
+    walk: false,
+    seal: false,
+    pack: false,
+  });
+  const [completedScannerChecklist, setCompletedScannerChecklist] = useState<Record<string, boolean>>({
+    laser: false,
+    dist: false,
+    battery: false,
+  });
+  const [completedTargetChecklist, setCompletedTargetChecklist] = useState<Record<string, boolean>>({
+    orders: false,
+    pacing: false,
+    report: false,
+  });
 
   // Voice recording & input states
   const [isListening, setIsListening] = useState<boolean>(false);
@@ -419,60 +453,134 @@ export const NewHireView: React.FC<NewHireViewProps> = ({
         onSelectSection={setActiveSection}
         onUpdateHire={onUpdateHire}
         onOpenBuddy={() => setActiveSection("buddy")}
+        onSelectModuleWithId={(modId) => {
+          setSelectedDeepLinkModuleId(modId);
+          setActiveSection("modules");
+          setShowTodaysGoalView(false);
+        }}
+        onSelectFloorTask={(modalType) => {
+          setActiveSection("dial");
+          if (modalType === "map" || modalType === "buddy") {
+            setActiveFloorTaskId("t1");
+          } else if (modalType === "scanner") {
+            setActiveFloorTaskId("t2");
+          } else if (modalType === "work") {
+            setActiveFloorTaskId("t3");
+          } else if (modalType === "target") {
+            setActiveFloorTaskId("t4");
+          }
+          setShowTodaysGoalView(false);
+        }}
       />
     );
   }
 
-  return (
-    <div className="max-w-md mx-auto px-4 py-3 space-y-4 pb-28 select-none">
-      {/* ========================================================= */}
-      {/* 1. HOME: WHERE AM I? WHAT TO DO NOW? WHY? WHO HELPS?       */}
-      {/* ========================================================= */}
-      {activeSection === "home" && (
-        <div className="space-y-4 animate-in fade-in duration-200">
+  if (activeSection === "modules") {
+    return (
+      <div 
+        className="max-w-md mx-auto pb-28 select-none min-h-screen relative bg-cover bg-center animate-in fade-in duration-200"
+        style={{
+          backgroundImage: "url('/Editing_background_image_for_app_202609091446.jpeg')"
+        }}
+      >
+        {/* Soft elegant gradient overlay to ensure UI elements are ultra-legible */}
+        <div className="absolute inset-0 bg-slate-950/70 backdrop-blur-[2px] z-0" />
+        
+        {/* Content wrapper */}
+        <div className="relative z-10">
+          <ModulesView
+            newHire={newHire}
+            onUpdateHire={onUpdateHire}
+            isHindi={isHindi}
+            initialModuleId={selectedDeepLinkModuleId}
+          />
+        </div>
+        <FloatingGlassMenu
+          activeSection={activeSection}
+          onSelectSection={setActiveSection}
+          isHindi={isHindi}
+          hasAttention={isNeedsHelp || isSupportAssigned}
+          buddyAssigned={isSupportAssigned}
+        />
+      </div>
+    );
+  }
+
+  if (activeSection === "home") {
+    return (
+      <div 
+        className="max-w-md mx-auto pb-28 select-none min-h-screen relative bg-cover bg-center"
+        style={{
+          backgroundImage: "url('/Editing_background_image_for_app_202609091446.jpeg')"
+        }}
+      >
+        {/* Soft elegant gradient overlay to ensure UI elements are ultra-legible */}
+        <div className="absolute inset-0 bg-slate-950/60 backdrop-blur-[2px] z-0" />
+        
+        {/* Content wrapper */}
+        <div className="relative z-10 px-4 pt-4 space-y-4">
           {/* 1. HERO BANNER: ONLY SPEAKER TAB, CIRCULAR PERCENTAGE, AND START TAB */}
           <div
             id="todays-focus-card"
-            className="bg-gradient-to-br from-violet-700 via-purple-700 to-fuchsia-700 rounded-[28px] p-5 sm:p-6 text-white shadow-xl shadow-purple-950/15 relative overflow-hidden space-y-5"
+            className="moving-dark-gradient rounded-[28px] p-5 sm:p-6 text-white shadow-xl border border-white/10 relative overflow-hidden space-y-5"
           >
-            {/* Top Bar: Speaker Tab */}
-            <div className="flex items-center justify-between">
-              <span className="text-xs font-bold text-purple-200 uppercase tracking-wider">
+            {/* Real-time moving/flowing dark visual and halftone mesh dots as requested */}
+            <div className="absolute inset-0 dotted-halftone-pattern pointer-events-none opacity-85 z-0" />
+            
+            {/* Subtle premium accent glow to lift the look */}
+            <div className="absolute -top-16 -left-16 w-56 h-56 bg-cyan-500/15 rounded-full blur-3xl pointer-events-none z-0" />
+            <div className="absolute -bottom-16 -right-16 w-56 h-56 bg-blue-600/10 rounded-full blur-3xl pointer-events-none z-0" />
+
+            {/* Top Bar: Speaker Tab & Daily Report Icon */}
+            <div className="flex items-center justify-between relative z-10">
+              <span className="text-xs font-bold text-slate-200 uppercase tracking-wider">
                 {isHindi ? "दैनिक स्कोर प्रगति" : "Daily Score Progress"}
               </span>
 
-              <button
-                type="button"
-                onClick={() => {
-                  const completedCount = newHire.modulesCompleted ?? 3;
-                  const quizAvg = newHire.quizAverageScore ?? 94;
-                  const actualPace = currentRecord.workSignal?.actualPickRate ?? 35;
-                  const targetPace = currentRecord.workSignal?.targetPickRate ?? 50;
-                  const accuracy = currentRecord.workSignal?.accuracyRate ?? 98;
-                  const ordersCompleted = currentRecord.workSignal?.ordersCompleted ?? 38;
-                  const targetOrders = currentRecord.workSignal?.targetOrders ?? 42;
-                  const trainingScore = Math.min(100, Math.round(((completedCount / 3) * 50 + (quizAvg / 100) * 50)));
-                  const speedScore = Math.min(100, Math.round((actualPace / targetPace) * 100));
-                  const accuracyScore = Math.min(100, Math.round(accuracy));
-                  const ordersScore = Math.min(100, Math.round((ordersCompleted / targetOrders) * 100));
-                  const compositeScore = Math.round(
-                    trainingScore * 0.25 + speedScore * 0.30 + accuracyScore * 0.30 + ordersScore * 0.15
-                  );
-                  handlePlayAudio(
-                    "status-card",
-                    isHindi ? `दैनिक स्कोर ${compositeScore} प्रतिशत है।` : `Daily performance score is ${compositeScore} percent.`
-                  );
-                }}
-                className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-white text-slate-950 text-xs font-black shadow-xs cursor-pointer active:scale-95 transition-all"
-                title="Listen aloud"
-              >
-                <Volume2
-                  className={`w-4 h-4 ${
-                    playingAudioId === "status-card" ? "text-purple-600 animate-bounce" : "text-slate-800"
-                  }`}
-                />
-                <span>{isHindi ? "सुनिए" : "Listen"}</span>
-              </button>
+              <div className="flex items-center gap-2">
+                <button
+                  type="button"
+                  onClick={() => setShowDailyCoachReport(true)}
+                  className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-white/20 hover:bg-white/30 text-white text-xs font-black shadow-xs cursor-pointer active:scale-95 transition-all border border-white/30"
+                  title="Daily Coach Report"
+                >
+                  <Sparkles className="w-3.5 h-3.5 text-amber-300" />
+                  <span>{isHindi ? "कोच रिपोर्ट" : "Daily Report"}</span>
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() => {
+                    const completedCount = newHire.modulesCompleted ?? 3;
+                    const quizAvg = newHire.quizAverageScore ?? 94;
+                    const actualPace = currentRecord.workSignal?.actualPickRate ?? 35;
+                    const targetPace = currentRecord.workSignal?.targetPickRate ?? 50;
+                    const accuracy = currentRecord.workSignal?.accuracyRate ?? 98;
+                    const ordersCompleted = currentRecord.workSignal?.ordersCompleted ?? 38;
+                    const targetOrders = currentRecord.workSignal?.targetOrders ?? 42;
+                    const trainingScore = Math.min(100, Math.round(((completedCount / 3) * 50 + (quizAvg / 100) * 50)));
+                    const speedScore = Math.min(100, Math.round((actualPace / targetPace) * 100));
+                    const accuracyScore = Math.min(100, Math.round(accuracy));
+                    const ordersScore = Math.min(100, Math.round((ordersCompleted / targetOrders) * 100));
+                    const compositeScore = Math.round(
+                      trainingScore * 0.25 + speedScore * 0.30 + accuracyScore * 0.30 + ordersScore * 0.15
+                    );
+                    handlePlayAudio(
+                      "status-card",
+                      isHindi ? `दैनिक स्कोर ${compositeScore} प्रतिशत है।` : `Daily performance score is ${compositeScore} percent.`
+                    );
+                  }}
+                  className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-white text-slate-950 text-xs font-black shadow-xs cursor-pointer active:scale-95 transition-all"
+                  title="Listen aloud"
+                >
+                  <Volume2
+                    className={`w-4 h-4 ${
+                      playingAudioId === "status-card" ? "text-purple-600 animate-bounce" : "text-slate-800"
+                    }`}
+                  />
+                  <span>{isHindi ? "सुनिए" : "Listen"}</span>
+                </button>
+              </div>
             </div>
 
             {/* Circular Percentage in the Card */}
@@ -493,7 +601,7 @@ export const NewHireView: React.FC<NewHireViewProps> = ({
               );
 
               return (
-                <div className="flex flex-col items-center justify-center py-2">
+                <div className="flex flex-col items-center justify-center py-2 relative z-10">
                   <div className="relative w-40 h-40 flex items-center justify-center">
                     <svg className="w-full h-full transform -rotate-90" viewBox="0 0 100 100">
                       <circle
@@ -501,7 +609,7 @@ export const NewHireView: React.FC<NewHireViewProps> = ({
                         cy="50"
                         r="40"
                         fill="transparent"
-                        stroke="rgba(255, 255, 255, 0.2)"
+                        stroke="rgba(255, 255, 255, 0.15)"
                         strokeWidth="8"
                       />
                       <circle
@@ -509,17 +617,17 @@ export const NewHireView: React.FC<NewHireViewProps> = ({
                         cy="50"
                         r="40"
                         fill="transparent"
-                        stroke="#ffffff"
+                        stroke="#22d3ee" // dynamic glowing color (cyan) for outstanding readability
                         strokeWidth="8"
                         strokeDasharray={251.2}
                         strokeDashoffset={251.2 - (251.2 * compositeScore) / 100}
                         strokeLinecap="round"
-                        className="transition-all duration-1000"
+                        className="transition-all duration-1000 drop-shadow-[0_0_6px_rgba(34,211,238,0.4)]"
                       />
                     </svg>
                     <div className="absolute inset-0 flex flex-col items-center justify-center text-center">
                       <span className="text-3xl font-black text-white">{compositeScore}%</span>
-                      <span className="text-[10px] font-bold text-purple-200 uppercase tracking-tight">
+                      <span className="text-[10px] font-bold text-slate-300 uppercase tracking-tight">
                         {isHindi ? "समग्र स्कोर" : "Composite"}
                       </span>
                     </div>
@@ -529,12 +637,12 @@ export const NewHireView: React.FC<NewHireViewProps> = ({
             })()}
 
             {/* Start Button / Tab */}
-            <div className="pt-1 flex justify-center">
+            <div className="pt-1 flex justify-center relative z-10">
               <button
                 id="home-primary-cta-btn"
                 type="button"
                 onClick={() => setShowTodaysGoalView(true)}
-                className="max-w-[180px] w-full py-2.5 px-4 rounded-xl bg-white text-slate-950 hover:bg-slate-50 font-black text-xs sm:text-sm shadow-md active:scale-98 transition-all flex items-center justify-center gap-1.5 cursor-pointer border border-white/80"
+                className="max-w-[180px] w-full py-2.5 px-4 rounded-xl bg-cyan-500 text-slate-950 hover:bg-cyan-400 font-black text-xs sm:text-sm shadow-lg shadow-cyan-500/25 active:scale-98 transition-all flex items-center justify-center gap-1.5 cursor-pointer border border-cyan-400"
               >
                 <span>{status.primaryBtnText}</span>
                 <ArrowRight className="w-4 h-4 stroke-[2.5]" />
@@ -553,21 +661,21 @@ export const NewHireView: React.FC<NewHireViewProps> = ({
             onOpenModules={() => setActiveSection("modules")}
           />
 
-          {/* 3. BUDDY VIKRAM CARD (MATCHING ATTACHMENT) */}
+          {/* 3. BUDDY VIKRAM CARD (GLASSMORPHIC STYLING) */}
           <div
             onClick={() => setActiveSection("buddy")}
-            className="bg-gradient-to-r from-violet-700 via-purple-700 to-fuchsia-700 rounded-[26px] p-4 text-white shadow-xl shadow-purple-950/15 flex items-center justify-between gap-3 cursor-pointer group active:scale-[0.99] transition-all relative overflow-hidden"
+            className="bg-white/10 backdrop-blur-md rounded-[26px] p-4 text-white shadow-xl border border-white/20 flex items-center justify-between gap-3 cursor-pointer group active:scale-[0.99] transition-all relative overflow-hidden"
           >
             <div className="flex items-center gap-3.5 min-w-0">
               <div className="relative shrink-0">
-                <div className="w-14 h-14 rounded-full overflow-hidden border-2 border-white shadow-md">
+                <div className="w-14 h-14 rounded-full overflow-hidden border-2 border-white/80 shadow-md">
                   <img
                     src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=150&h=150&fit=crop&crop=face"
                     alt={newHire.buddy}
                     className="w-full h-full object-cover"
                   />
                 </div>
-                <span className="absolute bottom-0 right-0 w-3.5 h-3.5 rounded-full bg-emerald-500 border-2 border-purple-700 animate-pulse" />
+                <span className="absolute bottom-0 right-0 w-3.5 h-3.5 rounded-full bg-emerald-500 border-2 border-slate-900 animate-pulse" />
               </div>
               <div className="min-w-0">
                 <div className="flex items-center gap-2">
@@ -578,7 +686,7 @@ export const NewHireView: React.FC<NewHireViewProps> = ({
                     LIVE
                   </span>
                 </div>
-                <p className="text-xs text-purple-100 font-semibold mt-0.5">
+                <p className="text-xs text-slate-300 font-semibold mt-0.5">
                   {isHindi ? "फ्लोर साथी • आइसल 4-8" : "Floor Buddy • Aisle 4-8"}
                 </p>
               </div>
@@ -590,41 +698,23 @@ export const NewHireView: React.FC<NewHireViewProps> = ({
                 e.stopPropagation();
                 setActiveSection("buddy");
               }}
-              className="w-11 h-11 rounded-full bg-white text-purple-900 hover:bg-purple-50 flex items-center justify-center shadow-md shrink-0 cursor-pointer active:scale-95 transition-all"
+              className="w-11 h-11 rounded-full bg-white text-slate-900 hover:bg-slate-50 flex items-center justify-center shadow-md shrink-0 cursor-pointer active:scale-95 transition-all"
               title="Call Buddy"
             >
               <Phone className="w-5 h-5 stroke-[2.5]" />
             </button>
           </div>
 
-          {/* 4. JOB READY CARD (MATCHING ATTACHMENT) */}
-          <div
-            onClick={() => setActiveSection("dashboard")}
-            className="bg-gradient-to-r from-violet-700 via-purple-700 to-fuchsia-700 rounded-[26px] p-4 text-white shadow-xl shadow-purple-950/15 flex items-center justify-between gap-3 cursor-pointer group active:scale-[0.99] transition-all relative overflow-hidden"
-          >
-            <div className="flex items-center gap-3.5 min-w-0">
-              <div className="w-12 h-12 rounded-2xl bg-white/20 backdrop-blur-xs flex items-center justify-center text-white shrink-0 shadow-inner border border-white/20">
-                <Footprints className="w-6 h-6 stroke-[2]" />
-              </div>
-              <div className="min-w-0">
-                <div className="flex items-baseline gap-1.5">
-                  <span className="text-xl font-black text-white tracking-tight">
-                    12%
-                  </span>
-                  <span className="text-xs font-bold text-purple-200">
-                    {isHindi ? "तैयार" : "Ready"}
-                  </span>
-                </div>
-                <p className="text-xs text-purple-100 font-semibold mt-0.5">
-                  {isHindi ? "जॉब रेडी स्कोर • 14/20 हुनर" : "Job Ready Score • 14/20 Skills"}
-                </p>
-              </div>
-            </div>
-
-            <div className="w-10 h-10 rounded-full bg-white/20 hover:bg-white/30 text-white flex items-center justify-center shrink-0 border border-white/20 transition-all group-hover:scale-105">
-              <ChevronRight className="w-5 h-5 stroke-[2.5]" />
-            </div>
-          </div>
+          {/* 4. JOB READY & ROADMAP CARD */}
+          <LearnerJourneyRoadmap
+            newHire={newHire}
+            currentDay={currentDay}
+            isHindi={isHindi}
+            compact={true}
+            onNavigateToSection={(sec) => setActiveSection(sec)}
+            onOpenWorkTools={() => setActiveModal("work")}
+            onSelectStage={() => setActiveSection("dashboard")}
+          />
 
           {/* Quick Access: Revisit Onboarding Welcome Walkthrough */}
           {onOpenOnboarding && (
@@ -632,7 +722,7 @@ export const NewHireView: React.FC<NewHireViewProps> = ({
               <button
                 type="button"
                 onClick={onOpenOnboarding}
-                className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-white hover:bg-purple-50 text-purple-700 hover:text-purple-800 text-xs font-bold transition-all border border-purple-200/80 shadow-2xs cursor-pointer active:scale-95"
+                className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-white/80 hover:bg-white text-purple-700 hover:text-purple-800 text-xs font-bold transition-all border border-purple-200/80 shadow-2xs cursor-pointer active:scale-95"
               >
                 <Sparkles className="w-3.5 h-3.5 text-purple-600" />
                 <span>{isHindi ? "ऑनबोर्डिंग स्क्रीन देखें (Walkthrough)" : "View Onboarding Screen"}</span>
@@ -640,24 +730,31 @@ export const NewHireView: React.FC<NewHireViewProps> = ({
             </div>
           )}
         </div>
-      )}
 
-      {/* ========================================================= */}
-      {/* 2. MODULES: 10-DAY LMS TRAINING JOURNEY                   */}
-      {/* ========================================================= */}
-      {activeSection === "modules" && (
-        <ModulesView
-          newHire={newHire}
-          onUpdateHire={onUpdateHire}
+        <FloatingGlassMenu
+          activeSection={activeSection}
+          onSelectSection={setActiveSection}
           isHindi={isHindi}
+          hasAttention={isNeedsHelp || isSupportAssigned}
+          buddyAssigned={isSupportAssigned}
         />
-      )}
+      </div>
+    );
+  }
 
-      {/* ========================================================= */}
-      {/* 3. DIAL: FLOOR TELEMETRY & SPEED DIAL GAUGE               */}
-      {/* ========================================================= */}
-      {activeSection === "dial" && (
-        <div className="space-y-4 animate-in fade-in duration-200">
+  if (activeSection === "dial") {
+    return (
+      <div 
+        className="max-w-md mx-auto pb-28 select-none min-h-screen relative bg-cover bg-center animate-in fade-in duration-200"
+        style={{
+          backgroundImage: "url('/Retail_cashier_black_and_white_202609091434.jpeg')"
+        }}
+      >
+        {/* Soft elegant gradient overlay to ensure UI elements are ultra-legible */}
+        <div className="absolute inset-0 bg-slate-950/70 backdrop-blur-[2px] z-0" />
+        
+        {/* Content wrapper */}
+        <div className="relative z-10 px-4 pt-4 space-y-4">
           {/* Main Dial Gauge Widget */}
           <CircularDialWidget
             pickRate={currentRecord.workSignal?.actualPickRate ?? 35}
@@ -687,7 +784,209 @@ export const NewHireView: React.FC<NewHireViewProps> = ({
             isHindi={isHindi}
             activeZoneId={currentDay === 3 ? "aisles_4_8" : "aisles_1_3"}
           />
+
+          {/* ========================================================= */}
+          {/* ACTIONABLE SHIFT TASKS & INLINE DRILL EXPERIENCE          */}
+          {/* ========================================================= */}
+          <div className="bg-white/10 backdrop-blur-md rounded-[28px] p-4 border border-white/20 shadow-xl space-y-4 text-white">
+            <div className="flex items-center justify-between border-b border-white/10 pb-3">
+              <div className="flex items-center gap-2">
+                <span className="w-2.5 h-2.5 rounded-full bg-emerald-400 animate-pulse" />
+                <h3 className="text-xs font-black uppercase tracking-wider text-white">
+                  {isHindi ? "सक्रिय कार्यसूची और जांच" : "Active Floor Checklist & Drills"}
+                </h3>
+              </div>
+              <span className="text-[10px] font-bold text-emerald-300 bg-white/10 px-2.5 py-0.5 rounded-full border border-white/10">
+                {isHindi ? "फ्लोर पर लाइव" : "Live Floor Practice"}
+              </span>
+            </div>
+
+            {/* Total Sub-tasks completion progress bar */}
+            <div className="space-y-1.5 bg-black/20 p-3 rounded-2xl border border-white/5">
+              <div className="flex items-center justify-between text-xs font-bold text-slate-200">
+                <span>{isHindi ? "आज की प्रगति" : "Today's Task Completion"}</span>
+                <span>
+                  {Object.values(completedFloorTasks).filter(Boolean).length} / {Object.keys(completedFloorTasks).length} Completed
+                </span>
+              </div>
+              <div className="w-full h-2 bg-white/10 rounded-full overflow-hidden">
+                <div
+                  className="h-full bg-cyan-400 rounded-full transition-all duration-300 shadow-[0_0_6px_rgba(34,211,238,0.5)]"
+                  style={{
+                    width: `${(Object.values(completedFloorTasks).filter(Boolean).length / Object.keys(completedFloorTasks).length) * 100}%`
+                  }}
+                />
+              </div>
+            </div>
+
+            <div className="space-y-3">
+              {[
+                {
+                  id: "t1",
+                  title: isHindi ? "आइसल 4 से 8 का वॉकथ्रू" : "Aisle 4-8 physical walkthrough",
+                  category: isHindi ? "साथी वॉकथ्रू" : "Buddy Walk",
+                  desc: isHindi ? "सीनियर साथी विक्रम के साथ मुख्य रैक लेआउट की लाइव जांच" : "Review physical shelf heights and coordinates with your buddy",
+                  badge: isHindi ? "मैप वॉक" : "Map Walk",
+                  checklist: [
+                    { key: "t1_sub1", label: isHindi ? "रैक लेआउट और बारकोड की संरेखण जांचें" : "Verify bin coordinates align with PDA guidelines" },
+                    { key: "t1_sub2", label: isHindi ? "लेवल 1 से 5 के रैक पर लेबल की भौतिक जांच करें" : "Trace vertical level labels (Levels 1 to 5) in Aisles 4-8" },
+                    { key: "t1_sub3", label: isHindi ? "साथी विक्रम के साथ लाइव पोजिशन कैलिब्रेट करें" : "Confirm floor barcode integrity with Buddy Vikram" },
+                  ]
+                },
+                {
+                  id: "t2",
+                  title: isHindi ? "फिंगर-रिंग स्कैनर और ऑर्डर पिकिंग" : "Pick 50 orders via ring-scanner",
+                  category: isHindi ? "फ्लोर पिकिंग" : "Floor Pick",
+                  desc: isHindi ? "फिंगर स्कैनर से बिना किसी गलत स्कैन के तेजी से सामान उठाना" : "Pick with 0 mis-scans using lightweight ring tool",
+                  badge: isHindi ? "स्कैनर" : "Scanner",
+                  checklist: [
+                    { key: "t2_sub1", label: isHindi ? "फिंगर स्कैनर के लाल शीशे को साफ करें" : "Wipe and clean red laser glass lens" },
+                    { key: "t2_sub2", label: isHindi ? "बारकोड से 15 सेंटीमीटर की सही दूरी पर स्कैन करें" : "Test scan at exact 15cm distance" },
+                    { key: "t2_sub3", label: isHindi ? "लाइट पीली होने पर बैटरी को बदलें" : "Swap ring battery if indicator status turns yellow" },
+                  ]
+                },
+                {
+                  id: "t3",
+                  title: isHindi ? "कोल्ड रूम डेयरी 90-सेकंड एसओपी" : "Cold Room dairy 90-sec SOP",
+                  category: isHindi ? "गुणवत्ता व सुरक्षा" : "Quality SOP",
+                  desc: isHindi ? "कोल्ड चेन डेयरी बैग्स और टोट्स को इंसुलेटेड पैक में सील करना" : "Complete temperature-controlled dairy packing",
+                  badge: isHindi ? "कोल्ड चेन" : "Cold Chain",
+                  checklist: [
+                    { key: "t3_sub1", label: isHindi ? "कोल्ड रूम में प्रवेश/निकास 90 सेकंड में पूरा करें" : "Keep entry speed within 90-second safety window" },
+                    { key: "t3_sub2", label: isHindi ? "थर्मल बैग सील को अच्छी तरह बंद करें" : "Fasten thermal seal on insulated packaging totes" },
+                    { key: "t3_sub3", label: isHindi ? "कोल्ड चेन रूट लेबल को डिस्पैच से मैच करें" : "Attach cold-chain route tags matching dispatch table" },
+                  ]
+                },
+                {
+                  id: "t4",
+                  title: isHindi ? "पिक रेट और शिफ्ट रिपोर्ट" : "Speed pacing & Shift Report",
+                  category: isHindi ? "रिपोर्ट" : "Pacing & Report",
+                  desc: isHindi ? "45 से अधिक UPH की स्पीड बनाए रखें और अपनी रिपोर्ट भेजें" : "Ensure continuous high-speed pick pacing on active shift",
+                  badge: isHindi ? "रिपोर्ट" : "Report KPI",
+                  checklist: [
+                    { key: "t4_sub1", label: isHindi ? "45 UPH से अधिक की गति बनाए रखें" : "Maintain speed pacing goal of >45 UPH" },
+                    { key: "t4_sub2", label: isHindi ? "डीन को शिफ्ट के अंत की वॉइस रिपोर्ट सबमिट करें" : "Submit end-of-shift status update voice check-in" },
+                  ]
+                }
+              ].map((task) => {
+                const isExpanded = activeFloorTaskId === task.id;
+                return (
+                  <div
+                    key={task.id}
+                    className={`rounded-2xl border transition-all overflow-hidden ${
+                      isExpanded
+                        ? "bg-black/35 border-cyan-400/50 shadow-md ring-2 ring-cyan-500/10"
+                        : "bg-white/5 border-white/10 hover:border-white/20 shadow-2xs text-white"
+                    }`}
+                  >
+                    {/* Header trigger */}
+                    <div
+                      onClick={() => setActiveFloorTaskId(isExpanded ? null : task.id)}
+                      className="p-3.5 flex items-center justify-between gap-3 cursor-pointer"
+                    >
+                      <div className="flex items-center gap-3 min-w-0">
+                        <div className={`w-8 h-8 rounded-xl flex items-center justify-center shrink-0 ${
+                          isExpanded ? "bg-cyan-500 text-slate-950 font-black" : "bg-white/10 text-slate-200"
+                        }`}>
+                          <CheckCircle2 className="w-4 h-4" />
+                        </div>
+                        <div className="min-w-0">
+                          <p className="text-xs font-bold truncate text-white">{task.title}</p>
+                          <p className="text-[10px] text-slate-300 font-medium truncate">{task.desc}</p>
+                        </div>
+                      </div>
+                      <span className={`text-[9px] font-black uppercase px-2 py-0.5 rounded-full ${
+                        isExpanded ? "bg-cyan-500 text-slate-950" : "bg-white/10 text-slate-300"
+                      }`}>
+                        {task.badge}
+                      </span>
+                    </div>
+
+                    {isExpanded && (
+                      <div className="px-3.5 pb-3.5 pt-0 border-t border-white/10 space-y-2.5 bg-black/20 text-xs">
+                        <div className="space-y-2">
+                          {task.checklist.map((item) => {
+                            const isSubCompleted = !!completedFloorTasks[item.key];
+                            return (
+                              <div
+                                key={item.key}
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  setCompletedFloorTasks(prev => ({ ...prev, [item.key]: !prev[item.key] }));
+                                }}
+                                className={`p-2.5 border rounded-xl flex items-start gap-2.5 cursor-pointer transition-all active:scale-[0.99] ${
+                                  isSubCompleted
+                                    ? "bg-emerald-500/20 border-emerald-500/30 text-emerald-200"
+                                    : "bg-white/5 border-white/10 hover:bg-white/10 text-slate-200"
+                                }`}
+                              >
+                                <input
+                                  type="checkbox"
+                                  checked={isSubCompleted}
+                                  onChange={() => {}}
+                                  className="w-4 h-4 rounded mt-0.5 accent-emerald-500 shrink-0 cursor-pointer"
+                                />
+                                <span className={isSubCompleted ? "line-through text-slate-400 font-medium" : "font-bold text-slate-200"}>
+                                  {item.label}
+                                </span>
+                              </div>
+                            );
+                          })}
+                        </div>
+
+                        <div className="flex items-center gap-2 justify-end pt-1">
+                          <button
+                            type="button"
+                            onClick={() => {
+                              // Auto-check all items in this task
+                              const updated = { ...completedFloorTasks };
+                              task.checklist.forEach(item => {
+                                updated[item.key] = true;
+                              });
+                              setCompletedFloorTasks(updated);
+                            }}
+                            className="px-2.5 py-1 rounded bg-white/10 hover:bg-white/20 text-slate-200 text-[10px] font-bold transition-all cursor-pointer border border-white/15"
+                          >
+                            {isHindi ? "सभी पूर्ण करें" : "Mark All Done"}
+                          </button>
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                );
+              })}
+            </div>
+          </div>
         </div>
+
+        <FloatingGlassMenu
+          activeSection={activeSection}
+          onSelectSection={setActiveSection}
+          isHindi={isHindi}
+          hasAttention={isNeedsHelp || isSupportAssigned}
+          buddyAssigned={isSupportAssigned}
+        />
+      </div>
+    );
+  }
+
+  return (
+    <div className="max-w-md mx-auto px-4 py-3 space-y-4 pb-28 select-none">
+      {/* ========================================================= */}
+      {/* 1. HOME: WHERE AM I? WHAT TO DO NOW? WHY? WHO HELPS?       */}
+      {/* ========================================================= */}
+
+
+      {activeSection === "journey" && (
+        <TenDaySkillJourneyView
+          newHires={[newHire]}
+          activeHireId={newHire.id}
+          onSelectHire={() => {}}
+          currentDay={currentDay}
+          isLearnerMode={true}
+          onNavigateToSection={(sec) => setActiveSection(sec)}
+          onOpenTodaysGoal={() => setShowTodaysGoalView(true)}
+        />
       )}
 
       {/* ========================================================= */}
@@ -888,9 +1187,7 @@ export const NewHireView: React.FC<NewHireViewProps> = ({
         </div>
       )}
 
-      {/* ========================================================= */}
-      {/* 4. DASHBOARD: WHAT HAVE I LEARNED & JOB READINESS VISUAL  */}
-      {/* ========================================================= */}
+
       {activeSection === "dashboard" && (
         <div className="space-y-4 animate-in fade-in duration-200">
           {/* 1. INTERACTIVE 6-STAGE ROADMAP */}
@@ -1174,13 +1471,25 @@ export const NewHireView: React.FC<NewHireViewProps> = ({
               </button>
             </div>
 
-            <div className="space-y-2 text-xs text-slate-700">
-              <div className="p-3 bg-purple-50/70 border border-purple-200 rounded-2xl flex items-start gap-2.5">
-                <span className="w-5 h-5 rounded-full bg-purple-600 text-white font-bold flex items-center justify-center text-[11px] shrink-0 mt-0.5">
-                  1
-                </span>
-                <div>
-                  <strong className="text-purple-950 block font-bold">
+            <div className="space-y-2.5 text-xs text-slate-700">
+              <p className="text-[11px] font-black uppercase text-purple-700 tracking-wider">
+                {isHindi ? "सामान उठाने की प्रक्रिया और जांच सूची" : "PICKING PROCESS & CHECKLIST"}
+              </p>
+
+              <div
+                onClick={() => setCompletedScannerChecklist(prev => ({ ...prev, laser: !prev.laser }))}
+                className={`p-3 border rounded-2xl flex items-start gap-2.5 cursor-pointer transition-all active:scale-98 ${
+                  completedScannerChecklist.laser ? "bg-emerald-50 border-emerald-200" : "bg-purple-50/70 border-purple-200"
+                }`}
+              >
+                <input
+                  type="checkbox"
+                  checked={completedScannerChecklist.laser}
+                  onChange={() => {}}
+                  className="w-4 h-4 rounded mt-0.5 accent-emerald-600 shrink-0"
+                />
+                <div className="min-w-0">
+                  <strong className={`block font-bold ${completedScannerChecklist.laser ? "line-through text-slate-500" : "text-purple-950"}`}>
                     {isHindi ? "लाल शीशा साफ करें" : "Clean red laser glass"}
                   </strong>
                   <p className="text-[11px] text-purple-900 mt-0.5">
@@ -1191,12 +1500,20 @@ export const NewHireView: React.FC<NewHireViewProps> = ({
                 </div>
               </div>
 
-              <div className="p-3 bg-blue-50/70 border border-blue-200 rounded-2xl flex items-start gap-2.5">
-                <span className="w-5 h-5 rounded-full bg-blue-600 text-white font-bold flex items-center justify-center text-[11px] shrink-0 mt-0.5">
-                  2
-                </span>
-                <div>
-                  <strong className="text-blue-950 block font-bold">
+              <div
+                onClick={() => setCompletedScannerChecklist(prev => ({ ...prev, dist: !prev.dist }))}
+                className={`p-3 border rounded-2xl flex items-start gap-2.5 cursor-pointer transition-all active:scale-98 ${
+                  completedScannerChecklist.dist ? "bg-emerald-50 border-emerald-200" : "bg-blue-50/70 border-blue-200"
+                }`}
+              >
+                <input
+                  type="checkbox"
+                  checked={completedScannerChecklist.dist}
+                  onChange={() => {}}
+                  className="w-4 h-4 rounded mt-0.5 accent-emerald-600 shrink-0"
+                />
+                <div className="min-w-0">
+                  <strong className={`block font-bold ${completedScannerChecklist.dist ? "line-through text-slate-500" : "text-blue-950"}`}>
                     {isHindi ? "दूरी सही रखें (15 सेमी)" : "Hold 15cm from barcode"}
                   </strong>
                   <p className="text-[11px] text-blue-900 mt-0.5">
@@ -1207,18 +1524,26 @@ export const NewHireView: React.FC<NewHireViewProps> = ({
                 </div>
               </div>
 
-              <div className="p-3 bg-slate-50 border border-slate-200 rounded-2xl flex items-start gap-2.5">
-                <span className="w-5 h-5 rounded-full bg-slate-800 text-white font-bold flex items-center justify-center text-[11px] shrink-0 mt-0.5">
-                  3
-                </span>
-                <div>
-                  <strong className="text-slate-900 block font-bold">
-                    {isHindi ? "फिर भी ना चले?" : "Still not working?"}
+              <div
+                onClick={() => setCompletedScannerChecklist(prev => ({ ...prev, battery: !prev.battery }))}
+                className={`p-3 border rounded-2xl flex items-start gap-2.5 cursor-pointer transition-all active:scale-98 ${
+                  completedScannerChecklist.battery ? "bg-emerald-50 border-emerald-200" : "bg-slate-50 border-slate-200"
+                }`}
+              >
+                <input
+                  type="checkbox"
+                  checked={completedScannerChecklist.battery}
+                  onChange={() => {}}
+                  className="w-4 h-4 rounded mt-0.5 accent-emerald-600 shrink-0"
+                />
+                <div className="min-w-0">
+                  <strong className={`block font-bold ${completedScannerChecklist.battery ? "line-through text-slate-500" : "text-slate-900"}`}>
+                    {isHindi ? "बैटरी स्टेटस व रीसेट" : "Battery status & Reset"}
                   </strong>
                   <p className="text-[11px] text-slate-600 mt-0.5">
                     {isHindi
-                      ? "डिस्पैच टेबल पर जाएं और 1 मिनट में दूसरा चार्जर/स्कैनर ले लें।"
-                      : "Swap device at the main packing desk immediately."}
+                      ? "चेक करें कि लाइट हरी जल रही है या नहीं। जरूरत पड़ने पर रीसेट दबाएं।"
+                      : "Check ring scanner green indicator light. Reset if needed."}
                   </p>
                 </div>
               </div>
@@ -1283,6 +1608,47 @@ export const NewHireView: React.FC<NewHireViewProps> = ({
                 <span className="text-lg font-black text-blue-700">
                   {isSupportCompleted ? "48/hr" : "35 / 50"}
                 </span>
+              </div>
+
+              {/* Actionable checklists inside Target card */}
+              <div className="space-y-2 pt-2 border-t border-slate-100">
+                <p className="text-[10px] font-black uppercase tracking-wider text-slate-400">
+                  {isHindi ? "लक्ष्य प्राप्ति हेतु आवश्यक कदम" : "STEPS FOR TODAY'S GOAL"}
+                </p>
+
+                <div
+                  onClick={() => setCompletedTargetChecklist(prev => ({ ...prev, orders: !prev.orders }))}
+                  className={`p-2.5 border rounded-xl flex items-center gap-2 cursor-pointer transition-all ${
+                    completedTargetChecklist.orders ? "bg-emerald-50/70 border-emerald-200" : "bg-slate-50 border-slate-200"
+                  }`}
+                >
+                  <input
+                    type="checkbox"
+                    checked={completedTargetChecklist.orders}
+                    onChange={() => {}}
+                    className="w-3.5 h-3.5 accent-emerald-600 rounded shrink-0"
+                  />
+                  <span className={`text-xs font-bold ${completedTargetChecklist.orders ? "line-through text-slate-400" : "text-slate-800"}`}>
+                    {isHindi ? "फिंगर स्कैनर से 50 ऑर्डर पैक करें" : "Pick 50 orders via finger scanner"}
+                  </span>
+                </div>
+
+                <div
+                  onClick={() => setCompletedTargetChecklist(prev => ({ ...prev, pacing: !prev.pacing }))}
+                  className={`p-2.5 border rounded-xl flex items-center gap-2 cursor-pointer transition-all ${
+                    completedTargetChecklist.pacing ? "bg-emerald-50/70 border-emerald-200" : "bg-slate-50 border-slate-200"
+                  }`}
+                >
+                  <input
+                    type="checkbox"
+                    checked={completedTargetChecklist.pacing}
+                    onChange={() => {}}
+                    className="w-3.5 h-3.5 accent-emerald-600 rounded shrink-0"
+                  />
+                  <span className={`text-xs font-bold ${completedTargetChecklist.pacing ? "line-through text-slate-400" : "text-slate-800"}`}>
+                    {isHindi ? "45 से अधिक UPH की स्पीड बनाए रखें" : "Maintain >45 UPH picking pace"}
+                  </span>
+                </div>
               </div>
 
               <p className="text-[11px] text-slate-500 leading-relaxed px-1">
@@ -1373,6 +1739,64 @@ export const NewHireView: React.FC<NewHireViewProps> = ({
               activeZoneId={currentDay === 3 ? "aisles_4_8" : "aisles_1_3"}
             />
 
+            {/* Daily Quality & Safety Checklists */}
+            <div className="space-y-2 pt-2 border-t border-slate-100">
+              <p className="text-[10px] font-black uppercase tracking-wider text-slate-400">
+                {isHindi ? "गुणवत्ता व सुरक्षा एसओपी एक्टिविटी" : "QUALITY & SAFETY SOP CHECKLIST"}
+              </p>
+
+              <div
+                onClick={() => setCompletedWorkChecklist(prev => ({ ...prev, walk: !prev.walk }))}
+                className={`p-2.5 border rounded-xl flex items-center gap-2 cursor-pointer transition-all ${
+                  completedWorkChecklist.walk ? "bg-emerald-50 border-emerald-200" : "bg-white border-slate-200"
+                }`}
+              >
+                <input
+                  type="checkbox"
+                  checked={completedWorkChecklist.walk}
+                  onChange={() => {}}
+                  className="w-3.5 h-3.5 accent-emerald-600 rounded shrink-0"
+                />
+                <span className={`text-xs font-bold ${completedWorkChecklist.walk ? "line-through text-slate-400" : "text-slate-800"}`}>
+                  {isHindi ? "कोल्ड रूम डेयरी 90-सेकंड एसओपी और सील" : "Cold Room dairy 90-sec retrieval SOP"}
+                </span>
+              </div>
+
+              <div
+                onClick={() => setCompletedWorkChecklist(prev => ({ ...prev, seal: !prev.seal }))}
+                className={`p-2.5 border rounded-xl flex items-center gap-2 cursor-pointer transition-all ${
+                  completedWorkChecklist.seal ? "bg-emerald-50 border-emerald-200" : "bg-white border-slate-200"
+                }`}
+              >
+                <input
+                  type="checkbox"
+                  checked={completedWorkChecklist.seal}
+                  onChange={() => {}}
+                  className="w-3.5 h-3.5 accent-emerald-600 rounded shrink-0"
+                />
+                <span className={`text-xs font-bold ${completedWorkChecklist.seal ? "line-through text-slate-400" : "text-slate-800"}`}>
+                  {isHindi ? "इंसुलेटेड बैग सीलिंग और टोट लेबल जांचें" : "Insulated bag sealing & tote check"}
+                </span>
+              </div>
+
+              <div
+                onClick={() => setCompletedWorkChecklist(prev => ({ ...prev, pack: !prev.pack }))}
+                className={`p-2.5 border rounded-xl flex items-center gap-2 cursor-pointer transition-all ${
+                  completedWorkChecklist.pack ? "bg-emerald-50 border-emerald-200" : "bg-white border-slate-200"
+                }`}
+              >
+                <input
+                  type="checkbox"
+                  checked={completedWorkChecklist.pack}
+                  onChange={() => {}}
+                  className="w-3.5 h-3.5 accent-emerald-600 rounded shrink-0"
+                />
+                <span className={`text-xs font-bold ${completedWorkChecklist.pack ? "line-through text-slate-400" : "text-slate-800"}`}>
+                  {isHindi ? "मल्टी-टोट्स पैकेजिंग SOP पूर्ण करें" : "Complete Multi-Totes Packaging SOP"}
+                </span>
+              </div>
+            </div>
+
             <button
               onClick={() => setActiveModal(null)}
               className="w-full py-2.5 bg-slate-900 text-white rounded-2xl text-xs font-bold cursor-pointer"
@@ -1403,6 +1827,18 @@ export const NewHireView: React.FC<NewHireViewProps> = ({
             setActiveModal(null);
             setActiveSection("buddy");
           }}
+        />
+      )}
+
+      {/* ========================================================= */}
+      {/* DAILY COACH REPORT VIEW (SEPARATE SPART / REPORT PAGE)   */}
+      {/* ========================================================= */}
+      {showDailyCoachReport && (
+        <DailyCoachReportView
+          newHire={newHire}
+          currentDay={currentDay}
+          isHindi={isHindi}
+          onClose={() => setShowDailyCoachReport(false)}
         />
       )}
     </div>
