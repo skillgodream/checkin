@@ -41,6 +41,8 @@ import {  Mic,
   RotateCcw,
   Clock,
   Compass,
+  Eye,
+  Globe,
 } from "lucide-react";
 
 interface NewHireViewProps {
@@ -478,13 +480,10 @@ export const NewHireView: React.FC<NewHireViewProps> = ({
   if (activeSection === "modules") {
     return (
       <div 
-        className="max-w-md mx-auto pb-28 select-none min-h-screen relative bg-cover bg-center animate-in fade-in duration-200"
-        style={{
-          backgroundImage: "url('/Editing_background_image_for_app_202609091446.jpeg')"
-        }}
+        className="max-w-md mx-auto pb-28 select-none min-h-screen relative bg-[#14161d] animate-in fade-in duration-200"
       >
-        {/* Soft elegant gradient overlay to ensure UI elements are ultra-legible */}
-        <div className="absolute inset-0 bg-slate-950/70 backdrop-blur-[2px] z-0" />
+        {/* Soft elegant gradient overlay */}
+        <div className="absolute inset-0 bg-slate-950/20 backdrop-blur-[1px] z-0" />
         
         {/* Content wrapper */}
         <div className="relative z-10">
@@ -509,20 +508,17 @@ export const NewHireView: React.FC<NewHireViewProps> = ({
   if (activeSection === "home") {
     return (
       <div 
-        className="max-w-md mx-auto pb-28 select-none min-h-screen relative bg-cover bg-center"
-        style={{
-          backgroundImage: "url('/Editing_background_image_for_app_202609091446.jpeg')"
-        }}
+        className="max-w-md mx-auto pb-28 select-none min-h-screen relative bg-[#14161d]"
       >
-        {/* Soft elegant gradient overlay to ensure UI elements are ultra-legible */}
-        <div className="absolute inset-0 bg-slate-950/60 backdrop-blur-[2px] z-0" />
+        {/* Soft elegant gradient overlay */}
+        <div className="absolute inset-0 bg-slate-950/20 backdrop-blur-[1px] z-0" />
         
         {/* Content wrapper */}
-        <div className="relative z-10 px-4 pt-4 space-y-4">
-          {/* 1. HERO BANNER: ONLY SPEAKER TAB, CIRCULAR PERCENTAGE, AND START TAB */}
+        <div className="relative z-10 space-y-4">
+          {/* 1. HERO BANNER: FULL BLEED FROM TOP AND SIDES, ROUNDED AT THE BOTTOM */}
           <div
             id="todays-focus-card"
-            className="moving-dark-gradient rounded-[28px] p-5 sm:p-6 text-white shadow-xl border border-white/10 relative overflow-hidden space-y-5"
+            className="moving-dark-gradient rounded-b-[32px] p-5 sm:p-6 text-white shadow-xl border-b border-white/10 relative overflow-hidden space-y-5"
           >
             {/* Real-time moving/flowing dark visual and halftone mesh dots as requested */}
             <div className="absolute inset-0 dotted-halftone-pattern pointer-events-none opacity-85 z-0" />
@@ -531,56 +527,61 @@ export const NewHireView: React.FC<NewHireViewProps> = ({
             <div className="absolute -top-16 -left-16 w-56 h-56 bg-cyan-500/15 rounded-full blur-3xl pointer-events-none z-0" />
             <div className="absolute -bottom-16 -right-16 w-56 h-56 bg-blue-600/10 rounded-full blur-3xl pointer-events-none z-0" />
 
-            {/* Top Bar: Speaker Tab & Daily Report Icon */}
-            <div className="flex items-center justify-between relative z-10">
-              <span className="text-xs font-bold text-slate-200 uppercase tracking-wider">
-                {isHindi ? "दैनिक स्कोर प्रगति" : "Daily Score Progress"}
-              </span>
-
-              <div className="flex items-center gap-2">
+            {/* Top Bar: Onboarding Walkthrough, Language Toggle, & Speaker Tab */}
+            <div className="flex items-center justify-end relative z-10 gap-2">
+              {onOpenOnboarding && (
                 <button
                   type="button"
-                  onClick={() => setShowDailyCoachReport(true)}
-                  className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-white/20 hover:bg-white/30 text-white text-xs font-black shadow-xs cursor-pointer active:scale-95 transition-all border border-white/30"
-                  title="Daily Coach Report"
+                  onClick={onOpenOnboarding}
+                  className="p-1.5 rounded-full bg-white/10 hover:bg-white/20 text-white cursor-pointer active:scale-95 transition-all"
+                  title="View Walkthrough"
                 >
-                  <Sparkles className="w-3.5 h-3.5 text-amber-300" />
-                  <span>{isHindi ? "कोच रिपोर्ट" : "Daily Report"}</span>
+                  <Eye className="w-4 h-4 text-cyan-400" />
                 </button>
+              )}
 
-                <button
-                  type="button"
-                  onClick={() => {
-                    const completedCount = newHire.modulesCompleted ?? 3;
-                    const quizAvg = newHire.quizAverageScore ?? 94;
-                    const actualPace = currentRecord.workSignal?.actualPickRate ?? 35;
-                    const targetPace = currentRecord.workSignal?.targetPickRate ?? 50;
-                    const accuracy = currentRecord.workSignal?.accuracyRate ?? 98;
-                    const ordersCompleted = currentRecord.workSignal?.ordersCompleted ?? 38;
-                    const targetOrders = currentRecord.workSignal?.targetOrders ?? 42;
-                    const trainingScore = Math.min(100, Math.round(((completedCount / 3) * 50 + (quizAvg / 100) * 50)));
-                    const speedScore = Math.min(100, Math.round((actualPace / targetPace) * 100));
-                    const accuracyScore = Math.min(100, Math.round(accuracy));
-                    const ordersScore = Math.min(100, Math.round((ordersCompleted / targetOrders) * 100));
-                    const compositeScore = Math.round(
-                      trainingScore * 0.25 + speedScore * 0.30 + accuracyScore * 0.30 + ordersScore * 0.15
-                    );
-                    handlePlayAudio(
-                      "status-card",
-                      isHindi ? `दैनिक स्कोर ${compositeScore} प्रतिशत है।` : `Daily performance score is ${compositeScore} percent.`
-                    );
-                  }}
-                  className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-white text-slate-950 text-xs font-black shadow-xs cursor-pointer active:scale-95 transition-all"
-                  title="Listen aloud"
-                >
-                  <Volume2
-                    className={`w-4 h-4 ${
-                      playingAudioId === "status-card" ? "text-purple-600 animate-bounce" : "text-slate-800"
-                    }`}
-                  />
-                  <span>{isHindi ? "सुनिए" : "Listen"}</span>
-                </button>
-              </div>
+              <button
+                type="button"
+                onClick={() => setIsHindi(!isHindi)}
+                className="px-2.5 py-1 rounded-full bg-white/10 hover:bg-white/20 text-white cursor-pointer active:scale-95 transition-all flex items-center gap-1 font-bold text-[11px]"
+                title="Toggle Language"
+              >
+                <Globe className="w-3.5 h-3.5 text-cyan-400" />
+                <span>{isHindi ? "EN" : "HI"}</span>
+              </button>
+
+              <button
+                type="button"
+                onClick={() => {
+                  const completedCount = newHire.modulesCompleted ?? 3;
+                  const quizAvg = newHire.quizAverageScore ?? 94;
+                  const actualPace = currentRecord.workSignal?.actualPickRate ?? 35;
+                  const targetPace = currentRecord.workSignal?.targetPickRate ?? 50;
+                  const accuracy = currentRecord.workSignal?.accuracyRate ?? 98;
+                  const ordersCompleted = currentRecord.workSignal?.ordersCompleted ?? 38;
+                  const targetOrders = currentRecord.workSignal?.targetOrders ?? 42;
+                  const trainingScore = Math.min(100, Math.round(((completedCount / 3) * 50 + (quizAvg / 100) * 50)));
+                  const speedScore = Math.min(100, Math.round((actualPace / targetPace) * 100));
+                  const accuracyScore = Math.min(100, Math.round(accuracy));
+                  const ordersScore = Math.min(100, Math.round((ordersCompleted / targetOrders) * 100));
+                  const compositeScore = Math.round(
+                    trainingScore * 0.25 + speedScore * 0.30 + accuracyScore * 0.30 + ordersScore * 0.15
+                  );
+                  handlePlayAudio(
+                    "status-card",
+                    isHindi ? `दैनिक स्कोर ${compositeScore} प्रतिशत है।` : `Daily performance score is ${compositeScore} percent.`
+                  );
+                }}
+                className="flex items-center gap-1 px-2.5 py-1 rounded-full bg-white text-slate-950 text-xs font-black shadow-xs cursor-pointer active:scale-95 transition-all"
+                title="Listen aloud"
+              >
+                <Volume2
+                  className={`w-3.5 h-3.5 ${
+                    playingAudioId === "status-card" ? "text-purple-600 animate-bounce" : "text-slate-800"
+                  }`}
+                />
+                <span>{isHindi ? "सुनिए" : "Listen"}</span>
+              </button>
             </div>
 
             {/* Circular Percentage in the Card */}
@@ -650,85 +651,88 @@ export const NewHireView: React.FC<NewHireViewProps> = ({
             </div>
           </div>
 
-          {/* 2. YESTERDAY — QUICK SNAPSHOT & WHAT IT MEANS */}
-          <LearnerDailyReportCard
-            newHire={newHire}
-            currentDay={currentDay}
-            isHindi={isHindi}
-            onOpenDashboard={() => setActiveSection("dashboard")}
-            onOpenWorkTools={() => setActiveModal("work")}
-            onOpenBuddy={() => setActiveSection("buddy")}
-            onOpenModules={() => setActiveSection("modules")}
-          />
+          {/* Wrapper for remaining sections below the full-bleed banner */}
+          <div className="px-4 space-y-4">
+            {/* 2. YESTERDAY — QUICK SNAPSHOT & WHAT IT MEANS */}
+            <LearnerDailyReportCard
+              newHire={newHire}
+              currentDay={currentDay}
+              isHindi={isHindi}
+              onOpenDashboard={() => setActiveSection("dashboard")}
+              onOpenWorkTools={() => setActiveModal("work")}
+              onOpenBuddy={() => setActiveSection("buddy")}
+              onOpenModules={() => setActiveSection("modules")}
+            />
 
-          {/* 3. BUDDY VIKRAM CARD (GLASSMORPHIC STYLING) */}
-          <div
-            onClick={() => setActiveSection("buddy")}
-            className="bg-white/10 backdrop-blur-md rounded-[26px] p-4 text-white shadow-xl border border-white/20 flex items-center justify-between gap-3 cursor-pointer group active:scale-[0.99] transition-all relative overflow-hidden"
-          >
-            <div className="flex items-center gap-3.5 min-w-0">
-              <div className="relative shrink-0">
-                <div className="w-14 h-14 rounded-full overflow-hidden border-2 border-white/80 shadow-md">
-                  <img
-                    src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=150&h=150&fit=crop&crop=face"
-                    alt={newHire.buddy}
-                    className="w-full h-full object-cover"
-                  />
-                </div>
-                <span className="absolute bottom-0 right-0 w-3.5 h-3.5 rounded-full bg-emerald-500 border-2 border-slate-900 animate-pulse" />
-              </div>
-              <div className="min-w-0">
-                <div className="flex items-center gap-2">
-                  <h3 className="text-base font-black tracking-wider text-white uppercase">
-                    VIKRAM
-                  </h3>
-                  <span className="px-2 py-0.5 rounded-full text-[10px] font-black tracking-wider uppercase bg-white/20 text-white backdrop-blur-xs">
-                    LIVE
-                  </span>
-                </div>
-                <p className="text-xs text-slate-300 font-semibold mt-0.5">
-                  {isHindi ? "फ्लोर साथी • आइसल 4-8" : "Floor Buddy • Aisle 4-8"}
-                </p>
-              </div>
-            </div>
-
-            <button
-              type="button"
-              onClick={(e) => {
-                e.stopPropagation();
-                setActiveSection("buddy");
-              }}
-              className="w-11 h-11 rounded-full bg-white text-slate-900 hover:bg-slate-50 flex items-center justify-center shadow-md shrink-0 cursor-pointer active:scale-95 transition-all"
-              title="Call Buddy"
+            {/* 3. BUDDY VIKRAM CARD (GLASSMORPHIC STYLING) */}
+            <div
+              onClick={() => setActiveSection("buddy")}
+              className="bg-white/10 backdrop-blur-md rounded-[26px] p-4 text-white shadow-xl border border-white/20 flex items-center justify-between gap-3 cursor-pointer group active:scale-[0.99] transition-all relative overflow-hidden"
             >
-              <Phone className="w-5 h-5 stroke-[2.5]" />
-            </button>
-          </div>
+              <div className="flex items-center gap-3.5 min-w-0">
+                <div className="relative shrink-0">
+                  <div className="w-14 h-14 rounded-full overflow-hidden border-2 border-white/80 shadow-md">
+                    <img
+                      src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=150&h=150&fit=crop&crop=face"
+                      alt={newHire.buddy}
+                      className="w-full h-full object-cover"
+                    />
+                  </div>
+                  <span className="absolute bottom-0 right-0 w-3.5 h-3.5 rounded-full bg-emerald-500 border-2 border-slate-900 animate-pulse" />
+                </div>
+                <div className="min-w-0">
+                  <div className="flex items-center gap-2">
+                    <h3 className="text-base font-black tracking-wider text-white uppercase">
+                      VIKRAM
+                    </h3>
+                    <span className="px-2 py-0.5 rounded-full text-[10px] font-black tracking-wider uppercase bg-white/20 text-white backdrop-blur-xs">
+                      LIVE
+                    </span>
+                  </div>
+                  <p className="text-xs text-slate-300 font-semibold mt-0.5">
+                    {isHindi ? "फ्लोर साथी • आइसल 4-8" : "Floor Buddy • Aisle 4-8"}
+                  </p>
+                </div>
+              </div>
 
-          {/* 4. JOB READY & ROADMAP CARD */}
-          <LearnerJourneyRoadmap
-            newHire={newHire}
-            currentDay={currentDay}
-            isHindi={isHindi}
-            compact={true}
-            onNavigateToSection={(sec) => setActiveSection(sec)}
-            onOpenWorkTools={() => setActiveModal("work")}
-            onSelectStage={() => setActiveSection("dashboard")}
-          />
-
-          {/* Quick Access: Revisit Onboarding Welcome Walkthrough */}
-          {onOpenOnboarding && (
-            <div className="pt-2 pb-1 flex justify-center">
               <button
                 type="button"
-                onClick={onOpenOnboarding}
-                className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-white/80 hover:bg-white text-purple-700 hover:text-purple-800 text-xs font-bold transition-all border border-purple-200/80 shadow-2xs cursor-pointer active:scale-95"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  setActiveSection("buddy");
+                }}
+                className="w-11 h-11 rounded-full bg-white text-slate-900 hover:bg-slate-50 flex items-center justify-center shadow-md shrink-0 cursor-pointer active:scale-95 transition-all"
+                title="Call Buddy"
               >
-                <Sparkles className="w-3.5 h-3.5 text-purple-600" />
-                <span>{isHindi ? "ऑनबोर्डिंग स्क्रीन देखें (Walkthrough)" : "View Onboarding Screen"}</span>
+                <Phone className="w-5 h-5 stroke-[2.5]" />
               </button>
             </div>
-          )}
+
+            {/* 4. JOB READY & ROADMAP CARD */}
+            <LearnerJourneyRoadmap
+              newHire={newHire}
+              currentDay={currentDay}
+              isHindi={isHindi}
+              compact={true}
+              onNavigateToSection={(sec) => setActiveSection(sec)}
+              onOpenWorkTools={() => setActiveModal("work")}
+              onSelectStage={() => setActiveSection("dashboard")}
+            />
+
+            {/* Quick Access: Revisit Onboarding Welcome Walkthrough */}
+            {onOpenOnboarding && (
+              <div className="pt-2 pb-1 flex justify-center">
+                <button
+                  type="button"
+                  onClick={onOpenOnboarding}
+                  className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-white/80 hover:bg-white text-purple-700 hover:text-purple-800 text-xs font-bold transition-all border border-purple-200/80 shadow-2xs cursor-pointer active:scale-95"
+                >
+                  <Sparkles className="w-3.5 h-3.5 text-purple-600" />
+                  <span>{isHindi ? "ऑनबोर्डिंग स्क्रीन देखें (Walkthrough)" : "View Onboarding Screen"}</span>
+                </button>
+              </div>
+            )}
+          </div>
         </div>
 
         <FloatingGlassMenu
@@ -745,13 +749,10 @@ export const NewHireView: React.FC<NewHireViewProps> = ({
   if (activeSection === "dial") {
     return (
       <div 
-        className="max-w-md mx-auto pb-28 select-none min-h-screen relative bg-cover bg-center animate-in fade-in duration-200"
-        style={{
-          backgroundImage: "url('/Retail_cashier_black_and_white_202609091434.jpeg')"
-        }}
+        className="max-w-md mx-auto pb-28 select-none min-h-screen relative bg-[#14161d] animate-in fade-in duration-200"
       >
-        {/* Soft elegant gradient overlay to ensure UI elements are ultra-legible */}
-        <div className="absolute inset-0 bg-slate-950/70 backdrop-blur-[2px] z-0" />
+        {/* Soft elegant gradient overlay */}
+        <div className="absolute inset-0 bg-slate-950/20 backdrop-blur-[1px] z-0" />
         
         {/* Content wrapper */}
         <div className="relative z-10 px-4 pt-4 space-y-4">
@@ -993,9 +994,9 @@ export const NewHireView: React.FC<NewHireViewProps> = ({
       {/* 4. BUDDY: LET ME TALK TO SOMEONE (VOICE-FIRST & NATURAL)  */}
       {/* ========================================================= */}
       {activeSection === "buddy" && (
-        <div className="space-y-4 animate-in fade-in duration-200">
+        <div className="space-y-4 animate-in fade-in duration-200 text-white">
           {/* Buddy Profile & Live Floor Stance */}
-          <div className="bg-white rounded-[28px] p-4 border border-emerald-100 shadow-sm flex items-center justify-between">
+          <div className="bg-[#1b1e26] rounded-[28px] p-4 border border-white/10 shadow-xl flex items-center justify-between">
             <div className="flex items-center gap-3">
               <img
                 src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=150&h=150&fit=crop&crop=face"
@@ -1003,9 +1004,9 @@ export const NewHireView: React.FC<NewHireViewProps> = ({
                 className="w-12 h-12 rounded-full object-cover border-2 border-emerald-500 shadow-xs"
               />
               <div>
-                <h3 className="text-base font-black text-slate-900">{newHire.buddy}</h3>
-                <p className="text-xs text-slate-500 font-medium">Senior Floor Buddy</p>
-                <span className="text-xs text-emerald-700 font-bold bg-emerald-50 px-2.5 py-0.5 rounded-full inline-block mt-0.5 border border-emerald-200">
+                <h3 className="text-base font-black text-white">{newHire.buddy}</h3>
+                <p className="text-xs text-slate-300 font-medium">Senior Floor Buddy</p>
+                <span className="text-xs text-emerald-400 font-bold bg-emerald-500/10 px-2.5 py-0.5 rounded-full inline-block mt-0.5 border border-emerald-500/25">
                   🟢 {isHindi ? "फ्लोर पर हैं (Aisles 4-8)" : "On Floor (Aisles 4-8)"}
                 </span>
               </div>
@@ -1016,20 +1017,20 @@ export const NewHireView: React.FC<NewHireViewProps> = ({
                 setBuddyAlertSent(true);
                 setActiveModal("buddy");
               }}
-              className="px-3.5 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-full text-xs font-bold shadow-2xs cursor-pointer active:scale-95 transition-all flex items-center gap-1.5 shrink-0"
+              className="px-3.5 py-2 bg-gradient-to-r from-emerald-500 to-teal-600 text-slate-950 rounded-full text-xs font-black shadow-xs cursor-pointer active:scale-95 transition-all flex items-center gap-1.5 shrink-0"
             >
-              <Phone className="w-4 h-4" />
+              <Phone className="w-4 h-4 text-slate-950" />
               <span>{isHindi ? "बुलाएं" : "Call to Rack"}</span>
             </button>
           </div>
 
           {/* Voice-First Push-to-Talk Action Bar */}
-          <div className="bg-gradient-to-br from-violet-50 via-purple-50 to-white rounded-[28px] p-4 sm:p-5 border border-purple-100/90 shadow-2xs space-y-3.5">
+          <div className="bg-[#1b1e26] rounded-[28px] p-4 sm:p-5 border border-white/10 shadow-xl space-y-3.5">
             <div className="text-center space-y-1">
-              <h3 className="text-sm font-black text-slate-900 uppercase tracking-wide">
+              <h3 className="text-sm font-black text-white uppercase tracking-wide">
                 {isHindi ? "विक्रम भैया से पूछें" : "Talk to Buddy Vikram"}
               </h3>
-              <p className="text-xs text-slate-600 font-medium">
+              <p className="text-xs text-slate-300 font-medium">
                 {isHindi
                   ? "माइक दबाकर सवाल बोलें, विक्रम भैया जवाब देंगे:"
                   : "Tap the mic and speak naturally. Vikram answers aloud:"}
@@ -1043,8 +1044,8 @@ export const NewHireView: React.FC<NewHireViewProps> = ({
               disabled={isProcessing}
               className={`w-full py-4 px-4 rounded-[26px] font-black text-base flex items-center justify-center gap-2.5 shadow-lg active:scale-98 transition-all cursor-pointer ${
                 isListening
-                  ? "bg-rose-600 text-white ring-4 ring-rose-200 animate-pulse"
-                  : "bg-gradient-to-r from-violet-600 via-purple-600 to-fuchsia-600 hover:opacity-95 text-white shadow-purple-500/25"
+                  ? "bg-rose-600 text-white ring-4 ring-rose-600/30 animate-pulse"
+                  : "bg-gradient-to-r from-cyan-500 to-blue-600 hover:opacity-95 text-white shadow-lg shadow-cyan-500/20"
               }`}
             >
               {isListening ? (
@@ -1070,7 +1071,7 @@ export const NewHireView: React.FC<NewHireViewProps> = ({
               <button
                 type="button"
                 onClick={() => setShowTextInput(!showTextInput)}
-                className="text-xs text-slate-500 hover:text-purple-700 font-semibold underline underline-offset-2 cursor-pointer"
+                className="text-xs text-slate-400 hover:text-white font-semibold underline underline-offset-2 cursor-pointer"
               >
                 {showTextInput
                   ? isHindi ? "टाइपिंग छुपाएं" : "Hide typing"
@@ -1088,12 +1089,12 @@ export const NewHireView: React.FC<NewHireViewProps> = ({
                   onKeyDown={(e) => e.key === "Enter" && handleSendMessage()}
                   placeholder={isHindi ? "सवाल लिखें..." : "Type your question..."}
                   disabled={isProcessing}
-                  className="flex-1 text-sm px-4 py-2.5 rounded-2xl border border-slate-200 bg-white focus:outline-none focus:ring-2 focus:ring-purple-500 shadow-2xs font-medium"
+                  className="flex-1 text-sm px-4 py-2.5 rounded-2xl border border-white/10 bg-black/35 focus:outline-none focus:ring-2 focus:ring-cyan-500 shadow-2xs font-medium text-white"
                 />
                 <button
                   onClick={() => handleSendMessage()}
                   disabled={isProcessing || !inputText.trim()}
-                  className="p-3 rounded-2xl bg-gradient-to-r from-violet-600 to-fuchsia-600 text-white disabled:opacity-30 cursor-pointer transition-all active:scale-95 shrink-0"
+                  className="p-3 rounded-2xl bg-gradient-to-r from-cyan-500 to-blue-600 text-white disabled:opacity-30 cursor-pointer transition-all active:scale-95 shrink-0"
                   title="Send"
                 >
                   <Send className="w-4 h-4" />
@@ -1104,33 +1105,33 @@ export const NewHireView: React.FC<NewHireViewProps> = ({
 
           {/* Conversation Exchange Card */}
           {latestInteraction ? (
-            <div className="bg-white rounded-[28px] p-4 sm:p-5 border border-purple-100/90 shadow-md space-y-3 animate-in fade-in duration-150">
+            <div className="bg-[#1b1e26] rounded-[28px] p-4 sm:p-5 border border-white/10 shadow-xl space-y-3 animate-in fade-in duration-150">
               <div className="flex items-center justify-between">
-                <span className="text-xs font-black text-slate-800 flex items-center gap-1.5 uppercase tracking-wide">
-                  <span className="w-2.5 h-2.5 rounded-full bg-emerald-600 animate-pulse"></span>
+                <span className="text-xs font-black text-white flex items-center gap-1.5 uppercase tracking-wide">
+                  <span className="w-2.5 h-2.5 rounded-full bg-emerald-400 animate-pulse"></span>
                   {isHindi ? "विक्रम भैया का जवाब" : "Vikram's Answer"}
                 </span>
                 <button
                   onClick={() => handlePlayAudio("latest-interaction", latestInteraction.replyText)}
-                  className="flex items-center gap-1 text-xs font-bold text-violet-700 hover:text-violet-900 bg-purple-50 px-3 py-1 rounded-full cursor-pointer"
+                  className="flex items-center gap-1 text-xs font-bold text-cyan-400 hover:text-cyan-300 bg-cyan-400/10 px-3 py-1 rounded-full cursor-pointer"
                 >
                   <Volume2 className="w-3.5 h-3.5" />
                   <span>{isHindi ? "दोबारा सुनें" : "Replay"}</span>
                 </button>
               </div>
 
-              <div className="p-3 rounded-2xl bg-slate-50 border border-slate-100 text-xs sm:text-sm text-slate-700 italic">
+              <div className="p-3 rounded-2xl bg-black/30 border border-white/5 text-xs sm:text-sm text-slate-200 italic">
                 🗣️ "{latestInteraction.userText}"
               </div>
 
-              <p className="text-sm sm:text-base font-semibold text-slate-900 leading-relaxed">
+              <p className="text-sm sm:text-base font-semibold text-white leading-relaxed">
                 {latestInteraction.replyText}
               </p>
 
-              <div className="pt-2 border-t border-slate-100 flex items-center justify-between">
+              <div className="pt-2 border-t border-white/10 flex items-center justify-between">
                 <button
                   onClick={handleToggleVoice}
-                  className="text-xs font-bold text-violet-600 hover:text-violet-800 flex items-center gap-1.5 cursor-pointer"
+                  className="text-xs font-bold text-cyan-400 hover:text-cyan-300 flex items-center gap-1.5 cursor-pointer"
                 >
                   <RotateCcw className="w-3.5 h-3.5" />
                   <span>{isHindi ? "दूसरा सवाल पूछें" : "Ask follow-up question"}</span>
@@ -1139,9 +1140,9 @@ export const NewHireView: React.FC<NewHireViewProps> = ({
               </div>
             </div>
           ) : (
-            <div className="bg-white rounded-[24px] p-4 border border-purple-100/80 text-xs sm:text-sm text-slate-700 flex items-center gap-3 shadow-xs">
-              <div className="w-10 h-10 rounded-2xl bg-gradient-to-br from-violet-600 to-fuchsia-600 text-white flex items-center justify-center shrink-0 shadow-xs">
-                <Sparkles className="w-5 h-5" />
+            <div className="bg-[#1b1e26] rounded-[24px] p-4 border border-white/10 text-xs sm:text-sm text-slate-300 flex items-center gap-3 shadow-xl">
+              <div className="w-10 h-10 rounded-2xl bg-gradient-to-br from-cyan-500 to-blue-600 text-white flex items-center justify-center shrink-0 shadow-xs">
+                <Sparkles className="w-5 h-5 text-white" />
               </div>
               <p className="leading-snug font-medium">
                 {isHindi
@@ -1153,7 +1154,7 @@ export const NewHireView: React.FC<NewHireViewProps> = ({
 
           {/* Voice Practice Situation Chips */}
           <div className="space-y-2 pt-1">
-            <h4 className="text-xs font-bold text-slate-700 px-1">
+            <h4 className="text-xs font-bold text-slate-400 px-1">
               {isHindi ? "आम सवाल (टैप करें):" : "Quick Questions (Tap to Ask):"}
             </h4>
             <div className="flex gap-2 overflow-x-auto pb-1 scrollbar-none">
@@ -1177,7 +1178,7 @@ export const NewHireView: React.FC<NewHireViewProps> = ({
                   key={idx}
                   onClick={() => handleSendMessage(chip)}
                   disabled={isProcessing}
-                  className="px-3.5 py-2 rounded-full bg-white hover:bg-violet-50 text-slate-800 hover:text-violet-900 border border-slate-200 text-xs font-semibold whitespace-nowrap shadow-2xs transition-all active:scale-95 cursor-pointer shrink-0"
+                  className="px-3.5 py-2 rounded-full bg-white/10 hover:bg-white/20 text-slate-200 hover:text-white border border-white/10 text-xs font-semibold whitespace-nowrap shadow-2xs transition-all active:scale-95 cursor-pointer shrink-0"
                 >
                   {chip}
                 </button>

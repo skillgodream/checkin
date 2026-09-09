@@ -94,14 +94,14 @@ export const Header: React.FC<HeaderProps> = ({
   const isBackstageActive = activeTab === "manager" || activeTab === "organization";
 
   return (
-    <header className="bg-white/95 backdrop-blur-md border-b border-slate-200/80 sticky top-0 z-40 shadow-2xs">
+    <header className="bg-[#16181f]/95 backdrop-blur-md border-b border-white/10 sticky top-0 z-40 shadow-md">
       <div className="max-w-md mx-auto px-4 py-2.5">
         {/* Top bar: Brand + Live Tag + Actions */}
         <div className="flex items-center justify-between gap-2">
           {/* Brand Identity / Store Header */}
           <div className="flex items-center gap-2 min-w-0">
             <Logo variant="compact" size="sm" />
-            <span className="text-[11px] text-slate-400 font-medium truncate">• Dark Store #104</span>
+            <span className="text-[11px] text-slate-300 font-medium truncate">• Dark Store #104</span>
           </div>
 
           {/* Right Action Icons: Language button visible everywhere, menu only on home screen */}
@@ -114,10 +114,10 @@ export const Header: React.FC<HeaderProps> = ({
                 onClick={onToggleLanguage}
                 title={isHindi ? "Switch to English (अंग्रेजी में देखें)" : "हिंदी में बदलें (Switch to Hindi)"}
                 aria-label="Toggle language"
-                className="px-2.5 py-1.5 rounded-2xl transition-all cursor-pointer flex items-center justify-center gap-1 active:scale-95 bg-slate-100 hover:bg-slate-200 text-slate-800 border border-slate-200/80 shadow-2xs font-black text-xs"
+                className="px-2.5 py-1.5 rounded-2xl transition-all cursor-pointer flex items-center justify-center gap-1 active:scale-95 bg-white/10 hover:bg-white/20 text-slate-200 border border-white/10 shadow-2xs font-black text-xs"
               >
-                <Languages className="w-4 h-4 text-violet-700" />
-                <span className="text-[11px] font-black uppercase text-violet-700">
+                <Languages className="w-4 h-4 text-cyan-400" />
+                <span className="text-[11px] font-black uppercase text-cyan-400">
                   {isHindi ? "हिंदी" : "EN"}
                 </span>
               </button>
@@ -133,7 +133,7 @@ export const Header: React.FC<HeaderProps> = ({
                 onClick={onOpenClientDemo}
                 title="Client Demo Story & Closed-Loop Scenarios"
                 aria-label="Client Demo Story"
-                className="px-2.5 py-1.5 rounded-2xl transition-all cursor-pointer flex items-center justify-center gap-1 active:scale-95 bg-gradient-to-r from-violet-600 to-fuchsia-600 hover:from-violet-500 hover:to-fuchsia-500 text-white shadow-xs font-black text-xs"
+                className="px-2.5 py-1.5 rounded-2xl transition-all cursor-pointer flex items-center justify-center gap-1 active:scale-95 bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-400 hover:to-blue-500 text-white shadow-xs font-black text-xs"
               >
                 <span className="text-xs">🎯</span>
                 <span className="text-[11px] font-black tracking-tight hidden sm:inline">Demo</span>
@@ -150,14 +150,14 @@ export const Header: React.FC<HeaderProps> = ({
                 aria-expanded={isEyeMenuOpen}
                 className={`p-2 rounded-2xl transition-all cursor-pointer flex items-center justify-center relative active:scale-95 ${
                   isEyeMenuOpen || isBackstageActive
-                    ? "bg-violet-600 text-white shadow-md shadow-violet-500/25 ring-2 ring-violet-400/40"
-                    : "text-slate-600 hover:text-slate-900 bg-slate-100 hover:bg-slate-200"
+                    ? "bg-cyan-500 text-slate-950 shadow-md shadow-cyan-500/25 ring-2 ring-cyan-400/40"
+                    : "text-slate-200 hover:text-white bg-white/10 hover:bg-white/20"
                 }`}
               >
                 <Eye className="w-4 h-4 stroke-[2.2]" />
                 {/* Alert badge if any hires need attention or are at risk */}
                 {(needsAttentionCount > 0 || atRiskCount > 0) && !isEyeMenuOpen && (
-                  <span className="absolute -top-1 -right-1 w-2.5 h-2.5 rounded-full bg-fuchsia-500 ring-2 ring-white animate-pulse" />
+                  <span className="absolute -top-1 -right-1 w-2.5 h-2.5 rounded-full bg-[#ff2a6d] ring-2 ring-[#16181f] animate-pulse" />
                 )}
               </button>
 
@@ -165,13 +165,13 @@ export const Header: React.FC<HeaderProps> = ({
               {isEyeMenuOpen && (
                 <div
                   id="header-eye-popover"
-                  className="absolute right-0 mt-2 w-56 rounded-2xl bg-white border border-slate-200/90 shadow-xl py-2 z-50 animate-in fade-in zoom-in-95 duration-150"
+                  className="absolute right-0 mt-2 w-56 rounded-2xl bg-[#1b1e26] border border-white/10 shadow-2xl py-2 z-50 animate-in fade-in zoom-in-95 duration-150 text-white"
                 >
-                  <div className="px-3 py-1.5 border-b border-slate-100 flex items-center justify-between">
-                    <span className="text-[10px] font-black uppercase tracking-wider text-slate-400">
+                  <div className="px-3 py-1.5 border-b border-white/10 flex items-center justify-between">
+                    <span className="text-[10px] font-black uppercase tracking-wider text-slate-300">
                       Operations Hub
                     </span>
-                    <span className="text-[10px] font-bold text-violet-600 bg-violet-50 px-1.5 py-0.5 rounded-full">
+                    <span className="text-[10px] font-bold text-cyan-400 bg-cyan-400/15 px-1.5 py-0.5 rounded-full">
                       Admin Access
                     </span>
                   </div>
@@ -183,16 +183,16 @@ export const Header: React.FC<HeaderProps> = ({
                       onClick={() => handleSelectTab("manager")}
                       className={`w-full flex items-center justify-between px-3 py-2 rounded-xl text-xs font-bold transition-all cursor-pointer ${
                         activeTab === "manager"
-                          ? "bg-violet-50 text-violet-700"
-                          : "text-slate-700 hover:bg-slate-100 hover:text-slate-900"
+                          ? "bg-white/10 text-cyan-400"
+                          : "text-slate-200 hover:bg-white/5 hover:text-white"
                       }`}
                     >
                       <div className="flex items-center gap-2.5">
                         <div
                           className={`p-1.5 rounded-lg ${
                             activeTab === "manager"
-                              ? "bg-violet-600 text-white"
-                              : "bg-slate-100 text-slate-600"
+                              ? "bg-cyan-500 text-slate-950"
+                              : "bg-white/10 text-slate-200"
                           }`}
                         >
                           <User className="w-3.5 h-3.5 stroke-[2.2]" />
@@ -205,7 +205,7 @@ export const Header: React.FC<HeaderProps> = ({
                         </div>
                       </div>
                       {(atRiskCount > 0 || needsAttentionCount > 0) && (
-                        <span className="px-1.5 py-0.5 rounded-full text-[9px] font-black bg-fuchsia-500 text-white">
+                        <span className="px-1.5 py-0.5 rounded-full text-[9px] font-black bg-[#ff2a6d] text-white">
                           {needsAttentionCount + atRiskCount}
                         </span>
                       )}
@@ -217,16 +217,16 @@ export const Header: React.FC<HeaderProps> = ({
                       onClick={() => handleSelectTab("organization")}
                       className={`w-full flex items-center justify-between px-3 py-2 rounded-xl text-xs font-bold transition-all cursor-pointer ${
                         activeTab === "organization"
-                          ? "bg-violet-50 text-violet-700"
-                          : "text-slate-700 hover:bg-slate-100 hover:text-slate-900"
+                          ? "bg-white/10 text-cyan-400"
+                          : "text-slate-200 hover:bg-white/5 hover:text-white"
                       }`}
                     >
                       <div className="flex items-center gap-2.5">
                         <div
                           className={`p-1.5 rounded-lg ${
                             activeTab === "organization"
-                              ? "bg-violet-600 text-white"
-                              : "bg-slate-100 text-slate-600"
+                              ? "bg-cyan-500 text-slate-950"
+                              : "bg-white/10 text-slate-200"
                           }`}
                         >
                           <Zap className="w-3.5 h-3.5 stroke-[2.2]" />
@@ -245,10 +245,10 @@ export const Header: React.FC<HeaderProps> = ({
                     <button
                       id="eye-menu-loop-flow"
                       onClick={handleSelectLoop}
-                      className="w-full flex items-center justify-between px-3 py-2 rounded-xl text-xs font-bold text-slate-700 hover:bg-slate-100 hover:text-slate-900 transition-all cursor-pointer"
+                      className="w-full flex items-center justify-between px-3 py-2 rounded-xl text-xs font-bold text-slate-200 hover:bg-white/5 hover:text-white transition-all cursor-pointer"
                     >
                       <div className="flex items-center gap-2.5">
-                        <div className="p-1.5 rounded-lg bg-blue-50 text-blue-600">
+                        <div className="p-1.5 rounded-lg bg-blue-500/10 text-blue-400">
                           <Sliders className="w-3.5 h-3.5 stroke-[2.2]" />
                         </div>
                         <div className="text-left">
@@ -258,7 +258,7 @@ export const Header: React.FC<HeaderProps> = ({
                           </div>
                         </div>
                       </div>
-                      <span className="text-[10px] font-bold text-blue-600 bg-blue-50 px-1.5 py-0.5 rounded-md">
+                      <span className="text-[10px] font-bold text-blue-400 bg-blue-500/10 px-1.5 py-0.5 rounded-md">
                         Inspect
                       </span>
                     </button>

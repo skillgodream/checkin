@@ -72,7 +72,7 @@ export const FloatingGlassMenu: React.FC<FloatingGlassMenuProps> = ({
       <nav
         id="floating-apple-glass-menu"
         aria-label="Learner Bottom Navigation"
-        className="pointer-events-auto max-w-sm w-full bg-white/90 backdrop-blur-2xl border border-white/80 shadow-[0_12px_36px_rgba(30,10,60,0.18)] rounded-full p-1.5 flex items-center justify-between ring-1 ring-black/5 transition-all"
+        className="pointer-events-auto max-w-sm w-full bg-[#1b1e26]/95 backdrop-blur-2xl border border-white/10 shadow-[0_16px_40px_rgba(0,0,0,0.6)] rounded-full p-1.5 flex items-center justify-between transition-all"
       >
         {items.map((item) => {
           const isActive = activeSection === item.id;
@@ -84,17 +84,17 @@ export const FloatingGlassMenu: React.FC<FloatingGlassMenuProps> = ({
               onClick={() => onSelectSection(item.id)}
               className={`relative flex-1 flex flex-col items-center justify-center py-2 px-2 rounded-full font-bold transition-all cursor-pointer select-none active:scale-95 ${
                 isActive
-                  ? "bg-gradient-to-r from-violet-600 via-purple-600 to-fuchsia-600 text-white shadow-md shadow-violet-500/25"
-                  : "text-slate-600 hover:text-slate-950 hover:bg-slate-100/60"
+                  ? "bg-gradient-to-r from-cyan-500 to-blue-600 text-white shadow-lg shadow-cyan-500/20"
+                  : "text-slate-400 hover:text-white hover:bg-white/5"
               }`}
             >
               <div className="relative">
                 {item.icon}
                 {item.badge && !isActive && (
-                  <span className="absolute -top-1 -right-1 w-2 h-2 rounded-full bg-fuchsia-500 ring-2 ring-white animate-pulse" />
+                  <span className="absolute -top-1 -right-1 w-2 h-2 rounded-full bg-cyan-400 ring-2 ring-[#1b1e26] animate-pulse" />
                 )}
               </div>
-              <span className="text-xs font-bold leading-tight mt-0.5 whitespace-nowrap">
+              <span className="text-[10px] font-black leading-tight mt-0.5 whitespace-nowrap">
                 {isHindi ? item.labelHi : item.labelEn}
               </span>
             </button>

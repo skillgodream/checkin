@@ -308,9 +308,7 @@ export default function App() {
 
   return (
     <div
-      className={`min-h-screen ${
-        isOnboarding ? "bg-[#181324]" : "bg-[#EAE6DF]"
-      } text-slate-900 flex flex-col font-sans antialiased transition-colors duration-300 ${
+      className={`min-h-screen bg-[#0e1014] text-white flex flex-col font-sans antialiased transition-colors duration-300 ${
         isFramed ? "md:py-6 md:px-4" : ""
       }`}
     >
@@ -319,11 +317,11 @@ export default function App() {
         className={`w-full mx-auto flex flex-col transition-all duration-300 ${
           isOnboarding
             ? isFramed
-              ? "max-w-[390px] md:rounded-[44px] md:shadow-[0_24px_60px_rgba(30,10,25,0.25)] md:overflow-hidden min-h-screen md:min-h-[844px] bg-[#181324]"
-              : "max-w-md min-h-screen bg-[#181324]"
+              ? "max-w-[390px] md:rounded-[44px] md:shadow-[0_24px_60px_rgba(0,0,0,0.6)] md:overflow-hidden min-h-screen md:min-h-[844px] bg-[#14161d]"
+              : "max-w-md min-h-screen bg-[#14161d]"
             : isFramed
-            ? "max-w-md md:rounded-[36px] md:shadow-2xl md:border md:border-stone-300/80 md:overflow-hidden md:ring-8 md:ring-stone-900/5 min-h-screen md:min-h-[850px] bg-[#F7F6F2]"
-            : "max-w-lg min-h-screen shadow-xs bg-[#F7F6F2]"
+            ? "max-w-md md:rounded-[36px] md:shadow-2xl md:border md:border-white/10 md:overflow-hidden md:ring-8 md:ring-slate-950 min-h-screen md:min-h-[850px] bg-[#14161d]"
+            : "max-w-lg min-h-screen shadow-2xl bg-[#14161d]"
         }`}
       >
         {/* Subtle phone speaker notch for framed mobile experience on desktop (only during active shift views) */}
@@ -344,7 +342,7 @@ export default function App() {
         ) : (
           <>
             {/* Global Mobile Header (Only during active shift views) */}
-            {!(activeTab === "new_hire" && learnerSection === "modules") && (
+            {!(activeTab === "new_hire" && (learnerSection === "modules" || learnerSection === "home")) && (
               <Header
                 activeTab={activeTab}
                 setActiveTab={setActiveTab}

@@ -241,54 +241,54 @@ export const ClientDemoModal: React.FC<ClientDemoModalProps> = ({
       onClick={onClose}
     >
       <div
-        className="w-full max-w-3xl bg-white rounded-3xl border border-slate-200 shadow-2xl overflow-hidden flex flex-col my-auto max-h-[92vh]"
+        className="w-full max-w-3xl bg-[#1b1e26] rounded-3xl border border-white/10 shadow-2xl overflow-hidden flex flex-col my-auto max-h-[92vh] text-white"
         onClick={(e) => e.stopPropagation()}
       >
         {/* Header with Client Story summary */}
-        <div className="bg-gradient-to-r from-slate-900 via-violet-950 to-slate-900 px-6 py-4 text-white flex items-center justify-between border-b border-white/10">
+        <div className="bg-[#13151b] px-6 py-4 text-white flex items-center justify-between border-b border-white/10">
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-2xl bg-gradient-to-br from-violet-500 to-fuchsia-600 flex items-center justify-center text-white shadow-md shadow-violet-500/30 font-black text-sm">
+            <div className="w-10 h-10 rounded-2xl bg-gradient-to-br from-cyan-500 to-blue-600 flex items-center justify-center text-slate-950 shadow-md font-black text-sm">
               🎯
             </div>
             <div>
               <div className="flex items-center gap-2">
-                <h3 className="text-base font-black tracking-tight">Client Demo Experience</h3>
-                <span className="px-2 py-0.5 rounded-full text-[10px] font-black uppercase bg-violet-400 text-slate-950">
+                <h3 className="text-base font-black tracking-tight text-white">Client Demo Experience</h3>
+                <span className="px-2 py-0.5 rounded-full text-[10px] font-black uppercase bg-cyan-500/10 text-cyan-400 border border-cyan-500/20">
                   Closed-Loop Proof
                 </span>
               </div>
-              <p className="text-xs text-slate-300 font-normal">
+              <p className="text-xs text-slate-400 font-normal">
                 See how CheckIn CheckOut continuously sees BOTH learning + work to diagnose, intervene, check, and adapt
               </p>
             </div>
           </div>
           <button
             onClick={onClose}
-            className="w-8 h-8 rounded-full bg-white/10 hover:bg-white/20 flex items-center justify-center text-white cursor-pointer transition-all active:scale-95"
+            className="w-8 h-8 rounded-full bg-white/5 hover:bg-white/10 flex items-center justify-center text-white cursor-pointer transition-all active:scale-95"
           >
             <X className="w-4 h-4" />
           </button>
         </div>
 
         {/* Client Story Progression Banner */}
-        <div className="bg-slate-50 border-b border-slate-200/80 px-6 py-2.5 overflow-x-auto no-scrollbar">
-          <div className="flex items-center gap-1.5 text-[11px] font-bold text-slate-600 min-w-max">
-            <span className="px-2 py-0.5 rounded-md bg-violet-100 text-violet-800 font-black">
+        <div className="bg-[#13151b]/40 border-b border-white/10 px-6 py-2.5 overflow-x-auto no-scrollbar">
+          <div className="flex items-center gap-1.5 text-[11px] font-bold text-slate-400 min-w-max">
+            <span className="px-2 py-0.5 rounded-md bg-cyan-500/10 text-cyan-400 border border-cyan-500/20 font-black">
               Client Story:
             </span>
             <span>Worker Joins</span>
-            <ChevronRight className="w-3 h-3 text-slate-400" />
+            <ChevronRight className="w-3 h-3 text-slate-500" />
             <span>Learning + Real Work</span>
-            <ChevronRight className="w-3 h-3 text-slate-400" />
+            <ChevronRight className="w-3 h-3 text-slate-500" />
             <span>Continuous Intelligence</span>
-            <ChevronRight className="w-3 h-3 text-slate-400" />
+            <ChevronRight className="w-3 h-3 text-slate-500" />
             <span>Smallest Useful Support</span>
-            <ChevronRight className="w-3 h-3 text-slate-400" />
+            <ChevronRight className="w-3 h-3 text-slate-500" />
             <span>Check Result</span>
-            <ChevronRight className="w-3 h-3 text-slate-400" />
+            <ChevronRight className="w-3 h-3 text-slate-500" />
             <span>Adapt or Reduce</span>
-            <ChevronRight className="w-3 h-3 text-slate-400" />
-            <span className="text-emerald-700 font-black">Day 10 Outcome</span>
+            <ChevronRight className="w-3 h-3 text-slate-500" />
+            <span className="text-cyan-400 font-black">Day 10 Outcome</span>
           </div>
         </div>
 
@@ -297,10 +297,10 @@ export const ClientDemoModal: React.FC<ClientDemoModalProps> = ({
           {/* Top Quick Scenario Selector Grid */}
           <div>
             <div className="flex items-center justify-between mb-2">
-              <span className="text-xs font-black uppercase tracking-wider text-slate-500">
+              <span className="text-xs font-black uppercase tracking-wider text-slate-400">
                 Select Client Scenario (Demos 1 to 8):
               </span>
-              <span className="text-[11px] text-slate-400">Tap to select & run</span>
+              <span className="text-[11px] text-slate-555">Tap to select & run</span>
             </div>
 
             <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
@@ -312,26 +312,26 @@ export const ClientDemoModal: React.FC<ClientDemoModalProps> = ({
                     onClick={() => setSelectedScenarioId(sc.id)}
                     className={`p-2.5 rounded-2xl text-left transition-all cursor-pointer border flex flex-col justify-between ${
                       isSelected
-                        ? "bg-violet-50 border-violet-500 ring-2 ring-violet-500/20 shadow-xs"
-                        : "bg-white border-slate-200 hover:border-slate-300 hover:bg-slate-50"
+                        ? "bg-cyan-500/5 border-cyan-500 ring-2 ring-cyan-500/20 shadow-xs text-white"
+                        : "bg-[#13151b]/40 border-white/10 hover:border-white/20 text-white hover:bg-[#13151b]"
                     }`}
                   >
                     <div className="flex items-center justify-between mb-1">
                       <span
                         className={`text-[10px] font-black px-1.5 py-0.2 rounded-md ${
-                          isSelected ? "bg-violet-600 text-white" : "bg-slate-100 text-slate-600"
+                          isSelected ? "bg-cyan-500 text-slate-950 font-black" : "bg-white/5 text-slate-300"
                         }`}
                       >
                         {sc.stepNumber}
                       </span>
                       {sc.id.includes("8a") || sc.id.includes("4") ? (
-                        <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600" />
+                        <CheckCircle2 className="w-3.5 h-3.5 text-emerald-450" />
                       ) : sc.id.includes("7") ? (
-                        <AlertTriangle className="w-3.5 h-3.5 text-rose-600" />
+                        <AlertTriangle className="w-3.5 h-3.5 text-rose-455" />
                       ) : null}
                     </div>
-                    <div className="text-xs font-bold text-slate-900 truncate">{sc.title.split(":")[0]}</div>
-                    <div className="text-[10px] text-slate-500 truncate mt-0.5">{sc.badge}</div>
+                    <div className="text-xs font-bold text-white truncate">{sc.title.split(":")[0]}</div>
+                    <div className="text-[10px] text-slate-400 truncate mt-0.5">{sc.badge}</div>
                   </button>
                 );
               })}
@@ -339,26 +339,26 @@ export const ClientDemoModal: React.FC<ClientDemoModalProps> = ({
           </div>
 
           {/* Active Scenario Card with 5-Point Client Story Summary */}
-          <div className="p-5 rounded-3xl bg-slate-900 text-white shadow-xl space-y-4">
-            <div className="flex flex-wrap items-center justify-between gap-2 border-b border-slate-800 pb-3">
+          <div className="p-5 rounded-3xl bg-[#13151b] text-white shadow-xl space-y-4 border border-white/5">
+            <div className="flex flex-wrap items-center justify-between gap-2 border-b border-white/5 pb-3">
               <div>
                 <div className="flex items-center gap-2">
-                  <span className="px-2 py-0.5 rounded-full text-[10px] font-black uppercase bg-violet-400 text-slate-950">
+                  <span className="px-2 py-0.5 rounded-full text-[10px] font-black uppercase bg-cyan-500/10 text-cyan-400 border border-cyan-500/20">
                     {currentScenario.stepNumber}
                   </span>
                   <h4 className="text-base font-black text-white">{currentScenario.title}</h4>
                 </div>
-                <p className="text-xs text-slate-300 mt-1">{currentScenario.summary}</p>
+                <p className="text-xs text-slate-350 mt-1">{currentScenario.summary}</p>
               </div>
 
               <div className="flex items-center gap-2">
                 <button
                   id={`btn-run-${currentScenario.id}`}
                   onClick={() => handleRunCurrentScenario(currentScenario)}
-                  className={`px-4 py-2 rounded-2xl text-xs font-black flex items-center gap-1.5 cursor-pointer shadow-md transition-all active:scale-95 ${
+                  className={`px-4 py-2 rounded-2xl text-xs font-black flex items-center gap-1.5 cursor-pointer shadow-md transition-all active:scale-95 border border-white/10 ${
                     justRanId === currentScenario.id
-                      ? "bg-emerald-500 text-white"
-                      : "bg-gradient-to-r from-violet-500 to-fuchsia-600 text-white hover:opacity-95"
+                      ? "bg-emerald-555 text-slate-950"
+                      : "bg-gradient-to-r from-cyan-500 to-blue-600 text-slate-950 hover:opacity-95"
                   }`}
                 >
                   {justRanId === currentScenario.id ? (
@@ -378,63 +378,63 @@ export const ClientDemoModal: React.FC<ClientDemoModalProps> = ({
 
             {/* 5-Point Client Breakdown: What We See -> Why -> What We Did -> Did It Work -> What Next */}
             <div className="grid grid-cols-1 sm:grid-cols-5 gap-2.5 text-xs">
-              <div className="p-3 rounded-2xl bg-slate-800/80 border border-slate-700/80 space-y-1">
-                <span className="text-[10px] font-black uppercase tracking-wider text-blue-300 block">
+              <div className="p-3 rounded-2xl bg-[#1b1e26] border border-white/5 space-y-1">
+                <span className="text-[10px] font-black uppercase tracking-wider text-cyan-400 block">
                   1. WHAT WE SEE
                 </span>
-                <p className="text-[11px] text-slate-200 leading-relaxed font-medium">
+                <p className="text-[11px] text-slate-300 leading-relaxed font-medium">
                   {currentScenario.whatWeSee}
                 </p>
               </div>
 
-              <div className="p-3 rounded-2xl bg-slate-800/80 border border-slate-700/80 space-y-1">
-                <span className="text-[10px] font-black uppercase tracking-wider text-purple-300 block">
+              <div className="p-3 rounded-2xl bg-[#1b1e26] border border-white/5 space-y-1">
+                <span className="text-[10px] font-black uppercase tracking-wider text-emerald-400 block">
                   2. WHAT INTELLIGENCE THINKS
                 </span>
-                <p className="text-[11px] text-slate-200 leading-relaxed font-medium">
+                <p className="text-[11px] text-slate-300 leading-relaxed font-medium">
                   {currentScenario.whatIntelligenceThinks}
                 </p>
               </div>
 
-              <div className="p-3 rounded-2xl bg-slate-800/80 border border-slate-700/80 space-y-1">
-                <span className="text-[10px] font-black uppercase tracking-wider text-amber-300 block">
+              <div className="p-3 rounded-2xl bg-[#1b1e26] border border-white/5 space-y-1">
+                <span className="text-[10px] font-black uppercase tracking-wider text-amber-400 block">
                   3. WHAT IT DOES
                 </span>
-                <p className="text-[11px] text-slate-200 leading-relaxed font-medium">
+                <p className="text-[11px] text-slate-300 leading-relaxed font-medium">
                   {currentScenario.whatItDoes}
                 </p>
               </div>
 
-              <div className="p-3 rounded-2xl bg-slate-800/80 border border-slate-700/80 space-y-1">
-                <span className="text-[10px] font-black uppercase tracking-wider text-emerald-300 block">
+              <div className="p-3 rounded-2xl bg-[#1b1e26] border border-white/5 space-y-1">
+                <span className="text-[10px] font-black uppercase tracking-wider text-teal-400 block">
                   4. DID IT WORK?
                 </span>
-                <p className="text-[11px] text-slate-200 leading-relaxed font-medium">
+                <p className="text-[11px] text-slate-300 leading-relaxed font-medium">
                   {currentScenario.didItWork}
                 </p>
               </div>
 
-              <div className="p-3 rounded-2xl bg-slate-800/80 border border-slate-700/80 space-y-1">
-                <span className="text-[10px] font-black uppercase tracking-wider text-cyan-300 block">
+              <div className="p-3 rounded-2xl bg-[#1b1e26] border border-white/5 space-y-1">
+                <span className="text-[10px] font-black uppercase tracking-wider text-blue-400 block">
                   5. WHAT NEXT?
                 </span>
-                <p className="text-[11px] text-slate-200 leading-relaxed font-medium">
+                <p className="text-[11px] text-slate-300 leading-relaxed font-medium">
                   {currentScenario.whatNext}
                 </p>
               </div>
             </div>
 
             {/* Direct Verification Controls */}
-            <div className="pt-2 border-t border-slate-800 flex flex-wrap items-center justify-between gap-2 text-xs">
+            <div className="pt-2 border-t border-white/5 flex flex-wrap items-center justify-between gap-2 text-xs">
               <div className="flex items-center gap-2">
                 <button
                   onClick={() => {
                     onOpenLoopInspector();
                     onClose();
                   }}
-                  className="px-3 py-1.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 font-bold flex items-center gap-1.5 cursor-pointer"
+                  className="px-3 py-1.5 rounded-xl bg-white/5 hover:bg-white/10 text-slate-300 border border-white/10 font-bold flex items-center gap-1.5 cursor-pointer"
                 >
-                  <Sliders className="w-3.5 h-3.5 text-blue-400" />
+                  <Sliders className="w-3.5 h-3.5 text-cyan-400" />
                   <span>Inspect 6-Stage Loop (Six Doctors)</span>
                 </button>
 
@@ -443,9 +443,9 @@ export const ClientDemoModal: React.FC<ClientDemoModalProps> = ({
                     onSelectTab("new_hire");
                     onClose();
                   }}
-                  className="px-3 py-1.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 font-bold flex items-center gap-1.5 cursor-pointer"
+                  className="px-3 py-1.5 rounded-xl bg-white/5 hover:bg-white/10 text-slate-300 border border-white/10 font-bold flex items-center gap-1.5 cursor-pointer"
                 >
-                  <Eye className="w-3.5 h-3.5 text-purple-400" />
+                  <Eye className="w-3.5 h-3.5 text-emerald-400" />
                   <span>View in Learner Companion</span>
                 </button>
 
@@ -454,40 +454,40 @@ export const ClientDemoModal: React.FC<ClientDemoModalProps> = ({
                     onSelectTab("manager");
                     onClose();
                   }}
-                  className="px-3 py-1.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 font-bold flex items-center gap-1.5 cursor-pointer"
+                  className="px-3 py-1.5 rounded-xl bg-white/5 hover:bg-white/10 text-slate-300 border border-white/10 font-bold flex items-center gap-1.5 cursor-pointer"
                 >
                   <UserCheck className="w-3.5 h-3.5 text-amber-400" />
                   <span>View in Supervisor View</span>
                 </button>
               </div>
 
-              <span className="text-[11px] text-slate-400 font-mono">
+              <span className="text-[11px] text-slate-500 font-mono">
                 Worker: {currentHire.name} • Live Day {currentDay}
               </span>
             </div>
           </div>
 
           {/* Day 10 Commercial Certification Panel */}
-          <div className="p-4 bg-slate-50 rounded-3xl border border-slate-200/90 space-y-3">
+          <div className="p-4 bg-[#13151b] rounded-3xl border border-white/10 space-y-3">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-2">
-                <Award className="w-5 h-5 text-violet-600" />
-                <h4 className="text-sm font-black text-slate-900">
+                <Award className="w-5 h-5 text-cyan-400" />
+                <h4 className="text-sm font-black text-white">
                   Day 10 Commercial Certification Engine (7 Criteria)
                 </h4>
               </div>
               <span
                 className={`px-3 py-1 rounded-full text-xs font-black uppercase ${
                   day10Result.isReady
-                    ? "bg-emerald-100 text-emerald-800 border border-emerald-300"
-                    : "bg-rose-100 text-rose-800 border border-rose-300"
+                    ? "bg-emerald-500/10 text-emerald-400 border border-emerald-500/20"
+                    : "bg-rose-500/10 text-rose-355 border border-rose-500/20"
                 }`}
               >
                 {day10Result.isReady ? "JOB READY" : "NOT READY"}
               </span>
             </div>
 
-            <p className="text-xs text-slate-600 leading-relaxed font-medium">
+            <p className="text-xs text-slate-450 leading-relaxed font-medium">
               {day10Result.summary}
             </p>
 
@@ -498,27 +498,27 @@ export const ClientDemoModal: React.FC<ClientDemoModalProps> = ({
                   key={idx}
                   className={`p-2.5 rounded-xl border flex items-start gap-2 ${
                     crit.met
-                      ? "bg-white border-emerald-200 text-slate-800"
-                      : "bg-rose-50/70 border-rose-200 text-rose-950"
+                      ? "bg-emerald-500/5 border-emerald-500/20 text-white"
+                      : "bg-rose-500/5 border-rose-500/20 text-rose-300"
                   }`}
                 >
                   <div className="mt-0.5 shrink-0">
                     {crit.met ? (
-                      <CheckCircle2 className="w-4 h-4 text-emerald-600 fill-emerald-50" />
+                      <CheckCircle2 className="w-4 h-4 text-emerald-400" />
                     ) : (
-                      <AlertTriangle className="w-4 h-4 text-rose-600" />
+                      <AlertTriangle className="w-4 h-4 text-rose-450" />
                     )}
                   </div>
                   <div className="min-w-0">
-                    <div className="font-bold text-xs">{crit.name}</div>
-                    <div className="text-[11px] text-slate-500 font-medium">{crit.detail}</div>
+                    <div className="font-bold text-xs">{crit.met ? <span className="text-emerald-400">{crit.name}</span> : <span className="text-rose-300">{crit.name}</span>}</div>
+                    <div className="text-[11px] text-slate-400 font-medium">{crit.detail}</div>
                   </div>
                 </div>
               ))}
             </div>
 
             {!day10Result.isReady && day10Result.unresolvedBlockers.length > 0 && (
-              <div className="p-3 bg-amber-50 border border-amber-200 rounded-2xl text-xs text-amber-900 font-medium">
+              <div className="p-3 bg-amber-500/10 border border-amber-500/20 rounded-2xl text-xs text-amber-300 font-medium">
                 <strong>Main blocker → Required next action: </strong>
                 {day10Result.unresolvedBlockers[0]} is unresolved. {day10Result.recommendedAction}
               </div>
@@ -527,10 +527,10 @@ export const ClientDemoModal: React.FC<ClientDemoModalProps> = ({
         </div>
 
         {/* Footer */}
-        <div className="bg-slate-50 px-6 py-3.5 border-t border-slate-200/80 flex items-center justify-between text-xs">
+        <div className="bg-[#13151b] px-6 py-3.5 border-t border-white/10 flex items-center justify-between text-xs">
           <button
             onClick={onResetDemo}
-            className="px-3 py-2 rounded-xl text-slate-600 hover:text-slate-900 font-bold hover:bg-slate-200 transition-all cursor-pointer flex items-center gap-1.5"
+            className="px-3 py-2 rounded-xl text-slate-300 hover:text-white font-bold hover:bg-white/5 transition-all cursor-pointer flex items-center gap-1.5 border border-white/10"
           >
             <RotateCcw className="w-3.5 h-3.5" />
             <span>Reset Demo to Baseline</span>
@@ -538,7 +538,7 @@ export const ClientDemoModal: React.FC<ClientDemoModalProps> = ({
 
           <button
             onClick={onClose}
-            className="px-6 py-2.5 rounded-2xl bg-slate-900 hover:bg-slate-800 text-white font-black cursor-pointer shadow-sm active:scale-95 transition-all"
+            className="px-6 py-2.5 rounded-2xl bg-gradient-to-r from-cyan-500 to-blue-600 hover:opacity-95 text-slate-950 font-black cursor-pointer shadow-sm active:scale-95 transition-all border border-white/10"
           >
             Close Demo Guide
           </button>

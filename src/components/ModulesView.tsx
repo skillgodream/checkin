@@ -210,43 +210,72 @@ export const ModulesView: React.FC<ModulesViewProps> = ({
   });
 
   return (
-    <div className="animate-in fade-in duration-200 select-none pb-20">
+    <div className="animate-in fade-in duration-200 select-none pb-20 text-white bg-[#14161d]">
       {/* ========================================================= */}
-      {/* 1. HERO BANNER (FULL BLEED WAREHOUSE BACKGROUND & DARK OVERLAY) */}
+      {/* 1. HERO BANNER */}
       {/* ========================================================= */}
       <div 
-        className="relative rounded-b-[32px] rounded-t-none pt-10 pb-7 px-5 sm:px-6 text-white shadow-xl shadow-blue-900/15 overflow-hidden bg-cover bg-center"
-        style={{
-          backgroundImage: `url('https://images.unsplash.com/photo-1586528116311-ad8dd3c8310d?w=1200&auto=format&fit=crop&q=80')`
-        }}
+        className="relative rounded-b-[32px] rounded-t-none pt-10 pb-7 px-5 sm:px-6 text-white shadow-2xl border-b border-white/10 overflow-hidden bg-[#1b1e26]"
       >
-        {/* Dark overlay for contrast */}
-        <div className="absolute inset-0 bg-gradient-to-t from-slate-950/90 via-slate-950/60 to-slate-950/40 backdrop-blur-[1px]" />
+        {/* Subtle premium accent glow to lift the look */}
+        <div className="absolute -top-16 -left-16 w-56 h-56 bg-pink-500/10 rounded-full blur-3xl pointer-events-none z-0" />
+        <div className="absolute -bottom-16 -right-16 w-56 h-56 bg-rose-600/10 rounded-full blur-3xl pointer-events-none z-0" />
 
-        <div className="relative z-10 space-y-4">
-          <div className="inline-block px-3 py-1 rounded-full bg-white/20 backdrop-blur-md text-white text-[10px] font-black uppercase tracking-wider border border-white/25">
-            {isHindi ? "फीचर्ड प्रोग्राम" : "Featured"}
-          </div>
+        <div className="relative z-10 flex items-center justify-between gap-4">
+          <div className="space-y-3.5 max-w-[65%]">
+            <div className="inline-block px-3 py-1 rounded-full bg-pink-500/10 backdrop-blur-md text-pink-300 text-[10px] font-black uppercase tracking-wider border border-pink-500/20">
+              {isHindi ? "फीचर्ड प्रोग्राम" : "Featured"}
+            </div>
 
-          <div className="space-y-1">
-            <h2 className="text-xl sm:text-2xl font-black tracking-tight text-white drop-shadow-sm">
-              {isHindi ? "10-दिवसीय ट्रेनिंग और सर्टिफिकेशन" : "Certification & Training"}
-            </h2>
-            <div className="flex items-center gap-2 text-xs sm:text-sm text-slate-200 font-medium drop-shadow-xs">
-              <span>⭐ 4.8</span>
-              <span>•</span>
-              <span>{isHindi ? `${modulesCompletedCount}/10 दिन पूर्ण` : `12k Reviews`}</span>
-              <span>•</span>
-              <span className="text-emerald-400 font-bold">{Math.round((modulesCompletedCount / 10) * 100)}% {isHindi ? "तैयार" : "Ready"}</span>
+            <div className="space-y-1">
+              <h2 className="text-xl sm:text-2xl font-black tracking-tight text-white drop-shadow-sm leading-tight">
+                {isHindi ? "10-दिवसीय ट्रेनिंग और सर्टिफिकेशन" : "Certification & Training"}
+              </h2>
+              <div className="flex items-center gap-2 text-xs text-slate-300 font-semibold drop-shadow-xs">
+                <span>⭐ 4.8</span>
+                <span>•</span>
+                <span>{isHindi ? `${modulesCompletedCount}/10 दिन पूर्ण` : `${modulesCompletedCount}/10 Days Done`}</span>
+                <span>•</span>
+                <span className="text-pink-400 font-bold">{Math.round((modulesCompletedCount / 10) * 100)}% {isHindi ? "तैयार" : "Ready"}</span>
+              </div>
             </div>
           </div>
 
-          {/* Progress bar inside banner */}
-          <div className="w-full h-1.5 bg-white/20 rounded-full overflow-hidden backdrop-blur-xs">
-            <div
-              className="h-full bg-emerald-400 rounded-full transition-all duration-500 shadow-sm"
-              style={{ width: `${Math.round((modulesCompletedCount / 10) * 100)}%` }}
-            />
+          {/* Premium Circular SVG Dial styled like the reference photo (hot pink with central stats) */}
+          <div className="relative shrink-0 w-24 h-24 flex items-center justify-center">
+            {/* Soft backdrop glow to mimic OLED lighting of hot pink */}
+            <div className="absolute inset-2 bg-pink-500/10 rounded-full blur-md animate-pulse" />
+
+            <svg className="w-full h-full transform -rotate-90" viewBox="0 0 100 100">
+              {/* Matte underlying circle track */}
+              <circle
+                cx="50"
+                cy="50"
+                r="38"
+                className="stroke-white/10"
+                strokeWidth="5"
+                fill="transparent"
+              />
+              {/* Vibrant Hot Pink glowing progress path */}
+              <circle
+                cx="50"
+                cy="50"
+                r="38"
+                className="stroke-pink-500 transition-all duration-700 ease-out"
+                strokeWidth="6"
+                fill="transparent"
+                strokeDasharray={238.76}
+                strokeDashoffset={238.76 - (238.76 * (modulesCompletedCount / 10))}
+                strokeLinecap="round"
+              />
+            </svg>
+
+            {/* Core text content inside circle */}
+            <div className="absolute inset-0 flex flex-col items-center justify-center leading-none">
+              <span className="text-[9px] font-black tracking-widest text-pink-400/85 uppercase">DAY</span>
+              <span className="text-2xl font-black text-white mt-1">0{modulesCompletedCount}</span>
+              <span className="text-[10px] font-bold text-slate-450 mt-0.5">/10</span>
+            </div>
           </div>
         </div>
       </div>
@@ -258,9 +287,9 @@ export const ModulesView: React.FC<ModulesViewProps> = ({
       {/* ========================================================= */}
       {/* TODAY'S TRAINING GOAL SUMMARY CARD                         */}
       {/* ========================================================= */}
-      <div className="bg-black/35 backdrop-blur-md border border-white/20 rounded-2xl p-4 shadow-xl flex items-center justify-between gap-3 text-white">
+      <div className="bg-[#1b1e26] border border-white/10 rounded-2xl p-4 shadow-xl flex items-center justify-between gap-3 text-white">
         <div className="flex items-center gap-3 min-w-0">
-          <div className="w-10 h-10 rounded-xl bg-cyan-950 text-cyan-400 border border-cyan-800/30 flex items-center justify-center shrink-0 font-black shadow-xs">
+          <div className="w-10 h-10 rounded-xl bg-[#13151b] text-pink-400 border border-white/10 flex items-center justify-center shrink-0 font-black shadow-xs">
             {modulesCompletedCount >= 3 ? <Check className="w-5 h-5 stroke-[3]" /> : "L3"}
           </div>
           <div className="min-w-0">
@@ -268,7 +297,7 @@ export const ModulesView: React.FC<ModulesViewProps> = ({
               <h4 className="text-xs font-black text-white uppercase tracking-wide">
                 {isHindi ? "आज का निर्धारित LMS मॉड्यूल लक्ष्य" : "Today's Prescribed LMS Goal"}
               </h4>
-              <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full ${modulesCompletedCount >= 3 ? "bg-emerald-500/20 text-emerald-300 border border-emerald-500/30" : "bg-amber-500/20 text-amber-300 border border-amber-500/30"}`}>
+              <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full ${modulesCompletedCount >= 3 ? "bg-emerald-500/20 text-emerald-400 border border-emerald-500/30" : "bg-pink-500/20 text-pink-300 border border-pink-500/30"}`}>
                 {modulesCompletedCount >= 3 ? "✓ Completed" : "In Progress"}
               </span>
             </div>
@@ -285,14 +314,14 @@ export const ModulesView: React.FC<ModulesViewProps> = ({
             setSelectedModuleId(targetMod.id);
             setActiveDetailModule(targetMod);
           }}
-          className="shrink-0 px-3 py-2 rounded-xl bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-400 hover:to-blue-500 text-white font-black text-xs shadow-xs active:scale-95 transition-all cursor-pointer flex items-center gap-1 border border-white/10"
+          className="shrink-0 px-3 py-2 rounded-xl bg-gradient-to-r from-pink-550 to-rose-600 hover:from-pink-500 hover:to-rose-500 bg-pink-500 text-white font-black text-xs shadow-xs active:scale-95 transition-all cursor-pointer flex items-center gap-1 border border-white/10"
         >
-          <span>{isHindi ? "खोलें" : "Open →"}</span>
+          <span className="text-white">{isHindi ? "खोलें" : "Open →"}</span>
         </button>
       </div>
 
       {/* ========================================================= */}
-      {/* 2. FILTER TABS BAR (FROM SCREENSHOT)                      */}
+      {/* 2. FILTER TABS BAR                                        */}
       {/* ========================================================= */}
       <div className="flex items-center gap-1.5 overflow-x-auto pb-1 no-scrollbar pt-1">
         {[
@@ -306,8 +335,8 @@ export const ModulesView: React.FC<ModulesViewProps> = ({
             onClick={() => setActiveTab(tab.id as any)}
             className={`px-3.5 py-1.5 rounded-full text-xs font-bold transition-all cursor-pointer whitespace-nowrap shrink-0 border ${
               activeTab === tab.id
-                ? "bg-gradient-to-r from-cyan-500 to-blue-600 text-white border-transparent shadow-md"
-                : "bg-black/30 text-slate-200 border-white/10 hover:bg-white/10 hover:text-white"
+                ? "bg-gradient-to-r from-pink-550 to-rose-600 bg-pink-500 text-white border-transparent shadow-md"
+                : "bg-white/5 text-slate-200 border-white/10 hover:bg-white/10 hover:text-white"
             }`}
           >
             {tab.label}
@@ -316,9 +345,9 @@ export const ModulesView: React.FC<ModulesViewProps> = ({
       </div>
 
       {/* ========================================================= */}
-      {/* 3. 3-COLUMN LEARNING AREA GRID (EXACT SCREENSHOT STYLE)   */}
+      {/* 3. PREMIUM VERTICAL LIST (AS PER REFERENCE IMAGE)          */}
       {/* ========================================================= */}
-      <div className="grid grid-cols-3 gap-3 sm:gap-4 pb-4">
+      <div className="flex flex-col gap-3.5 pb-8">
         {filteredModules.map((mod) => {
           const isCompleted = completedIds.includes(mod.id);
           const gateResult = checkDeanModuleGate(mod, newHire);
@@ -326,31 +355,8 @@ export const ModulesView: React.FC<ModulesViewProps> = ({
           const isCurrent = !isCompleted && !isGatedByDean && mod.dayNumber === modulesCompletedCount + 1;
           const isLocked = !isCompleted && (mod.dayNumber > modulesCompletedCount + 1 || isGatedByDean);
 
-          // Premium frosted glass color identities with subtle glow borders matching the dashboard
-          let cardBgClass = "bg-gradient-to-br from-cyan-500/20 to-blue-600/20 backdrop-blur-md border-cyan-400/40 text-white shadow-lg shadow-cyan-500/10 hover:border-cyan-400/75";
-          let padBgClass = "bg-cyan-950/80 border-cyan-500/30 shadow-inner";
-          let iconColorClass = "text-cyan-400";
-          let textColorClass = "text-white";
-
-          if (isLocked && !isGatedByDean) {
-            // Sleek translucent dark-glass layout for locked modules
-            cardBgClass = "bg-white/5 backdrop-blur-md border-white/10 text-slate-400 opacity-60 shadow-inner cursor-not-allowed";
-            padBgClass = "bg-black/30 border-white/5";
-            iconColorClass = "text-slate-500";
-            textColorClass = "text-slate-400";
-          } else if (isGatedByDean) {
-            // Amber-orange warning glass gradient for Gated modules
-            cardBgClass = "bg-gradient-to-br from-amber-500/20 to-orange-600/20 backdrop-blur-md border-amber-400/40 text-white shadow-lg shadow-amber-500/10 animate-pulse hover:border-amber-400/75";
-            padBgClass = "bg-amber-950/80 border-amber-500/30 shadow-inner";
-            iconColorClass = "text-amber-400";
-            textColorClass = "text-white";
-          } else if (isCompleted) {
-            // Radiant emerald-green glass gradient for Completed modules
-            cardBgClass = "bg-gradient-to-br from-emerald-500/20 to-teal-600/20 backdrop-blur-md border-emerald-400/40 text-white shadow-lg shadow-emerald-500/10 hover:border-emerald-400/75";
-            padBgClass = "bg-emerald-950/80 border-emerald-500/30 shadow-inner";
-            iconColorClass = "text-emerald-400";
-            textColorClass = "text-white";
-          }
+          // Highlight matching the active or completed list item in the reference image (capsule card with inset shadow)
+          const isCapsule = isCurrent || isCompleted;
 
           return (
             <div
@@ -359,57 +365,73 @@ export const ModulesView: React.FC<ModulesViewProps> = ({
                 setSelectedModuleId(mod.id);
                 setActiveDetailModule(mod);
               }}
-              className={`relative aspect-square rounded-[30px] p-2 sm:p-3 flex flex-col items-center justify-between text-center transition-all duration-300 hover:-translate-y-1 hover:shadow-xl active:scale-95 border cursor-pointer select-none overflow-hidden ${cardBgClass}`}
+              className={`w-full flex items-center justify-between gap-4 p-3.5 transition-all duration-300 cursor-pointer select-none ${
+                isCapsule
+                  ? "bg-[#111317] border border-white/5 rounded-[28px] shadow-[inset_0_2px_8px_rgba(0,0,0,0.95)] hover:border-[#ff007f]/45"
+                  : "bg-transparent rounded-[28px] border border-transparent hover:bg-white/5"
+              }`}
             >
-              {/* Top Row: Day marker + Complete checkbox check */}
-              <div className="w-full flex items-center justify-between text-[9px] font-bold px-1 select-none z-10">
-                <span className={`px-1.5 py-0.5 rounded-full ${
+              <div className="flex items-center gap-4 min-w-0">
+                {/* Neon fuchsia circular icon / checkmark container */}
+                <div className={`relative w-12 h-12 rounded-full shrink-0 flex items-center justify-center transition-all duration-300 shadow-md ${
                   isLocked && !isGatedByDean
-                    ? "bg-black/30 text-slate-400 border border-white/5"
-                    : "bg-white/10 text-white border border-white/10 backdrop-blur-xs"
+                    ? "bg-[#1f2229] text-slate-500 opacity-60"
+                    : isGatedByDean
+                    ? "bg-amber-600 text-white shadow-[0_4px_12px_rgba(217,119,6,0.3)]"
+                    : "bg-[#ff007f] text-white shadow-[0_4px_16px_rgba(255,0,127,0.35)]"
                 }`}>
-                  Day {mod.dayNumber}
-                </span>
+                  {/* Neumorphic/3D glossy inner glow overlay */}
+                  <div className="absolute inset-0.5 rounded-full border border-white/10 pointer-events-none" />
 
-                {isCompleted && (
-                  <span className="w-4 h-4 rounded-full bg-emerald-500/20 text-emerald-300 flex items-center justify-center shadow-xs border border-emerald-500/40 font-black text-[10px]">
-                    ✓
-                  </span>
-                )}
-                {isGatedByDean && (
-                  <span className="w-4 h-4 rounded-full bg-amber-500/20 text-amber-300 flex items-center justify-center shadow-xs border border-amber-500/40 font-black text-[10px]">
-                    !
-                  </span>
-                )}
-                {isCurrent && !isCompleted && !isGatedByDean && (
-                  <span className="w-1.5 h-1.5 rounded-full bg-cyan-400 animate-ping shadow-[0_0_6px_rgba(34,211,238,0.7)]" />
-                )}
-              </div>
+                  {isCompleted ? (
+                    <Check className="w-5.5 h-5.5 stroke-[3.5] text-white" />
+                  ) : isGatedByDean ? (
+                    <Lock className="w-5 h-5 text-white" />
+                  ) : isLocked ? (
+                    <Lock className="w-5 h-5 text-slate-400" />
+                  ) : (
+                    <div className="w-5.5 h-5.5 text-white">
+                      {getModuleDayIcon(mod.dayNumber)}
+                    </div>
+                  )}
+                </div>
 
-              {/* Central Elevated Glossy Square Pad (3D Skeuomorphic Glass) */}
-              <div className={`w-12 h-12 sm:w-14 sm:h-14 rounded-[18px] flex items-center justify-center border transition-all duration-300 relative z-10 ${padBgClass} ${
-                !isLocked ? "shadow-md hover:scale-105 active:scale-95" : ""
-              }`}>
-                {/* 3D beveled inner reflex boundary */}
-                <div className="absolute inset-0.5 rounded-[16px] border border-white/10 pointer-events-none" />
-                
-                {/* Render Lucide icon inside */}
-                <div className={`w-6 h-6 flex items-center justify-center transition-all ${iconColorClass}`}>
-                  {getModuleDayIcon(mod.dayNumber)}
+                {/* Typography matching reference image */}
+                <div className="min-w-0 text-left">
+                  {/* "Lorem" / small indicator line */}
+                  <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">
+                    Day {mod.dayNumber} • {mod.code} • {mod.durationMinutes} mins
+                  </span>
+                  
+                  {/* "ipsum" / main title */}
+                  <h3 className={`text-sm sm:text-base font-black mt-0.5 leading-snug tracking-tight ${
+                    isLocked ? "text-slate-500" : "text-white"
+                  }`}>
+                    {isHindi && mod.titleHi ? mod.titleHi : mod.title}
+                  </h3>
                 </div>
               </div>
 
-              {/* Module Short Title bottom aligned */}
-              <div className="w-full z-10">
-                <p className={`text-[10px] sm:text-[11px] font-black truncate leading-tight select-none ${textColorClass}`}>
-                  {getModuleShortLabel(mod.dayNumber, isHindi)}
-                </p>
+              {/* Status indicator / + sign as seen on the right hand side of the reference image */}
+              <div className="shrink-0 flex items-center gap-3 pr-2">
+                {isCompleted && (
+                  <span className="hidden sm:inline-block text-[9px] font-black uppercase text-emerald-400 bg-emerald-550/15 px-2.5 py-1 rounded-full border border-emerald-500/20">
+                    Done ✓
+                  </span>
+                )}
+                {isCurrent && (
+                  <span className="hidden sm:inline-block text-[9px] font-black uppercase text-[#ff007f] bg-[#ff007f]/10 px-2.5 py-1 rounded-full border border-[#ff007f]/30 animate-pulse">
+                    Active
+                  </span>
+                )}
+                
+                {/* Small indicator '+' sign from the right of reference layout */}
+                {!isCapsule && (
+                  <span className="text-white/20 text-lg font-light select-none shrink-0">
+                    +
+                  </span>
+                )}
               </div>
-
-              {/* Glossy diagonal light reflections crossing card for premium glass shine effect */}
-              {!isLocked && (
-                <div className="absolute -inset-y-1/2 -left-1/2 w-full h-[200%] bg-gradient-to-r from-transparent via-white/10 to-transparent rotate-[35deg] pointer-events-none mix-blend-overlay z-0" />
-              )}
             </div>
           );
         })}
@@ -419,13 +441,13 @@ export const ModulesView: React.FC<ModulesViewProps> = ({
       {/* 2.5 MODULE DETAIL MODAL                                   */}
       {/* ========================================================= */}
       {activeDetailModule && (
-        <div className="fixed inset-0 z-40 bg-black/60 backdrop-blur-xs flex items-center justify-center p-4">
-          <div className="bg-white rounded-3xl max-w-md w-full p-4 sm:p-5 shadow-2xl border border-slate-100 max-h-[88vh] overflow-y-auto space-y-4 animate-in fade-in zoom-in duration-150">
+        <div className="fixed inset-0 z-40 bg-black/75 backdrop-blur-sm flex items-center justify-center p-4 text-white">
+          <div className="bg-[#1b1e26] rounded-3xl max-w-md w-full p-4 sm:p-5 shadow-2xl border border-white/10 max-h-[88vh] overflow-y-auto space-y-4 animate-in fade-in zoom-in duration-150">
             {/* Header */}
-            <div className="flex items-start justify-between gap-3 border-b border-slate-100 pb-3">
+            <div className="flex items-start justify-between gap-3 border-b border-white/10 pb-3">
               <div>
                 <div className="flex items-center gap-2">
-                  <span className="text-[10px] sm:text-xs font-black uppercase tracking-wider px-2 py-0.5 rounded-md bg-violet-100 text-violet-800">
+                  <span className="text-[10px] sm:text-xs font-black uppercase tracking-wider px-2 py-0.5 rounded-md bg-pink-500/10 text-pink-300 border border-pink-500/20">
                     Day {activeDetailModule.dayNumber} • {activeDetailModule.code}
                   </span>
                   <span className="text-xs font-bold text-slate-400 flex items-center gap-1">
@@ -433,50 +455,50 @@ export const ModulesView: React.FC<ModulesViewProps> = ({
                     {activeDetailModule.durationMinutes} min
                   </span>
                 </div>
-                <h3 className="text-base sm:text-lg font-black text-slate-900 mt-1">
+                <h3 className="text-base sm:text-lg font-black text-white mt-1">
                   {isHindi && activeDetailModule.titleHi ? activeDetailModule.titleHi : activeDetailModule.title}
                 </h3>
               </div>
               <button
                 type="button"
                 onClick={() => setActiveDetailModule(null)}
-                className="p-1.5 rounded-full text-slate-400 hover:text-slate-700 hover:bg-slate-100 transition-colors cursor-pointer shrink-0"
+                className="p-1.5 rounded-full text-slate-400 hover:text-white hover:bg-white/5 transition-colors cursor-pointer shrink-0"
               >
                 <X className="w-5 h-5" />
               </button>
             </div>
 
             {/* Description */}
-            <p className="text-xs sm:text-sm text-slate-600 leading-relaxed">
+            <p className="text-xs sm:text-sm text-slate-300 leading-relaxed">
               {isHindi && activeDetailModule.descriptionHi
                 ? activeDetailModule.descriptionHi
                 : activeDetailModule.description}
             </p>
 
             {/* Capability mapping tag */}
-            <div className="flex items-center gap-1.5 text-xs text-violet-700 bg-violet-50/80 px-3 py-2 rounded-xl border border-violet-100">
-              <Zap className="w-3.5 h-3.5 shrink-0" />
+            <div className="flex items-center gap-1.5 text-xs text-pink-300 bg-pink-500/10 px-3 py-2 rounded-xl border border-pink-500/25">
+              <Zap className="w-3.5 h-3.5 shrink-0 text-pink-450" />
               <span>
                 <strong className="font-bold">{isHindi ? "हुनर संबंध:" : "Maps to:"}</strong>{" "}
                 {activeDetailModule.mappedCapabilityIds
                   .map((cid) => {
-                    const cap = DARK_STORE_CAPABILITIES.find((c) => c.id === cid);
-                    return cap ? cap.name : `Cap ${cid}`;
+                     const cap = DARK_STORE_CAPABILITIES.find((c) => c.id === cid);
+                     return cap ? cap.name : `Cap ${cid}`;
                   })
                   .join(", ")}
               </span>
             </div>
 
             {checkDeanModuleGate(activeDetailModule, newHire).isGated && (
-              <div className="p-3.5 rounded-2xl bg-amber-50 border border-amber-200 text-amber-950 space-y-2">
+              <div className="p-3.5 rounded-2xl bg-amber-500/5 border border-amber-500/20 text-amber-300 space-y-2">
                 <div className="flex items-center gap-2">
-                  <AlertTriangle className="w-4 h-4 text-amber-600 shrink-0" />
+                  <AlertTriangle className="w-4 h-4 text-amber-400 shrink-0" />
                   <span className="text-xs font-black uppercase tracking-wider">Dean Pit-Stop Rule & Gating Active</span>
                 </div>
                 <p className="text-xs leading-relaxed font-medium">
                   {checkDeanModuleGate(activeDetailModule, newHire).reason}
                 </p>
-                <div className="p-2 rounded-xl bg-white/90 border border-amber-200 text-[11px] font-bold text-amber-900">
+                <div className="p-2 rounded-xl bg-[#13151b] border border-amber-550/20 text-[11px] font-bold text-amber-400">
                   {checkDeanModuleGate(activeDetailModule, newHire).correctiveAction}
                 </div>
               </div>
@@ -509,21 +531,21 @@ export const ModulesView: React.FC<ModulesViewProps> = ({
                     }}
                     className={`p-3 rounded-2xl flex items-center justify-between transition-all cursor-pointer ${
                       isModLocked
-                        ? "bg-slate-100/50 opacity-60 cursor-not-allowed"
+                        ? "bg-white/5 opacity-40 cursor-not-allowed"
                         : isActCompleted
-                        ? "bg-white border border-slate-200 hover:border-violet-300 shadow-2xs"
-                        : "bg-white border border-violet-200 hover:border-violet-400 shadow-xs"
+                        ? "bg-[#13151b] border border-white/5 hover:border-pink-500/30"
+                        : "bg-[#13151b] border border-pink-500/25 hover:border-pink-500/50 shadow-md"
                     }`}
                   >
                     <div className="flex items-center gap-3 min-w-0">
-                      <div className="p-2 rounded-xl bg-slate-50 border border-slate-100 shrink-0">
+                      <div className="p-2 rounded-xl bg-black/25 border border-white/5 shrink-0 text-pink-400">
                         {getActivityIcon(act.type)}
                       </div>
                       <div className="min-w-0">
-                        <span className="text-[10px] font-bold text-slate-400 block uppercase">
+                        <span className="text-[10px] font-bold text-slate-450 block uppercase tracking-wide">
                           {getActivityTypeName(act.type)}
                         </span>
-                        <span className="text-xs sm:text-sm font-bold text-slate-900 leading-tight block truncate">
+                        <span className="text-xs sm:text-sm font-bold text-white leading-tight block truncate">
                           {isHindi && act.titleHi ? act.titleHi : act.title}
                         </span>
                       </div>
@@ -531,16 +553,16 @@ export const ModulesView: React.FC<ModulesViewProps> = ({
 
                     <div className="flex items-center gap-2 shrink-0 ml-2">
                       {act.score !== undefined && (
-                        <span className="text-xs font-black text-emerald-700 bg-emerald-50 px-2.5 py-0.5 rounded-full border border-emerald-200">
+                        <span className="text-xs font-black text-emerald-400 bg-emerald-500/10 px-2.5 py-0.5 rounded-full border border-emerald-500/20">
                           {act.score}%
                         </span>
                       )}
                       {isActCompleted ? (
-                        <span className="text-xs font-bold text-emerald-600 bg-emerald-50 px-2.5 py-1 rounded-full">
+                        <span className="text-xs font-bold text-emerald-400 bg-emerald-500/10 px-2.5 py-1 rounded-full border border-emerald-500/15">
                           ✓ {isHindi ? "पूर्ण" : "Done"}
                         </span>
                       ) : (
-                        <span className="text-xs font-bold text-violet-700 bg-violet-50 px-3 py-1 rounded-full hover:bg-violet-100">
+                        <span className="text-xs font-bold text-pink-300 bg-pink-500/10 px-3 py-1 rounded-full border border-pink-500/15 hover:bg-pink-500/20">
                           {isHindi ? "शुरू करें →" : "Start →"}
                         </span>
                       )}
@@ -559,10 +581,10 @@ export const ModulesView: React.FC<ModulesViewProps> = ({
                     handleCompleteActivity(activeDetailModule.id, activeDetailModule.activities[4].id);
                     setActiveDetailModule(null);
                   }}
-                  className="w-full py-3 bg-gradient-to-r from-violet-600 via-purple-600 to-fuchsia-600 text-white rounded-2xl text-xs font-bold shadow-md hover:opacity-95 cursor-pointer active:scale-98 transition-all flex items-center justify-center gap-2"
+                  className="w-full py-3 bg-gradient-to-r from-pink-550 to-rose-600 bg-pink-500 text-white rounded-2xl text-xs font-black shadow-lg hover:opacity-95 cursor-pointer active:scale-98 transition-all flex items-center justify-center gap-2 border border-white/10"
                 >
-                  <Award className="w-4 h-4" />
-                  <span>
+                  <Award className="w-4 h-4 text-white" />
+                  <span className="text-white">
                     {isHindi
                       ? `डे ${activeDetailModule.dayNumber} मॉड्यूल पूरा मार्क करें`
                       : `Complete Day ${activeDetailModule.dayNumber} Module`}
@@ -578,18 +600,18 @@ export const ModulesView: React.FC<ModulesViewProps> = ({
       {/* 3. INTERACTIVE ACTIVITY MODAL                             */}
       {/* ========================================================= */}
       {activeActivityModal && (
-        <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-xs flex items-center justify-center p-4">
-          <div className="bg-white rounded-3xl max-w-sm w-full p-4 sm:p-5 shadow-2xl border border-slate-100 space-y-4 animate-in fade-in zoom-in duration-150">
-            <div className="flex items-center justify-between border-b border-slate-100 pb-2.5">
+        <div className="fixed inset-0 z-50 bg-black/75 backdrop-blur-sm flex items-center justify-center p-4 text-white">
+          <div className="bg-[#1b1e26] rounded-3xl max-w-sm w-full p-4 sm:p-5 shadow-2xl border border-white/10 space-y-4 animate-in fade-in zoom-in duration-150">
+            <div className="flex items-center justify-between border-b border-white/10 pb-2.5">
               <div className="flex items-center gap-2.5">
-                <div className="w-9 h-9 rounded-2xl bg-purple-600 text-white flex items-center justify-center">
+                <div className="w-9 h-9 rounded-2xl bg-pink-500/15 text-pink-400 flex items-center justify-center border border-pink-500/25">
                   {getActivityIcon(activeActivityModal.activity.type)}
                 </div>
                 <div>
-                  <span className="text-[10px] font-bold text-slate-400 uppercase">
+                  <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wide">
                     {activeActivityModal.module.code} • {getActivityTypeName(activeActivityModal.activity.type)}
                   </span>
-                  <h3 className="text-xs sm:text-sm font-bold text-slate-900 line-clamp-1">
+                  <h3 className="text-xs sm:text-sm font-bold text-white line-clamp-1">
                     {isHindi && activeActivityModal.activity.titleHi
                       ? activeActivityModal.activity.titleHi
                       : activeActivityModal.activity.title}
@@ -598,7 +620,7 @@ export const ModulesView: React.FC<ModulesViewProps> = ({
               </div>
               <button
                 onClick={() => setActiveActivityModal(null)}
-                className="p-1 rounded-full text-slate-400 hover:text-slate-800 cursor-pointer"
+                className="p-1 rounded-full text-slate-400 hover:text-white cursor-pointer"
               >
                 <X className="w-5 h-5" />
               </button>
@@ -606,17 +628,17 @@ export const ModulesView: React.FC<ModulesViewProps> = ({
 
             {/* VIDEO ACTIVITY CONTENT */}
             {activeActivityModal.activity.type === "video" && (
-              <div className="space-y-3 text-xs text-slate-700">
-                <div className="aspect-video bg-slate-900 rounded-2xl flex flex-col items-center justify-center text-white p-4 text-center relative overflow-hidden">
-                  <PlayCircle className="w-10 h-10 text-purple-400 mb-1 animate-pulse" />
+              <div className="space-y-3 text-xs text-slate-300">
+                <div className="aspect-video bg-black/50 rounded-2xl flex flex-col items-center justify-center text-white p-4 text-center relative overflow-hidden border border-white/5">
+                  <PlayCircle className="w-10 h-10 text-pink-400 mb-1 animate-pulse" />
                   <span className="font-bold text-xs">{activeActivityModal.activity.title}</span>
-                  <span className="text-[10px] text-slate-400">Duration: {activeActivityModal.activity.durationMinutes} mins</span>
+                  <span className="text-[10px] text-slate-450">Duration: {activeActivityModal.activity.durationMinutes} mins</span>
                 </div>
-                <div className="p-3 bg-slate-50 rounded-2xl border border-slate-200 space-y-1">
-                  <span className="font-bold text-slate-900 block">
+                <div className="p-3 bg-[#13151b] rounded-2xl border border-white/5 space-y-1">
+                  <span className="font-bold text-white block">
                     {isHindi ? "वीडियो सारांश व मुख्य नियम:" : "Key Takeaways:"}
                   </span>
-                  <p className="text-[11px] text-slate-600 leading-snug">
+                  <p className="text-[11px] text-slate-300 leading-snug">
                     {isHindi
                       ? "1. हमेशा सेफ्टी शूज व ग्लव्स पहनें। 2. रैक से सामान उठाते समय नंबर क्रॉस-वेरिफाई करें।"
                       : "1. Follow standard aisle traffic rules. 2. Verify shelf rack-bay coordinates before picking."}
@@ -624,7 +646,7 @@ export const ModulesView: React.FC<ModulesViewProps> = ({
                 </div>
                 <button
                   onClick={() => setActiveActivityModal(null)}
-                  className="w-full py-2.5 bg-slate-900 text-white rounded-2xl text-xs font-bold cursor-pointer"
+                  className="w-full py-2.5 bg-gradient-to-r from-pink-500 to-rose-600 text-white rounded-2xl text-xs font-black cursor-pointer border border-white/10"
                 >
                   {isHindi ? "पाठ पूरा हुआ 👍" : "Mark Video Watched 👍"}
                 </button>
@@ -633,12 +655,12 @@ export const ModulesView: React.FC<ModulesViewProps> = ({
 
             {/* QUIZ ACTIVITY CONTENT */}
             {activeActivityModal.activity.type === "quiz" && (
-              <div className="space-y-3 text-xs text-slate-700">
-                <div className="p-3 bg-purple-50/70 border border-purple-200 rounded-2xl space-y-1">
-                  <span className="font-bold text-purple-950 block">
+              <div className="space-y-3 text-xs text-slate-300">
+                <div className="p-3 bg-[#13151b] border border-pink-500/20 rounded-2xl space-y-1">
+                  <span className="font-bold text-pink-300 block">
                     {isHindi ? "प्रश्न 1:" : "Question 1 of 1:"}
                   </span>
-                  <p className="text-xs font-medium text-purple-900">
+                  <p className="text-xs font-medium text-white">
                     {isHindi
                       ? "टोट पैक करते समय भारी सामान (जैसे आटा, तेल) कहां रखना चाहिए?"
                       : "When packing a tote, where should heavy items (flour, oil cans) always be placed?"}
@@ -656,8 +678,8 @@ export const ModulesView: React.FC<ModulesViewProps> = ({
                       onClick={() => setQuizAnswerSelected(idx)}
                       className={`w-full p-2.5 rounded-2xl border text-left text-xs font-medium transition-all cursor-pointer ${
                         quizAnswerSelected === idx
-                          ? "bg-purple-600 text-white border-purple-600 shadow-xs"
-                          : "bg-white text-slate-700 border-slate-200 hover:bg-slate-50"
+                          ? "bg-pink-500 text-white border-transparent shadow-xs font-black"
+                          : "bg-[#13151b] text-slate-200 border-white/5 hover:bg-white/5"
                       }`}
                     >
                       {idx === 0 ? "A" : idx === 1 ? "B" : "C"}. {isHindi ? opt.hi : opt.en}
@@ -668,22 +690,22 @@ export const ModulesView: React.FC<ModulesViewProps> = ({
                 {quizAnswerSelected !== null && !quizSubmitted && (
                   <button
                     onClick={() => setQuizSubmitted(true)}
-                    className="w-full py-2.5 bg-purple-600 hover:bg-purple-700 text-white rounded-2xl text-xs font-bold cursor-pointer"
+                    className="w-full py-2.5 bg-pink-500 text-white rounded-2xl text-xs font-black cursor-pointer hover:bg-pink-400 border border-white/10"
                   >
                     {isHindi ? "उत्तर जमा करें" : "Submit Answer"}
                   </button>
                 )}
 
                 {quizSubmitted && (
-                  <div className="p-3 bg-emerald-50 border border-emerald-200 rounded-2xl space-y-1 text-center">
-                    <span className="text-xs font-bold text-emerald-800 block">
+                  <div className="p-3 bg-emerald-550/10 border border-emerald-500/25 rounded-2xl space-y-1 text-center">
+                    <span className="text-xs font-bold text-emerald-400 block">
                       {quizAnswerSelected === 0
                         ? isHindi ? "✅ सही उत्तर! 100% स्कोर" : "✅ Correct! 100% Score"
                         : isHindi ? "❌ गलत उत्तर। भारी सामान हमेशा नीचे रहता है।" : "❌ Incorrect. Heavy items always go at the bottom."}
                     </span>
                     <button
                       onClick={() => setActiveActivityModal(null)}
-                      className="mt-1 px-4 py-1.5 bg-emerald-600 text-white rounded-full text-xs font-bold cursor-pointer"
+                      className="mt-1 px-4 py-1.5 bg-emerald-600 text-white rounded-full text-xs font-bold cursor-pointer hover:bg-emerald-500"
                     >
                       {isHindi ? "जारी रखें" : "Continue"}
                     </button>
@@ -694,25 +716,25 @@ export const ModulesView: React.FC<ModulesViewProps> = ({
 
             {/* SIMULATION ACTIVITY CONTENT */}
             {activeActivityModal.activity.type === "simulation" && (
-              <div className="space-y-3 text-xs text-slate-700">
-                <div className="p-3 bg-emerald-50/70 border border-emerald-200 rounded-2xl space-y-1">
-                  <span className="font-bold text-emerald-950 block">
+              <div className="space-y-3 text-xs text-slate-300">
+                <div className="p-3 bg-[#13151b] border border-pink-500/20 rounded-2xl space-y-1">
+                  <span className="font-bold text-pink-300 block">
                     {isHindi ? "3D वर्चुअल सिमुलेशन टास्क:" : "Virtual Simulation Task:"}
                   </span>
-                  <p className="text-[11px] text-emerald-900 leading-snug">
+                  <p className="text-[11px] text-slate-200 leading-snug">
                     {isHindi
                       ? "आइसल 5, बे 2, शेल्फ B पर जाएं और 1 किलो चीनी का बारकोड स्कैन करें।"
                       : "Navigate to Aisle 5, Bay 2, Shelf B and aim scanner at 1kg Sugar pouch."}
                   </p>
                 </div>
-                <div className="p-4 bg-slate-900 text-emerald-400 rounded-2xl font-mono text-[11px] space-y-1">
+                <div className="p-4 bg-black/45 text-emerald-400 rounded-2xl font-mono text-[11px] space-y-1 border border-white/5">
                   <div>&gt; Locating bin: A05-B02-S02... OK</div>
                   <div>&gt; Aiming ring laser at SKU: 890123456... OK</div>
                   <div>&gt; Barcode verified: MATCH (1000g)</div>
                 </div>
                 <button
                   onClick={() => setActiveActivityModal(null)}
-                  className="w-full py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-2xl text-xs font-bold cursor-pointer"
+                  className="w-full py-2.5 bg-gradient-to-r from-pink-500 to-rose-600 text-white rounded-2xl text-xs font-black cursor-pointer border border-white/10"
                 >
                   {isHindi ? "सिमुलेशन पास हुआ ✅" : "Pass Simulation Step ✅"}
                 </button>
@@ -722,26 +744,26 @@ export const ModulesView: React.FC<ModulesViewProps> = ({
             {/* PRACTICE / ASSESSMENT CONTENT */}
             {(activeActivityModal.activity.type === "practice" ||
               activeActivityModal.activity.type === "assessment") && (
-              <div className="space-y-3 text-xs text-slate-700">
-                <div className="p-3 bg-purple-50/70 border border-purple-200 rounded-2xl space-y-1">
-                  <span className="font-bold text-purple-950 block">
+              <div className="space-y-3 text-xs text-slate-300">
+                <div className="p-3 bg-[#13151b] border border-pink-500/20 rounded-2xl space-y-1">
+                  <span className="font-bold text-pink-300 block">
                     {isHindi ? "फ्लोर प्रैक्टिकल चेकलिस्ट:" : "Floor Practice Verification:"}
                   </span>
-                  <p className="text-[11px] text-purple-900 leading-snug">
+                  <p className="text-[11px] text-slate-200 leading-snug">
                     {isHindi
                       ? "सीनियर बडी के साथ 10-मिनट का अभ्यास पूरा करें और चेकलिस्ट टिक करें।"
                       : "Perform practical drill with senior floor buddy and confirm completion."}
                   </p>
                 </div>
 
-                <label className="flex items-center gap-2.5 p-3 bg-white border border-slate-200 rounded-2xl cursor-pointer">
+                <label className="flex items-center gap-2.5 p-3 bg-[#13151b] border border-white/10 rounded-2xl cursor-pointer">
                   <input
                     type="checkbox"
                     checked={practiceChecked}
                     onChange={(e) => setPracticeChecked(e.target.checked)}
-                    className="w-4 h-4 text-purple-600 rounded-md focus:ring-purple-500"
+                    className="w-4 h-4 text-pink-500 bg-black border-white/15 rounded-md focus:ring-pink-500"
                   />
-                  <span className="text-xs font-medium text-slate-800">
+                  <span className="text-xs font-medium text-slate-200">
                     {isHindi
                       ? "मैंने सभी स्टेप्स बडी के साथ अभ्यास कर लिए हैं"
                       : "I have completed all drill steps with my buddy"}
@@ -756,7 +778,7 @@ export const ModulesView: React.FC<ModulesViewProps> = ({
                       activeActivityModal.activity.id
                     )
                   }
-                  className="w-full py-2.5 bg-gradient-to-r from-violet-600 to-purple-600 text-white rounded-2xl text-xs font-bold disabled:opacity-40 cursor-pointer shadow-xs"
+                  className="w-full py-2.5 bg-gradient-to-r from-pink-500 to-rose-600 text-white rounded-2xl text-xs font-black disabled:opacity-40 cursor-pointer shadow-md border border-white/10"
                 >
                   {isHindi ? "ड्रिल पूर्ण मार्क करें ✅" : "Mark Activity Complete ✅"}
                 </button>

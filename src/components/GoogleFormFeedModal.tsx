@@ -99,47 +99,47 @@ export const GoogleFormFeedModal: React.FC<GoogleFormFeedModalProps> = ({
 
   return (
     <div
-      className="fixed inset-0 z-50 bg-slate-950/75 backdrop-blur-sm flex items-center justify-center p-3 sm:p-5 overflow-y-auto animate-in fade-in duration-150"
+      className="fixed inset-0 z-50 bg-slate-950/80 backdrop-blur-sm flex items-center justify-center p-3 sm:p-5 overflow-y-auto animate-in fade-in duration-150"
       onClick={onClose}
     >
       <div
-        className="w-full max-w-2xl bg-white rounded-3xl border border-slate-200 shadow-2xl overflow-hidden flex flex-col my-auto max-h-[90vh]"
+        className="w-full max-w-2xl bg-[#1b1e26] rounded-3xl border border-white/10 shadow-2xl overflow-hidden flex flex-col my-auto max-h-[90vh] text-white"
         onClick={(e) => e.stopPropagation()}
       >
         {/* Header */}
-        <div className="bg-gradient-to-r from-emerald-700 via-teal-700 to-emerald-800 px-6 py-4 text-white flex items-center justify-between">
+        <div className="bg-[#13151b] px-6 py-4 text-white flex items-center justify-between border-b border-white/10">
           <div className="flex items-center gap-3">
-            <div className="p-2 rounded-xl bg-white/10 backdrop-blur-md border border-white/20">
-              <FileSpreadsheet className="w-5 h-5 text-emerald-200" />
+            <div className="p-2 rounded-xl bg-cyan-500/10 border border-cyan-500/20">
+              <FileSpreadsheet className="w-5 h-5 text-cyan-450" />
             </div>
             <div>
               <div className="flex items-center gap-2">
-                <h3 className="text-base font-black tracking-tight">Client Demo Work-Signal Feed</h3>
-                <span className="px-2 py-0.5 rounded-full text-[10px] font-black uppercase bg-emerald-400 text-emerald-950">
+                <h3 className="text-base font-black tracking-tight text-white">Client Demo Work-Signal Feed</h3>
+                <span className="px-2 py-0.5 rounded-full text-[10px] font-black uppercase bg-cyan-500/10 text-cyan-400 border border-cyan-500/20">
                   Google Sheet Ingestor
                 </span>
               </div>
-              <p className="text-xs text-emerald-100 font-normal">
-                Feeds raw operational telemetry into existing <code className="font-mono text-[11px] bg-emerald-900/50 px-1 py-0.5 rounded">executeCoordinationLoop()</code>
+              <p className="text-xs text-slate-400 font-normal">
+                Feeds raw operational telemetry into existing <code className="font-mono text-[11px] bg-white/5 px-1 py-0.5 rounded text-cyan-300">executeCoordinationLoop()</code>
               </p>
             </div>
           </div>
           <button
             onClick={onClose}
-            className="w-8 h-8 rounded-full bg-white/10 hover:bg-white/20 flex items-center justify-center text-white cursor-pointer transition-all active:scale-95"
+            className="w-8 h-8 rounded-full bg-white/5 hover:bg-white/10 flex items-center justify-center text-white cursor-pointer transition-all active:scale-95"
           >
             <X className="w-4 h-4" />
           </button>
         </div>
 
         {/* Tab Selector */}
-        <div className="px-6 pt-3 border-b border-slate-100 bg-slate-50/80 flex items-center gap-2">
+        <div className="px-6 pt-3 border-b border-white/10 bg-[#13151b]/40 flex items-center gap-2">
           <button
             onClick={() => setActiveTab("preset")}
             className={`px-3.5 py-2 text-xs font-bold rounded-t-xl transition-all cursor-pointer border-b-2 flex items-center gap-1.5 ${
               activeTab === "preset"
-                ? "border-emerald-600 text-emerald-800 bg-white shadow-xs"
-                : "border-transparent text-slate-500 hover:text-slate-800"
+                ? "border-cyan-500 text-cyan-450 bg-white/5"
+                : "border-transparent text-slate-450 hover:text-white"
             }`}
           >
             <Sparkles className="w-3.5 h-3.5" />
@@ -149,8 +149,8 @@ export const GoogleFormFeedModal: React.FC<GoogleFormFeedModalProps> = ({
             onClick={() => setActiveTab("form")}
             className={`px-3.5 py-2 text-xs font-bold rounded-t-xl transition-all cursor-pointer border-b-2 flex items-center gap-1.5 ${
               activeTab === "form"
-                ? "border-emerald-600 text-emerald-800 bg-white shadow-xs"
-                : "border-transparent text-slate-500 hover:text-slate-800"
+                ? "border-cyan-500 text-cyan-450 bg-white/5"
+                : "border-transparent text-slate-450 hover:text-white"
             }`}
           >
             <Database className="w-3.5 h-3.5" />
@@ -160,8 +160,8 @@ export const GoogleFormFeedModal: React.FC<GoogleFormFeedModalProps> = ({
             onClick={() => setActiveTab("sheet_csv")}
             className={`px-3.5 py-2 text-xs font-bold rounded-t-xl transition-all cursor-pointer border-b-2 flex items-center gap-1.5 ${
               activeTab === "sheet_csv"
-                ? "border-emerald-600 text-emerald-800 bg-white shadow-xs"
-                : "border-transparent text-slate-500 hover:text-slate-800"
+                ? "border-cyan-500 text-cyan-450 bg-white/5"
+                : "border-transparent text-slate-450 hover:text-white"
             }`}
           >
             <FileSpreadsheet className="w-3.5 h-3.5" />
@@ -174,8 +174,8 @@ export const GoogleFormFeedModal: React.FC<GoogleFormFeedModalProps> = ({
           {/* TAB 1: PRESETS (Instantly demonstrate Scenario A vs Scenario B) */}
           {activeTab === "preset" && (
             <div className="space-y-4">
-              <div className="p-3 bg-amber-50/80 border border-amber-200/80 rounded-2xl text-xs text-amber-900 flex items-start gap-2.5">
-                <Sparkles className="w-4 h-4 text-amber-600 shrink-0 mt-0.5" />
+              <div className="p-3 bg-amber-500/10 border border-amber-500/20 rounded-2xl text-xs text-amber-300 flex items-start gap-2.5">
+                <Sparkles className="w-4 h-4 text-amber-400 shrink-0 mt-0.5" />
                 <div>
                   <span className="font-bold">Dynamic Intelligence Proof: </span>
                   Select <strong>Scenario A</strong> (friction) to see the engine prescribe floor buddy navigation support, then trigger <strong>Scenario B</strong> (recovery) to verify the SAME engine reduces support automatically.
@@ -191,32 +191,32 @@ export const GoogleFormFeedModal: React.FC<GoogleFormFeedModalProps> = ({
                       onClick={() => handleSelectPreset(preset.id)}
                       className={`p-4 rounded-2xl border-2 transition-all cursor-pointer flex flex-col justify-between text-left ${
                         isSelected
-                          ? "border-emerald-600 bg-emerald-50/40 shadow-sm"
-                          : "border-slate-200 hover:border-slate-300 bg-white"
+                          ? "border-cyan-500 bg-cyan-500/5 shadow-sm"
+                          : "border-white/10 hover:border-white/20 bg-[#13151b]/40 text-white"
                       }`}
                     >
                       <div>
                         <div className="flex items-center justify-between gap-2 mb-1.5">
-                          <span className="font-black text-xs text-slate-900">{preset.name}</span>
+                          <span className="font-black text-xs text-white">{preset.name}</span>
                           <span
                             className={`px-2 py-0.5 rounded-full text-[10px] font-black ${
                               preset.id.includes("recovery")
-                                ? "bg-emerald-100 text-emerald-800"
+                                ? "bg-emerald-500/10 text-emerald-355 border border-emerald-500/20"
                                 : preset.id.includes("friction")
-                                ? "bg-amber-100 text-amber-800"
-                                : "bg-rose-100 text-rose-800"
+                                ? "bg-amber-500/10 text-amber-355 border border-amber-500/20"
+                                : "bg-rose-500/10 text-rose-355 border border-rose-500/20"
                             }`}
                           >
                             {preset.badge}
                           </span>
                         </div>
-                        <p className="text-[11px] text-slate-600 leading-relaxed">{preset.description}</p>
+                        <p className="text-[11px] text-slate-400 leading-relaxed">{preset.description}</p>
                       </div>
 
-                      <div className="mt-3 pt-2.5 border-t border-slate-100 flex items-center justify-between text-[11px] font-mono text-slate-500">
-                        <span>Pick: {preset.payload.shiftActualPickRate}/{preset.payload.shiftTargetPickRate}</span>
-                        <span>Acc: {preset.payload.scanningAccuracyPercent}%</span>
-                        <span>Help: {preset.payload.helpRequests}</span>
+                      <div className="mt-3 pt-2.5 border-t border-white/5 flex items-center justify-between text-[11px] font-mono text-slate-500">
+                        <span>Pick: <strong className="text-white">{preset.payload.shiftActualPickRate}</strong>/{preset.payload.shiftTargetPickRate}</span>
+                        <span>Acc: <strong className="text-emerald-400">{preset.payload.scanningAccuracyPercent}%</strong></span>
+                        <span>Help: <strong className="text-rose-400">{preset.payload.helpRequests}</strong></span>
                       </div>
                     </div>
                   );
@@ -224,35 +224,35 @@ export const GoogleFormFeedModal: React.FC<GoogleFormFeedModalProps> = ({
               </div>
 
               {/* Selected Payload Preview */}
-              <div className="p-4 bg-slate-900 rounded-2xl text-white space-y-2">
-                <div className="flex items-center justify-between text-xs font-bold text-slate-300">
+              <div className="p-4 bg-[#13151b] rounded-2xl text-white space-y-2 border border-white/5">
+                <div className="flex items-center justify-between text-xs font-bold text-slate-400">
                   <span>Prepared Feed Record (12 Raw Fields)</span>
-                  <span className="text-[10px] font-mono text-emerald-400">Target: {formData.newHireNameOrId} • Day {formData.dayOfRamp}</span>
+                  <span className="text-[10px] font-mono text-cyan-400">Target: {formData.newHireNameOrId} • Day {formData.dayOfRamp}</span>
                 </div>
                 <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 text-[11px] font-mono">
-                  <div className="bg-slate-800 p-2 rounded-xl">
-                    <span className="text-slate-400 block text-[9px]">ACTUAL PICK</span>
-                    <span className="text-amber-300 font-bold">{formData.shiftActualPickRate} /hr</span>
+                  <div className="bg-[#1b1e26] p-2 rounded-xl border border-white/5">
+                    <span className="text-slate-500 block text-[9px]">ACTUAL PICK</span>
+                    <span className="text-amber-400 font-bold">{formData.shiftActualPickRate} /hr</span>
                   </div>
-                  <div className="bg-slate-800 p-2 rounded-xl">
-                    <span className="text-slate-400 block text-[9px]">TARGET PICK</span>
+                  <div className="bg-[#1b1e26] p-2 rounded-xl border border-white/5">
+                    <span className="text-slate-500 block text-[9px]">TARGET PICK</span>
                     <span className="text-white font-bold">{formData.shiftTargetPickRate} /hr</span>
                   </div>
-                  <div className="bg-slate-800 p-2 rounded-xl">
-                    <span className="text-slate-400 block text-[9px]">ACCURACY</span>
-                    <span className="text-emerald-300 font-bold">{formData.scanningAccuracyPercent}%</span>
+                  <div className="bg-[#1b1e26] p-2 rounded-xl border border-white/5">
+                    <span className="text-slate-500 block text-[9px]">ACCURACY</span>
+                    <span className="text-emerald-400 font-bold">{formData.scanningAccuracyPercent}%</span>
                   </div>
-                  <div className="bg-slate-800 p-2 rounded-xl">
-                    <span className="text-slate-400 block text-[9px]">HELP REQ</span>
-                    <span className="text-rose-300 font-bold">{formData.helpRequests}</span>
+                  <div className="bg-[#1b1e26] p-2 rounded-xl border border-white/5">
+                    <span className="text-slate-500 block text-[9px]">HELP REQ</span>
+                    <span className="text-rose-400 font-bold">{formData.helpRequests}</span>
                   </div>
                 </div>
                 <div className="text-[11px] text-slate-300 pt-1">
-                  <span className="text-slate-400 font-semibold">Learner Voice: </span>
+                  <span className="text-slate-500 font-semibold">Learner Voice: </span>
                   "{formData.learnerVoiceShiftLog}"
                 </div>
                 <div className="text-[11px] text-slate-300">
-                  <span className="text-slate-400 font-semibold">Supervisor: </span>
+                  <span className="text-slate-500 font-semibold">Supervisor: </span>
                   [{formData.supervisorObservationState}] {formData.supervisorFloorNotes}
                 </div>
               </div>
@@ -265,14 +265,14 @@ export const GoogleFormFeedModal: React.FC<GoogleFormFeedModalProps> = ({
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 {/* 1. New Hire */}
                 <div>
-                  <label className="block font-bold text-slate-700 mb-1">1. New Hire</label>
+                  <label className="block font-bold text-slate-400 mb-1">1. New Hire</label>
                   <select
                     value={formData.newHireNameOrId}
                     onChange={(e) => handleFieldChange("newHireNameOrId", e.target.value)}
-                    className="w-full px-3 py-2 rounded-xl border border-slate-200 bg-white font-medium focus:ring-2 focus:ring-emerald-500"
+                    className="w-full px-3 py-2 rounded-xl border border-white/10 bg-[#13151b] text-white font-medium focus:ring-2 focus:ring-cyan-500 outline-none"
                   >
                     {newHires.map((h) => (
-                      <option key={h.id} value={h.name}>
+                      <option key={h.id} value={h.name} className="bg-[#1b1e26]">
                         {h.name} ({h.id})
                       </option>
                     ))}
@@ -281,143 +281,143 @@ export const GoogleFormFeedModal: React.FC<GoogleFormFeedModalProps> = ({
 
                 {/* 2. Day of Ramp */}
                 <div>
-                  <label className="block font-bold text-slate-700 mb-1">2. Day of Ramp (1-14)</label>
+                  <label className="block font-bold text-slate-400 mb-1">2. Day of Ramp (1-14)</label>
                   <input
                     type="number"
                     min={1}
                     max={14}
                     value={formData.dayOfRamp}
                     onChange={(e) => handleFieldChange("dayOfRamp", Number(e.target.value))}
-                    className="w-full px-3 py-2 rounded-xl border border-slate-200 bg-white font-medium focus:ring-2 focus:ring-emerald-500"
+                    className="w-full px-3 py-2 rounded-xl border border-white/10 bg-[#13151b] text-white font-medium focus:ring-2 focus:ring-cyan-500 outline-none"
                   />
                 </div>
 
                 {/* 3. Shift Actual Pick Rate */}
                 <div>
-                  <label className="block font-bold text-slate-700 mb-1">3. Shift Actual Pick Rate (UPH)</label>
+                  <label className="block font-bold text-slate-400 mb-1">3. Shift Actual Pick Rate (UPH)</label>
                   <input
                     type="number"
                     value={formData.shiftActualPickRate}
                     onChange={(e) => handleFieldChange("shiftActualPickRate", Number(e.target.value))}
-                    className="w-full px-3 py-2 rounded-xl border border-slate-200 bg-white font-medium focus:ring-2 focus:ring-emerald-500"
+                    className="w-full px-3 py-2 rounded-xl border border-white/10 bg-[#13151b] text-white font-medium focus:ring-2 focus:ring-cyan-500 outline-none"
                   />
                 </div>
 
                 {/* 4. Shift Target Pick Rate */}
                 <div>
-                  <label className="block font-bold text-slate-700 mb-1">4. Shift Target Pick Rate (UPH)</label>
+                  <label className="block font-bold text-slate-400 mb-1">4. Shift Target Pick Rate (UPH)</label>
                   <input
                     type="number"
                     value={formData.shiftTargetPickRate}
                     onChange={(e) => handleFieldChange("shiftTargetPickRate", Number(e.target.value))}
-                    className="w-full px-3 py-2 rounded-xl border border-slate-200 bg-white font-medium focus:ring-2 focus:ring-emerald-500"
+                    className="w-full px-3 py-2 rounded-xl border border-white/10 bg-[#13151b] text-white font-medium focus:ring-2 focus:ring-cyan-500 outline-none"
                   />
                 </div>
 
                 {/* 5. Scanning Accuracy % */}
                 <div>
-                  <label className="block font-bold text-slate-700 mb-1">5. Scanning Accuracy %</label>
+                  <label className="block font-bold text-slate-400 mb-1">5. Scanning Accuracy %</label>
                   <input
                     type="number"
                     min={0}
                     max={100}
                     value={formData.scanningAccuracyPercent}
                     onChange={(e) => handleFieldChange("scanningAccuracyPercent", Number(e.target.value))}
-                    className="w-full px-3 py-2 rounded-xl border border-slate-200 bg-white font-medium focus:ring-2 focus:ring-emerald-500"
+                    className="w-full px-3 py-2 rounded-xl border border-white/10 bg-[#13151b] text-white font-medium focus:ring-2 focus:ring-cyan-500 outline-none"
                   />
                 </div>
 
                 {/* 6. Orders Completed */}
                 <div>
-                  <label className="block font-bold text-slate-700 mb-1">6. Orders Completed</label>
+                  <label className="block font-bold text-slate-400 mb-1">6. Orders Completed</label>
                   <input
                     type="number"
                     value={formData.ordersCompleted}
                     onChange={(e) => handleFieldChange("ordersCompleted", Number(e.target.value))}
-                    className="w-full px-3 py-2 rounded-xl border border-slate-200 bg-white font-medium focus:ring-2 focus:ring-emerald-500"
+                    className="w-full px-3 py-2 rounded-xl border border-white/10 bg-[#13151b] text-white font-medium focus:ring-2 focus:ring-cyan-500 outline-none"
                   />
                 </div>
 
                 {/* 7. Help Requests */}
                 <div>
-                  <label className="block font-bold text-slate-700 mb-1">7. Help Requests</label>
+                  <label className="block font-bold text-slate-400 mb-1">7. Help Requests</label>
                   <input
                     type="number"
                     value={formData.helpRequests}
                     onChange={(e) => handleFieldChange("helpRequests", Number(e.target.value))}
-                    className="w-full px-3 py-2 rounded-xl border border-slate-200 bg-white font-medium focus:ring-2 focus:ring-emerald-500"
+                    className="w-full px-3 py-2 rounded-xl border border-white/10 bg-[#13151b] text-white font-medium focus:ring-2 focus:ring-cyan-500 outline-none"
                   />
                 </div>
 
                 {/* 9. Learner Confidence */}
                 <div>
-                  <label className="block font-bold text-slate-700 mb-1">9. Learner Confidence</label>
+                  <label className="block font-bold text-slate-400 mb-1">9. Learner Confidence</label>
                   <select
                     value={formData.learnerConfidence || "Medium"}
                     onChange={(e) => handleFieldChange("learnerConfidence", e.target.value)}
-                    className="w-full px-3 py-2 rounded-xl border border-slate-200 bg-white font-medium focus:ring-2 focus:ring-emerald-500"
+                    className="w-full px-3 py-2 rounded-xl border border-white/10 bg-[#13151b] text-white font-medium focus:ring-2 focus:ring-cyan-500 outline-none"
                   >
-                    <option value="High">High</option>
-                    <option value="Medium">Medium</option>
-                    <option value="Low">Low</option>
+                    <option value="High" className="bg-[#1b1e26]">High</option>
+                    <option value="Medium" className="bg-[#1b1e26]">Medium</option>
+                    <option value="Low" className="bg-[#1b1e26]">Low</option>
                   </select>
                 </div>
               </div>
 
               {/* 8. Learner Voice / Daily Shift Log */}
               <div>
-                <label className="block font-bold text-slate-700 mb-1">8. Learner Voice / Daily Shift Log</label>
+                <label className="block font-bold text-slate-400 mb-1">8. Learner Voice / Daily Shift Log</label>
                 <textarea
                   rows={2}
                   value={formData.learnerVoiceShiftLog}
                   onChange={(e) => handleFieldChange("learnerVoiceShiftLog", e.target.value)}
                   placeholder="e.g. Hard to find items in aisle 6..."
-                  className="w-full px-3 py-2 rounded-xl border border-slate-200 bg-white font-medium focus:ring-2 focus:ring-emerald-500"
+                  className="w-full px-3 py-2 rounded-xl border border-white/10 bg-[#13151b] text-white font-medium focus:ring-2 focus:ring-cyan-500 outline-none"
                 />
               </div>
 
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 {/* 10. Supervisor Observation State */}
                 <div>
-                  <label className="block font-bold text-slate-700 mb-1">10. Supervisor Observation State</label>
+                  <label className="block font-bold text-slate-400 mb-1">10. Supervisor Observation State</label>
                   <select
                     value={formData.supervisorObservationState || "Needs support"}
                     onChange={(e) => handleFieldChange("supervisorObservationState", e.target.value)}
-                    className="w-full px-3 py-2 rounded-xl border border-slate-200 bg-white font-medium focus:ring-2 focus:ring-emerald-500"
+                    className="w-full px-3 py-2 rounded-xl border border-white/10 bg-[#13151b] text-white font-medium focus:ring-2 focus:ring-cyan-500 outline-none"
                   >
-                    <option value="Doing well">Doing well</option>
-                    <option value="Needs support">Needs support</option>
-                    <option value="Struggling">Struggling</option>
+                    <option value="Doing well" className="bg-[#1b1e26]">Doing well</option>
+                    <option value="Needs support" className="bg-[#1b1e26]">Needs support</option>
+                    <option value="Struggling" className="bg-[#1b1e26]">Struggling</option>
                   </select>
                 </div>
 
                 {/* 11. Supervisor Observed Category */}
                 <div>
-                  <label className="block font-bold text-slate-700 mb-1">11. Supervisor Observed Category</label>
+                  <label className="block font-bold text-slate-400 mb-1">11. Supervisor Observed Category</label>
                   <select
                     value={formData.supervisorObservedCategory || "Speed"}
                     onChange={(e) => handleFieldChange("supervisorObservedCategory", e.target.value)}
-                    className="w-full px-3 py-2 rounded-xl border border-slate-200 bg-white font-medium focus:ring-2 focus:ring-emerald-500"
+                    className="w-full px-3 py-2 rounded-xl border border-white/10 bg-[#13151b] text-white font-medium focus:ring-2 focus:ring-cyan-500 outline-none"
                   >
-                    <option value="Speed">Speed</option>
-                    <option value="Accuracy">Accuracy</option>
-                    <option value="Process">Process</option>
-                    <option value="Tool">Tool</option>
-                    <option value="Confidence">Confidence</option>
-                    <option value="Other">Other</option>
+                    <option value="Speed" className="bg-[#1b1e26]">Speed</option>
+                    <option value="Accuracy" className="bg-[#1b1e26]">Accuracy</option>
+                    <option value="Process" className="bg-[#1b1e26]">Process</option>
+                    <option value="Tool" className="bg-[#1b1e26]">Tool</option>
+                    <option value="Confidence" className="bg-[#1b1e26]">Confidence</option>
+                    <option value="Other" className="bg-[#1b1e26]">Other</option>
                   </select>
                 </div>
               </div>
 
               {/* 12. Supervisor Floor Notes */}
               <div>
-                <label className="block font-bold text-slate-700 mb-1">12. Supervisor Floor Notes</label>
+                <label className="block font-bold text-slate-400 mb-1">12. Supervisor Floor Notes</label>
                 <textarea
                   rows={2}
                   value={formData.supervisorFloorNotes || ""}
                   onChange={(e) => handleFieldChange("supervisorFloorNotes", e.target.value)}
                   placeholder="e.g. Needed constant help locating rack bins..."
-                  className="w-full px-3 py-2 rounded-xl border border-slate-200 bg-white font-medium focus:ring-2 focus:ring-emerald-500"
+                  className="w-full px-3 py-2 rounded-xl border border-white/10 bg-[#13151b] text-white font-medium focus:ring-2 focus:ring-cyan-500 outline-none"
                 />
               </div>
             </form>
@@ -426,22 +426,22 @@ export const GoogleFormFeedModal: React.FC<GoogleFormFeedModalProps> = ({
           {/* TAB 3: CSV ROW INGESTOR */}
           {activeTab === "sheet_csv" && (
             <div className="space-y-3 text-xs">
-              <p className="text-slate-600">
-                Paste a comma-separated row exported from your Google Sheet (Columns: <code className="bg-slate-100 px-1 py-0.5 rounded font-mono text-[11px]">Name, Day, ActualPick, TargetPick, Accuracy, Orders, HelpReqs, LearnerLog, Confidence, SupState, SupCategory, SupNotes</code>):
+              <p className="text-slate-400 leading-relaxed">
+                Paste a comma-separated row exported from your Google Sheet (Columns: <code className="bg-[#13151b] text-cyan-400 px-1 py-0.5 rounded font-mono text-[11px] border border-white/5">Name, Day, ActualPick, TargetPick, Accuracy, Orders, HelpReqs, LearnerLog, Confidence, SupState, SupCategory, SupNotes</code>):
               </p>
               <textarea
                 rows={4}
                 value={csvText}
                 onChange={(e) => setCsvText(e.target.value)}
                 placeholder="Rahul Verma, 3, 35, 50, 98, 44, 4, Hard to find items in aisle 6, Low, Needs support, Speed, Needed constant help"
-                className="w-full px-3 py-2 rounded-xl border border-slate-200 bg-white font-mono text-xs focus:ring-2 focus:ring-emerald-500"
+                className="w-full px-3 py-2 rounded-xl border border-white/10 bg-[#13151b] text-white font-mono text-xs focus:ring-2 focus:ring-cyan-500 outline-none"
               />
               <button
                 type="button"
                 onClick={handleCsvImport}
-                className="px-4 py-2 rounded-xl bg-slate-900 text-white font-bold hover:bg-slate-800 cursor-pointer flex items-center gap-2 active:scale-95 transition-all"
+                className="px-4 py-2 rounded-xl bg-[#13151b] border border-white/10 text-white font-bold hover:border-cyan-500/30 cursor-pointer flex items-center gap-2 active:scale-95 transition-all"
               >
-                <FileSpreadsheet className="w-3.5 h-3.5" />
+                <FileSpreadsheet className="w-3.5 h-3.5 text-cyan-400" />
                 <span>Parse & Ingest Row</span>
               </button>
             </div>
@@ -449,11 +449,11 @@ export const GoogleFormFeedModal: React.FC<GoogleFormFeedModalProps> = ({
         </div>
 
         {/* Footer Actions */}
-        <div className="bg-slate-50 px-6 py-4 border-t border-slate-100 flex items-center justify-between">
+        <div className="bg-[#13151b] px-6 py-4 border-t border-white/10 flex items-center justify-between">
           <div className="flex items-center gap-2 text-xs text-slate-500">
             {showSuccessToast && (
-              <span className="flex items-center gap-1.5 text-emerald-700 font-bold bg-emerald-100 px-2.5 py-1 rounded-full animate-in fade-in">
-                <CheckCircle2 className="w-3.5 h-3.5" />
+              <span className="flex items-center gap-1.5 text-emerald-400 font-bold bg-emerald-500/10 border border-emerald-500/20 px-2.5 py-1 rounded-full animate-in fade-in">
+                <CheckCircle2 className="w-3.5 h-3.5 text-emerald-400" />
                 <span>Signal Ingested & Coordination Loop Executed!</span>
               </span>
             )}
@@ -462,16 +462,16 @@ export const GoogleFormFeedModal: React.FC<GoogleFormFeedModalProps> = ({
           <div className="flex items-center gap-2.5">
             <button
               onClick={onClose}
-              className="px-4 py-2 rounded-xl text-xs font-bold text-slate-600 hover:bg-slate-200 transition-all cursor-pointer"
+              className="px-4 py-2 rounded-xl text-xs font-bold text-slate-400 hover:text-white hover:bg-white/5 transition-all cursor-pointer"
             >
               Cancel
             </button>
             <button
               id="btn-feed-ingest-run-loop"
               onClick={() => handleSubmit()}
-              className="px-5 py-2.5 rounded-xl text-xs font-black bg-emerald-600 hover:bg-emerald-700 text-white shadow-md hover:shadow-lg active:scale-95 transition-all flex items-center gap-2 cursor-pointer"
+              className="px-5 py-2.5 rounded-xl text-xs font-black bg-gradient-to-r from-cyan-500 to-blue-600 hover:opacity-95 text-slate-950 shadow-md active:scale-95 transition-all flex items-center gap-2 cursor-pointer border border-white/10"
             >
-              <Play className="w-3.5 h-3.5 fill-white" />
+              <Play className="w-3.5 h-3.5 fill-slate-950 text-slate-950" />
               <span>Feed & Run Coordination Loop</span>
             </button>
           </div>
