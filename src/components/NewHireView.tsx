@@ -466,7 +466,25 @@ export const NewHireView: React.FC<NewHireViewProps> = ({
       };
     }
 
-    // 6. Default Steady Ramp
+    // 6. Insufficient Evidence
+    if (
+      currentRecord.recommendedAction?.decisionType === "no_action_monitor" ||
+      currentRecord.identifiedPattern?.category === "insufficient_evidence"
+    ) {
+      return {
+        badge: isHindi ? "सामान्य काम 👍" : "NORMAL WORK 👍",
+        duration: isHindi ? "आज की शिफ्ट" : "Shift goal",
+        action: isHindi ? "आज का सामान्य काम जारी रखें" : "Continue today's normal work",
+        shortWhy: isHindi ? "हम अभी आपके प्रदर्शन को समझ रहे हैं।" : "We're still learning about your performance.",
+        target: "", // No target
+        primaryBtnText: isHindi ? "शुरू करें" : "START",
+        primaryAction: () => setActiveModal("work"),
+        secondaryBtnText: isHindi ? "मॉड्यूल" : "Modules",
+        secondaryAction: () => setActiveSection("modules"),
+      };
+    }
+
+    // 7. Default Steady Ramp
     return {
       badge: isHindi ? "आज का मुख्य काम 👍" : "TODAY'S FOCUS 👍",
       duration: isHindi ? "आज की शिफ्ट" : "Shift goal",
@@ -530,6 +548,7 @@ export const NewHireView: React.FC<NewHireViewProps> = ({
             onUpdateHire={onUpdateHire}
             isHindi={isHindi}
             initialModuleId={selectedDeepLinkModuleId}
+            currentDay={currentDay}
           />
         </div>
         <FloatingGlassMenu
@@ -735,6 +754,120 @@ export const NewHireView: React.FC<NewHireViewProps> = ({
                 </div>
               );
             })()}
+
+            {/* Next Skill to Improve Section */}
+            {(() => {
+              const decisionType = currentRecord.recommendedAction?.decisionType;
+              const targetCapId = currentRecord.recommendedAction?.targetCapabilityId;
+              const targetCapDef = targetCapId ? DARK_STORE_CAPABILITIES.find((c) => c.id === targetCapId) : null;
+              
+              const isEnvironmentIssue = decisionType === "tool_remedy" || decisionType === "environment_support" || decisionType === "communication_support";
+              const isInsufficient = decisionType === "no_action_monitor" || currentRecord.identifiedPattern?.category === "insufficient_evidence";
+              
+              let skillDisplay = "safe";
+              let skillStatusBadge = "";
+              
+              if (isInsufficient || isEnvironmentIssue || !targetCapDef) {
+                skillDisplay = "safe";
+              } else {
+                skillDisplay = "actionable";
+                if (decisionType === "advance_default" || decisionType === "jump_ahead") {
+                  skillStatusBadge = isHindi ? "अगला स्तर" : "Ready for next level";
+                } else {
+                  skillStatusBadge = isHindi ? "अभ्यास की आवश्यकता है" : "Needs practice";
+                }
+              }
+
+              return (
+                <div className="flex flex-col items-center text-center mt-3 mb-2 relative z-10 w-full px-2">
+                  <span className="text-[10px] font-black uppercase tracking-widest text-slate-400 mb-2">
+                    {isHindi ? "सुधारने के लिए अगला कौशल" : "NEXT SKILL TO IMPROVE"}
+                  </span>
+                  
+                  {skillDisplay === "safe" ? (
+                    <div className="bg-black/20 rounded-xl p-3 border border-white/5 w-full max-w-[260px]">
+                      <h3 className="text-sm font-bold text-emerald-400 mb-1">
+                        {isHindi ? "आप अच्छा कर रहे हैं।" : "You're doing well."}
+                      </h3>
+                      <p className="text-[11px] text-slate-400 leading-snug">
+                        {isHindi ? "हम आपका अगला सुधार क्षेत्र खोजने के लिए आपकी निगरानी कर रहे हैं।" : "We'll keep observing your work to find your next improvement area."}
+                      </p>
+                    </div>
+                  ) : (
+                    <div className="bg-black/20 rounded-xl p-3.5 border border-white/10 w-full max-w-[280px] flex flex-col items-center">
+                      <h3 className="text-[15px] font-black text-white text-center leading-tight">{targetCapDef?.name}</h3>
+                      <span className={`text-[10px] font-bold ${skillStatusBadge.includes('practice') || skillStatusBadge.includes('अभ्यास') ? 'text-amber-400' : 'text-emerald-400'} uppercase tracking-wider block mt-1`}>
+                        {skillStatusBadge}
+                      </span>
+                    </div>
+                  )}
+                </div>
+              );
+            })()}
+
+            {/* Yesterday -> Today Section */}
+            {(() => {
+              const decisionType = currentRecord.recommendedAction?.decisionType;
+              const isInsufficient = decisionType === "no_action_monitor" || currentRecord.identifiedPattern?.category === "insufficient_evidence";
+              const isSteady = decisionType === "advance_default" || decisionType === "jump_ahead";
+              
+              if (isInsufficient) {
+                return (
+                  <div className="flex flex-col items-center w-full px-2 mb-6 mt-2 relative z-10">
+                    <div className="flex flex-col bg-black/20 rounded-xl p-3.5 border border-white/5 relative text-center w-full max-w-[280px]">
+                      <span className="text-[9px] font-black uppercase tracking-widest text-slate-400 mb-1">{isHindi ? "कल से आज" : "YESTERDAY → TODAY"}</span>
+                      <p className="text-[12px] font-semibold text-white leading-snug">{isHindi ? "हम अभी भी आपके काम को समझ रहे हैं।" : "We're still learning about your work."}</p>
+                      <p className="text-[11px] font-semibold text-slate-400 mt-1">{status.action}</p>
+                    </div>
+                  </div>
+                );
+              }
+              
+              if (isSteady) {
+                return (
+                  <div className="flex flex-col items-center w-full px-2 mb-6 mt-2 relative z-10">
+                    <div className="flex flex-col bg-black/20 rounded-xl p-3.5 border border-white/5 relative text-center w-full max-w-[280px]">
+                      <span className="text-[9px] font-black uppercase tracking-widest text-slate-400 mb-1">{isHindi ? "कल से आज" : "YESTERDAY → TODAY"}</span>
+                      <p className="text-[12px] font-semibold text-emerald-400 leading-snug">{isHindi ? "आप लगातार अच्छा कर रहे हैं।" : "You're building consistency."}</p>
+                      <p className="text-[11px] font-semibold text-slate-300 mt-1">{isHindi ? "आज का लक्ष्य पूरा करें।" : "Keep working on today's goal."}</p>
+                    </div>
+                  </div>
+                );
+              }
+              
+              return (
+                <div className="flex flex-col items-center w-full px-2 mb-6 mt-2 relative z-10">
+                  <div className="flex flex-col bg-black/20 rounded-xl p-4 border border-white/10 relative w-full max-w-[280px]">
+                    <span className="text-[9px] font-black uppercase tracking-widest text-slate-400 mb-1">{isHindi ? "कल" : "YESTERDAY"}</span>
+                    <p className="text-[13px] font-semibold text-slate-200 leading-snug">{status.shortWhy}</p>
+                    
+                    <div className="flex justify-center my-3 relative">
+                      <div className="w-full h-[1px] bg-white/10 absolute top-1/2 -translate-y-1/2 left-0"></div>
+                      <div className="w-5 h-5 rounded-full bg-cyan-500/20 border border-cyan-500/30 flex items-center justify-center relative z-10 shadow-sm shadow-cyan-900/20">
+                        <span className="text-cyan-400 text-[10px] font-bold">↓</span>
+                      </div>
+                    </div>
+                    
+                    <span className="text-[9px] font-black uppercase tracking-widest text-slate-400 mb-1">{isHindi ? "आज" : "TODAY"}</span>
+                    <p className="text-[13px] font-semibold text-white leading-snug">{status.action}</p>
+                  </div>
+                </div>
+              );
+            })()}
+
+            {/* Next Best Action Section */}
+            <div className="flex flex-col items-center text-center mt-2 mb-2 relative z-10 space-y-3">
+              <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-cyan-500/10 border border-cyan-500/20">
+                <Zap className="w-3.5 h-3.5 text-cyan-400 fill-cyan-400/20" />
+                <span className="text-[10px] font-black uppercase tracking-widest text-cyan-400">
+                  {isHindi ? "आपका अगला कदम" : "YOUR NEXT STEP"}
+                </span>
+              </div>
+              
+              <h2 className="text-lg sm:text-[19px] font-black text-white leading-tight px-4 mb-2">
+                {status.target || status.action}
+              </h2>
+            </div>
 
             {/* Start Button / Tab */}
             <div className="pt-1 flex justify-center relative z-10">

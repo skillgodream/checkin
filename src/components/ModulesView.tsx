@@ -51,6 +51,7 @@ interface ModulesViewProps {
   onUpdateHire?: (updatedHire: NewHire) => void;
   isHindi?: boolean;
   initialModuleId?: string | null;
+  currentDay?: number;
 }
 
 export const ModulesView: React.FC<ModulesViewProps> = ({
@@ -58,8 +59,10 @@ export const ModulesView: React.FC<ModulesViewProps> = ({
   onUpdateHire,
   isHindi = false,
   initialModuleId = null,
+  currentDay = 3,
 }) => {
   const [activeTab, setActiveTab] = useState<"all" | "foundation" | "floor" | "cert">("all");
+  const [activeCapabilityModal, setActiveCapabilityModal] = useState<number | null>(null);
   const [selectedModuleId, setSelectedModuleId] = useState<string | null>(
     initialModuleId || `lms-mod-0${Math.min(10, Math.max(1, (newHire.modulesCompleted || 3) + 1))}`
   );
@@ -209,20 +212,94 @@ export const ModulesView: React.FC<ModulesViewProps> = ({
     return true;
   });
 
+
+  const currentRecord = newHire.daysHistory.find(d => d.dayNumber === currentDay) || newHire.daysHistory[newHire.daysHistory.length - 1];
+  const targetCapId = currentRecord?.recommendedAction?.targetCapabilityId;
+  const targetCapDef = targetCapId ? DARK_STORE_CAPABILITIES.find(c => c.id === targetCapId) : null;
+
+  const getModulesForCapability = (capId: number) => {
+    return MANDATORY_TRAINING_MODULES.filter((m) => m.mappedCapabilityIds.includes(capId));
+  };
+
+  const getCapabilityStatus = (capId: number) => {
+    const state = newHire.capabilities?.[capId];
+    if (!state) return null;
+    if (state.mastery === "mastered") return isHindi ? "मजबूत" : "Strong";
+    if (state.mastery === "proficient") return isHindi ? "अच्छा" : "Good";
+    if (state.performance === "below_target") return isHindi ? "अभ्यास की आवश्यकता है" : "Needs practice";
+    if (state.mastery === "in_progress") return isHindi ? "विकासशील" : "Developing";
+    return isHindi ? "विकासशील" : "Developing";
+  };
+
+  const getCapabilityStatusColor = (statusStr: string | null) => {
+    if (statusStr === "Strong" || statusStr === "मजबूत") return "text-emerald-400";
+    if (statusStr === "Good" || statusStr === "अच्छा") return "text-emerald-300";
+    if (statusStr === "Needs practice" || statusStr === "अभ्यास की आवश्यकता है") return "text-amber-400";
+    return "text-pink-400"; // Developing
+  };
+
+  const getCapabilityProgressText = (capId: number) => {
+    const modules = getModulesForCapability(capId);
+    if (modules.length === 0) return isHindi ? "कोई अभ्यास नहीं" : "No practice assigned yet";
+    
+    let totalAct = 0;
+    let compAct = 0;
+    modules.forEach((m) => {
+        const isModCompleted = completedIds.includes(m.id);
+        totalAct += m.activities.length;
+        if (isModCompleted) {
+            compAct += m.activities.length;
+        } else {
+            compAct += m.activities.filter(a => a.completed).length;
+        }
+    });
+    
+    if (totalAct === 0) return isHindi ? "0 / 0 पूर्ण" : "0 / 0 activities complete";
+    if (compAct === totalAct) return isHindi ? "✓ पूर्ण" : "✓ Complete";
+    return isHindi ? `${compAct} / ${totalAct} पूर्ण` : `${compAct} / ${totalAct} complete`;
+  };
+  
+  const getCapabilityProgressRatio = (capId: number) => {
+    const modules = getModulesForCapability(capId);
+    let totalAct = 0;
+    let compAct = 0;
+    modules.forEach((m) => {
+        const isModCompleted = completedIds.includes(m.id);
+        totalAct += m.activities.length;
+        if (isModCompleted) {
+            compAct += m.activities.length;
+        } else {
+            compAct += m.activities.filter(a => a.completed).length;
+        }
+    });
+    return { compAct, totalAct };
+  };
+
+  const capabilitiesToRender = DARK_STORE_CAPABILITIES.filter((cap) => {
+      const hasModules = getModulesForCapability(cap.id).length > 0;
+      const hasState = !!newHire.capabilities?.[cap.id];
+      return hasModules || hasState;
+  });
+
+  const unmappedModules = MANDATORY_TRAINING_MODULES.filter((m) => !m.mappedCapabilityIds || m.mappedCapabilityIds.length === 0);
+
   return (
     <div className="animate-in fade-in duration-200 select-none pb-20 text-white bg-[#14161d]">
       {/* ========================================================= */}
       {/* 1. HERO BANNER */}
       {/* ========================================================= */}
       <div 
-        className="relative rounded-b-[32px] rounded-t-none pt-10 pb-7 px-5 sm:px-6 text-white shadow-2xl border-b border-white/10 overflow-hidden bg-[#1b1e26]"
+        className="relative moving-dark-gradient rounded-b-[32px] rounded-t-none pt-10 pb-7 px-5 sm:px-6 text-white shadow-2xl border-b border-white/10 overflow-hidden"
       >
+        {/* Real-time moving/flowing dark visual and halftone mesh dots as requested */}
+        <div className="absolute inset-0 dotted-halftone-pattern rounded-b-[32px] pointer-events-none opacity-85 z-0" />
+
         {/* Subtle premium accent glow to lift the look */}
         <div className="absolute -top-16 -left-16 w-56 h-56 bg-pink-500/10 rounded-full blur-3xl pointer-events-none z-0" />
         <div className="absolute -bottom-16 -right-16 w-56 h-56 bg-rose-600/10 rounded-full blur-3xl pointer-events-none z-0" />
 
-        <div className="relative z-10 flex items-center justify-between gap-4">
-          <div className="space-y-3.5 max-w-[65%]">
+        <div className="relative z-10">
+          <div className="space-y-3.5">
             <div className="inline-block px-3 py-1 rounded-full bg-pink-500/10 backdrop-blur-md text-pink-300 text-[10px] font-black uppercase tracking-wider border border-pink-500/20">
               {isHindi ? "फीचर्ड प्रोग्राम" : "Featured"}
             </div>
@@ -235,46 +312,21 @@ export const ModulesView: React.FC<ModulesViewProps> = ({
                 <span>⭐ 4.8</span>
                 <span>•</span>
                 <span>{isHindi ? `${modulesCompletedCount}/10 दिन पूर्ण` : `${modulesCompletedCount}/10 Days Done`}</span>
-                <span>•</span>
-                <span className="text-pink-400 font-bold">{Math.round((modulesCompletedCount / 10) * 100)}% {isHindi ? "तैयार" : "Ready"}</span>
               </div>
             </div>
           </div>
 
-          {/* Premium Circular SVG Dial styled like the reference photo (hot pink with central stats) */}
-          <div className="relative shrink-0 w-24 h-24 flex items-center justify-center">
-            {/* Soft backdrop glow to mimic OLED lighting of hot pink */}
-            <div className="absolute inset-2 bg-pink-500/10 rounded-full blur-md animate-pulse" />
-
-            <svg className="w-full h-full transform -rotate-90" viewBox="0 0 100 100">
-              {/* Matte underlying circle track */}
-              <circle
-                cx="50"
-                cy="50"
-                r="38"
-                className="stroke-white/10"
-                strokeWidth="5"
-                fill="transparent"
+          {/* Flat line progress bar */}
+          <div className="mt-6 space-y-2">
+            <div className="flex items-center justify-between text-xs font-bold drop-shadow-sm">
+              <span className="text-slate-200 uppercase tracking-widest text-[10px]">{isHindi ? "कोर्स प्रगति" : "Course Progress"}</span>
+              <span className="text-pink-400 font-black">{Math.round((modulesCompletedCount / 10) * 100)}% {isHindi ? "पूर्ण" : "Completed"}</span>
+            </div>
+            <div className="h-2.5 w-full bg-black/40 rounded-full overflow-hidden border border-white/5 backdrop-blur-md shadow-inner">
+              <div 
+                className="h-full bg-gradient-to-r from-pink-500 to-rose-600 rounded-full transition-all duration-700 ease-out shadow-[0_0_10px_rgba(255,0,127,0.5)]"
+                style={{ width: `${Math.round((modulesCompletedCount / 10) * 100)}%` }}
               />
-              {/* Vibrant Hot Pink glowing progress path */}
-              <circle
-                cx="50"
-                cy="50"
-                r="38"
-                className="stroke-pink-500 transition-all duration-700 ease-out"
-                strokeWidth="6"
-                fill="transparent"
-                strokeDasharray={238.76}
-                strokeDashoffset={238.76 - (238.76 * (modulesCompletedCount / 10))}
-                strokeLinecap="round"
-              />
-            </svg>
-
-            {/* Core text content inside circle */}
-            <div className="absolute inset-0 flex flex-col items-center justify-center leading-none">
-              <span className="text-[9px] font-black tracking-widest text-pink-400/85 uppercase">DAY</span>
-              <span className="text-2xl font-black text-white mt-1">0{modulesCompletedCount}</span>
-              <span className="text-[10px] font-bold text-slate-450 mt-0.5">/10</span>
             </div>
           </div>
         </div>
@@ -285,171 +337,186 @@ export const ModulesView: React.FC<ModulesViewProps> = ({
 
 
       {/* ========================================================= */}
-      {/* TODAY'S TRAINING GOAL SUMMARY CARD                         */}
+      {/* YOUR CURRENT FOCUS (TARGET CAPABILITY)                      */}
       {/* ========================================================= */}
-      <div className="bg-[#1b1e26] border border-white/10 rounded-2xl p-4 shadow-xl flex items-center justify-between gap-3 text-white">
-        <div className="flex items-center gap-3 min-w-0">
-          <div className="w-10 h-10 rounded-xl bg-[#13151b] text-pink-400 border border-white/10 flex items-center justify-center shrink-0 font-black shadow-xs">
-            {modulesCompletedCount >= 3 ? <Check className="w-5 h-5 stroke-[3]" /> : "L3"}
-          </div>
-          <div className="min-w-0">
-            <div className="flex items-center gap-2">
-              <h4 className="text-xs font-black text-white uppercase tracking-wide">
-                {isHindi ? "आज का निर्धारित LMS मॉड्यूल लक्ष्य" : "Today's Prescribed LMS Goal"}
-              </h4>
-              <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full ${modulesCompletedCount >= 3 ? "bg-emerald-500/20 text-emerald-400 border border-emerald-500/30" : "bg-pink-500/20 text-pink-300 border border-pink-500/30"}`}>
-                {modulesCompletedCount >= 3 ? "✓ Completed" : "In Progress"}
-              </span>
+      {targetCapDef && (
+        <div className="bg-[#1b1e26] border border-white/10 rounded-2xl p-4 shadow-xl flex items-center justify-between gap-3 text-white mb-2">
+          <div className="flex items-center gap-3 min-w-0">
+            <div className="w-10 h-10 rounded-xl bg-[#13151b] text-cyan-400 border border-white/10 flex items-center justify-center shrink-0 font-black shadow-xs">
+              <Zap className="w-5 h-5 fill-cyan-400/20" />
             </div>
-            
-            {/* Explicit Actual Completed Day vs Ideal Target Day Indicators */}
-            <div className="flex items-center gap-2 mt-1">
-              <span className="text-[10px] font-bold text-slate-350">
-                {isHindi ? "वास्तविक प्रगति: " : "Actual Completed: "}
-                <span className="text-pink-400 font-black">Day {modulesCompletedCount}</span>
-              </span>
-              <span className="text-[10px] text-slate-500">•</span>
-              <span className="text-[10px] font-bold text-slate-350">
-                {isHindi ? "निर्धारित आदर्श: " : "Ideal Target: "}
-                <span className="text-cyan-400 font-black">Day {newHire.currentDay || 3}</span>
-              </span>
+            <div className="min-w-0">
+              <div className="flex items-center gap-2">
+                <h4 className="text-xs font-black text-white uppercase tracking-wide">
+                  {isHindi ? "आपका वर्तमान ध्यान" : "Your Current Focus"}
+                </h4>
+              </div>
+              <p className="text-[14px] text-cyan-400 font-bold truncate mt-1">
+                {targetCapDef.name}
+              </p>
+              <p className="text-[11px] text-slate-400 font-medium truncate mt-0.5">
+                {isHindi ? "अनुशंसित अभ्यास जारी रखें।" : "Continue the recommended practice."}
+              </p>
             </div>
-
-            <p className="text-[11px] text-slate-300 font-medium truncate mt-1">
-              {isHindi ? "फास्ट बारकोड स्कैनर एलाइनमेंट और शेल्फ नेविगेशन" : "Fast Barcode Scanner Alignment & Shelf Navigation"}
-            </p>
           </div>
         </div>
-
-        <button
-          type="button"
-          onClick={() => {
-            const targetMod = MANDATORY_TRAINING_MODULES.find(m => m.id === "lms-mod-03") || MANDATORY_TRAINING_MODULES[2];
-            setSelectedModuleId(targetMod.id);
-            setActiveDetailModule(targetMod);
-          }}
-          className="shrink-0 px-3 py-2 rounded-xl bg-gradient-to-r from-pink-550 to-rose-600 hover:from-pink-500 hover:to-rose-500 bg-pink-500 text-white font-black text-xs shadow-xs active:scale-95 transition-all cursor-pointer flex items-center gap-1 border border-white/10"
-        >
-          <span className="text-white">{isHindi ? "खोलें" : "Open →"}</span>
-        </button>
-      </div>
+      )}
 
       {/* ========================================================= */}
-      {/* 2. FILTER TABS BAR                                        */}
+      {/* MY JOB SKILLS (CAPABILITIES LIST)                         */}
       {/* ========================================================= */}
-      <div className="flex items-center gap-1.5 overflow-x-auto pb-1 no-scrollbar pt-1">
-        {[
-          { id: "all", label: isHindi ? "सभी (10)" : "All (10)" },
-          { id: "foundation", label: isHindi ? "फाउंडेशन (D1-3)" : "Foundation (D1-3)" },
-          { id: "floor", label: isHindi ? "फ्लोर पिक (D4-7)" : "Floor Pick (D4-7)" },
-          { id: "cert", label: isHindi ? "सर्टिफिकेशन (D8-10)" : "Certification (D8-10)" },
-        ].map((tab) => (
-          <button
-            key={tab.id}
-            onClick={() => setActiveTab(tab.id as any)}
-            className={`px-3.5 py-1.5 rounded-full text-xs font-bold transition-all cursor-pointer whitespace-nowrap shrink-0 border ${
-              activeTab === tab.id
-                ? "bg-gradient-to-r from-pink-550 to-rose-600 bg-pink-500 text-white border-transparent shadow-md"
-                : "bg-white/5 text-slate-200 border-white/10 hover:bg-white/10 hover:text-white"
-            }`}
-          >
-            {tab.label}
-          </button>
-        ))}
-      </div>
+      <div className="flex flex-col gap-3.5 pb-8 mt-4">
+        <div className="flex items-center gap-2 mb-1 px-1">
+          <Sparkles className="w-4 h-4 text-pink-400" />
+          <h3 className="text-[13px] font-black text-white uppercase tracking-widest">{isHindi ? "मेरे नौकरी कौशल" : "My Job Skills"}</h3>
+        </div>
 
-      {/* ========================================================= */}
-      {/* 3. PREMIUM VERTICAL LIST (AS PER REFERENCE IMAGE)          */}
-      {/* ========================================================= */}
-      <div className="flex flex-col gap-3.5 pb-8">
-        {filteredModules.map((mod) => {
-          const isCompleted = completedIds.includes(mod.id);
-          const gateResult = checkDeanModuleGate(mod, newHire);
-          const isGatedByDean = gateResult.isGated;
-          const isCurrent = !isCompleted && !isGatedByDean && mod.dayNumber === modulesCompletedCount + 1;
-          const isLocked = !isCompleted && (mod.dayNumber > modulesCompletedCount + 1 || isGatedByDean);
-
-          // Highlight matching the active or completed list item in the reference image (capsule card with inset shadow)
-          const isCapsule = isCurrent || isCompleted;
-
+        {capabilitiesToRender.map((cap) => {
+          const statusStr = getCapabilityStatus(cap.id);
+          const statusColor = getCapabilityStatusColor(statusStr);
+          const progText = getCapabilityProgressText(cap.id);
+          const { compAct, totalAct } = getCapabilityProgressRatio(cap.id);
+          
           return (
             <div
-              key={mod.id}
-              onClick={() => {
-                setSelectedModuleId(mod.id);
-                setActiveDetailModule(mod);
-              }}
-              className={`w-full flex items-center justify-between gap-4 p-3.5 transition-all duration-300 cursor-pointer select-none ${
-                isCapsule
-                  ? "bg-[#111317] border border-white/5 rounded-[28px] shadow-[inset_0_2px_8px_rgba(0,0,0,0.95)] hover:border-[#ff007f]/45"
-                  : "bg-transparent rounded-[28px] border border-transparent hover:bg-white/5"
-              }`}
+              key={cap.id}
+              onClick={() => setActiveCapabilityModal(cap.id)}
+              className="w-full flex flex-col gap-2 p-4 transition-all duration-300 cursor-pointer select-none bg-[#111317] border border-white/5 rounded-[24px] hover:border-[#ff007f]/45 shadow-[inset_0_2px_8px_rgba(0,0,0,0.5)]"
             >
-              <div className="flex items-center gap-4 min-w-0">
-                {/* Neon fuchsia circular icon / checkmark container */}
-                <div className={`relative w-12 h-12 rounded-full shrink-0 flex items-center justify-center transition-all duration-300 shadow-md ${
-                  isLocked && !isGatedByDean
-                    ? "bg-[#1f2229] text-slate-500 opacity-60"
-                    : isGatedByDean
-                    ? "bg-amber-600 text-white shadow-[0_4px_12px_rgba(217,119,6,0.3)]"
-                    : "bg-[#ff007f] text-white shadow-[0_4px_16px_rgba(255,0,127,0.35)]"
-                }`}>
-                  {/* Neumorphic/3D glossy inner glow overlay */}
-                  <div className="absolute inset-0.5 rounded-full border border-white/10 pointer-events-none" />
-
-                  {isCompleted ? (
-                    <Check className="w-5.5 h-5.5 stroke-[3.5] text-white" />
-                  ) : isGatedByDean ? (
-                    <Lock className="w-5 h-5 text-white" />
-                  ) : isLocked ? (
-                    <Lock className="w-5 h-5 text-slate-400" />
+              <div className="flex items-start justify-between w-full">
+                <div className="flex flex-col">
+                  <h3 className="text-[15px] font-black text-white leading-snug tracking-tight">{cap.name}</h3>
+                  {statusStr ? (
+                    <span className={`text-[11px] font-bold mt-1 ${statusColor}`}>
+                      {statusStr}
+                    </span>
                   ) : (
-                    <div className="w-5.5 h-5.5 text-white">
-                      {getModuleDayIcon(mod.dayNumber)}
-                    </div>
+                    <span className="text-[11px] font-bold mt-1 text-slate-500">
+                      {isHindi ? "शुरू नहीं हुआ" : "Not started"}
+                    </span>
                   )}
                 </div>
-
-                {/* Typography matching reference image */}
-                <div className="min-w-0 text-left">
-                  {/* "Lorem" / small indicator line */}
-                  <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">
-                    Day {mod.dayNumber} • {mod.code} • {mod.durationMinutes} mins
-                  </span>
-                  
-                  {/* "ipsum" / main title */}
-                  <h3 className={`text-sm sm:text-base font-black mt-0.5 leading-snug tracking-tight ${
-                    isLocked ? "text-slate-500" : "text-white"
-                  }`}>
-                    {isHindi && mod.titleHi ? mod.titleHi : mod.title}
-                  </h3>
-                </div>
               </div>
-
-              {/* Status indicator / + sign as seen on the right hand side of the reference image */}
-              <div className="shrink-0 flex items-center gap-3 pr-2">
-                {isCompleted && (
-                  <span className="hidden sm:inline-block text-[9px] font-black uppercase text-emerald-400 bg-emerald-550/15 px-2.5 py-1 rounded-full border border-emerald-500/20">
-                    Done ✓
-                  </span>
-                )}
-                {isCurrent && (
-                  <span className="hidden sm:inline-block text-[9px] font-black uppercase text-[#ff007f] bg-[#ff007f]/10 px-2.5 py-1 rounded-full border border-[#ff007f]/30 animate-pulse">
-                    Active
-                  </span>
-                )}
-                
-                {/* Small indicator '+' sign from the right of reference layout */}
-                {!isCapsule && (
-                  <span className="text-white/20 text-lg font-light select-none shrink-0">
-                    +
-                  </span>
-                )}
+              
+              <div className="mt-2 flex items-center justify-between">
+                <div className="flex-1 mr-4">
+                  <div className="h-2 w-full bg-black rounded-full overflow-hidden border border-white/5">
+                    <div 
+                      className="h-full bg-pink-500 rounded-full transition-all duration-500" 
+                      style={{ width: totalAct > 0 ? `${(compAct / totalAct) * 100}%` : '0%' }}
+                    />
+                  </div>
+                </div>
+                <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider shrink-0">
+                  {progText}
+                </span>
               </div>
             </div>
           );
         })}
+
+        {unmappedModules.length > 0 && (
+          <>
+            <div className="flex items-center gap-2 mb-1 mt-4 px-1">
+              <BookOpen className="w-4 h-4 text-pink-400" />
+              <h3 className="text-[13px] font-black text-white uppercase tracking-widest">{isHindi ? "अन्य शिक्षा" : "Other Learning"}</h3>
+            </div>
+            {unmappedModules.map((mod) => (
+              <div
+                key={mod.id}
+                onClick={() => {
+                  setSelectedModuleId(mod.id);
+                  setActiveDetailModule(mod);
+                }}
+                className="w-full flex flex-col gap-2 p-4 transition-all duration-300 cursor-pointer select-none bg-transparent rounded-[24px] border border-white/5 hover:bg-white/5"
+              >
+                <div className="flex items-center justify-between">
+                  <h3 className="text-sm font-bold text-white">{isHindi && mod.titleHi ? mod.titleHi : mod.title}</h3>
+                  <span className="text-white/20 text-lg font-light shrink-0">+</span>
+                </div>
+              </div>
+            ))}
+          </>
+        )}
       </div>
+
+      {/* ========================================================= */}
+      {/* CAPABILITY DETAIL MODAL                                   */}
+      {/* ========================================================= */}
+      {activeCapabilityModal && (() => {
+        const cap = DARK_STORE_CAPABILITIES.find(c => c.id === activeCapabilityModal);
+        if (!cap) return null;
+        
+        const statusStr = getCapabilityStatus(cap.id);
+        const statusColor = getCapabilityStatusColor(statusStr);
+        const modules = getModulesForCapability(cap.id);
+        const { compAct, totalAct } = getCapabilityProgressRatio(cap.id);
+        
+        return (
+          <div className="fixed inset-0 z-40 bg-black/75 backdrop-blur-sm flex items-center justify-center p-4 text-white">
+            <div className="bg-[#1b1e26] rounded-3xl max-w-md w-full p-5 shadow-2xl border border-white/10 max-h-[88vh] overflow-y-auto space-y-4 animate-in fade-in zoom-in duration-150">
+              <div className="flex items-start justify-between gap-3 border-b border-white/10 pb-3">
+                <div>
+                  <h3 className="text-[18px] font-black text-white leading-tight uppercase tracking-wide">
+                    {cap.name}
+                  </h3>
+                  {statusStr && (
+                    <span className={`text-xs font-bold mt-1.5 block ${statusColor}`}>
+                      {statusStr}
+                    </span>
+                  )}
+                </div>
+                <button
+                  type="button"
+                  onClick={() => setActiveCapabilityModal(null)}
+                  className="p-1.5 rounded-full text-slate-400 hover:text-white hover:bg-white/5 transition-colors cursor-pointer shrink-0"
+                >
+                  <X className="w-5 h-5" />
+                </button>
+              </div>
+
+              <div className="space-y-1">
+                <span className="text-[10px] font-black uppercase tracking-widest text-slate-400">{isHindi ? "आपकी शिक्षा" : "Your learning"}</span>
+                <p className="text-[14px] font-semibold text-slate-200">
+                  {isHindi ? `${compAct} / ${totalAct} गतिविधियाँ पूर्ण` : `${compAct} / ${totalAct} activities complete`}
+                </p>
+              </div>
+
+              <div className="space-y-2 pt-2">
+                <span className="text-[10px] font-black uppercase tracking-widest text-slate-400">{isHindi ? "आप क्या अभ्यास कर रहे हैं" : "What you're practising"}</span>
+                <ul className="space-y-2">
+                  {modules.map(mod => (
+                    <li key={mod.id} className="flex items-start gap-2 text-[13px] font-medium text-slate-300">
+                      <div className="w-1.5 h-1.5 mt-1.5 rounded-full bg-pink-500 shrink-0" />
+                      <span>{isHindi && mod.titleHi ? mod.titleHi : mod.title}</span>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+
+              <div className="pt-4">
+                <button
+                  type="button"
+                  onClick={() => {
+                    setActiveCapabilityModal(null);
+                    // Find first incomplete module, or just the first one
+                    let nextMod = modules.find(m => !completedIds.includes(m.id));
+                    if (!nextMod && modules.length > 0) nextMod = modules[0];
+                    if (nextMod) {
+                      setSelectedModuleId(nextMod.id);
+                      setActiveDetailModule(nextMod);
+                    }
+                  }}
+                  className="w-full py-3 bg-gradient-to-r from-pink-550 to-rose-600 bg-pink-500 text-white rounded-2xl text-[13px] font-black shadow-lg hover:opacity-95 cursor-pointer active:scale-98 transition-all flex items-center justify-center gap-2 border border-white/10"
+                >
+                  <span className="text-white">{isHindi ? "सीखना जारी रखें" : "CONTINUE LEARNING"}</span>
+                  <ArrowRight className="w-4 h-4" />
+                </button>
+              </div>
+            </div>
+          </div>
+        );
+      })()}
 
       {/* ========================================================= */}
       {/* 2.5 MODULE DETAIL MODAL                                   */}
