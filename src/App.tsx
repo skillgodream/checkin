@@ -395,15 +395,20 @@ export default function App() {
               />
             )}
 
-            {/* Chatbot Pull-Out Button docked on the right side of the screen (hidden pull-out) */}
+            {/* Purple Hidden Side Bar: 10-Day Journey & AI Floor Companion */}
             <ChatBotPullout
               currentDay={currentDay}
               learnerName={activeHire.name}
               buddyName={activeHire.buddy}
+              newHire={activeHire}
               isHindi={isHindi}
               onAlertBuddy={() => {
                 setActiveTab("new_hire");
                 setLearnerSection("buddy");
+              }}
+              onOpenFullScreenJourney={() => {
+                setActiveTab("new_hire");
+                setLearnerSection("journey");
               }}
             />
 

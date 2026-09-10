@@ -544,7 +544,7 @@ export const NewHireView: React.FC<NewHireViewProps> = ({
     return (
       <div 
         id="modules-view-container" 
-        className="max-w-md mx-auto pb-28 select-none min-h-screen relative bg-[#0a0b0e] text-white overflow-hidden animate-in fade-in duration-200"
+        className="max-w-md mx-auto pb-36 select-none min-h-screen relative bg-[#0a0b0e] text-white overflow-hidden animate-in fade-in duration-200"
       >
         {/* Subtle dark ambient accents */}
         <div className="absolute -top-16 -left-16 w-80 h-80 bg-blue-900/10 rounded-full blur-3xl pointer-events-none z-0" />
@@ -574,20 +574,20 @@ export const NewHireView: React.FC<NewHireViewProps> = ({
   if (activeSection === "home") {
     return (
       <div 
-        className="max-w-md mx-auto pb-28 select-none min-h-screen relative bg-[#14161d]"
+        className="max-w-md mx-auto pb-36 select-none min-h-screen relative bg-[#14161d]"
       >
         {/* Soft elegant gradient overlay */}
         <div className="absolute inset-0 bg-slate-950/20 backdrop-blur-[1px] z-0" />
         
         {/* Content wrapper */}
         <div className="relative z-10 space-y-4">
-          {/* 1. HERO BANNER: ADOPTING EXACT SCREENSHOT HERO CARD COLOR & STACKED DECK LAYOUT */}
+          {/* 1. HERO BANNER: ADOPTING EXACT SCREENSHOT HERO CARD COLOR & STACKED DECK LAYOUT (ENLARGED) */}
           <div
             id="todays-focus-card"
-            className="hero-card-screenshot-bg rounded-b-[44px] pt-7 pb-6 px-5 sm:px-6 text-white shadow-2xl border-b border-white/20 relative space-y-5 overflow-hidden"
+            className="hero-card-screenshot-bg rounded-b-[54px] pt-9 pb-8 sm:pt-11 sm:pb-10 px-6 sm:px-8 text-white shadow-[0_24px_50px_-12px_rgba(14,64,156,0.65)] border-b border-white/20 relative space-y-6 sm:space-y-7 overflow-hidden"
           >
             {/* Luminous soft radial glow inside bottom of the card */}
-            <div className="absolute inset-0 pointer-events-none bg-[radial-gradient(ellipse_at_50%_92%,rgba(33,136,248,0.45)_0%,transparent_64%)] z-0" />
+            <div className="absolute inset-0 pointer-events-none bg-[radial-gradient(ellipse_at_50%_92%,rgba(33,136,248,0.5)_0%,transparent_64%)] z-0" />
 
             {/* Top Bar: Profile Avatar (Left) & Notification Bell + Language Controls (Right) */}
             <div className="flex items-center justify-between relative z-30">
@@ -597,7 +597,7 @@ export const NewHireView: React.FC<NewHireViewProps> = ({
                   type="button"
                   id="home-learner-dropdown-btn"
                   onClick={() => setIsLearnerDropdownOpen((prev) => !prev)}
-                  className="w-12 h-12 rounded-full overflow-hidden border-2 border-white/35 shadow-md cursor-pointer active:scale-95 transition-transform shrink-0 block"
+                  className="w-14 h-14 rounded-full overflow-hidden border-2 border-white/40 shadow-lg cursor-pointer active:scale-95 transition-transform shrink-0 block"
                   title={newHire.name}
                 >
                   <img
@@ -647,11 +647,11 @@ export const NewHireView: React.FC<NewHireViewProps> = ({
               </div>
 
               {/* Action Buttons: Language toggle, Manager Console, and Bell Notification Icon */}
-              <div className="flex items-center gap-2">
+              <div className="flex items-center gap-2.5">
                 <button
                   type="button"
                   onClick={() => setIsHindi(!isHindi)}
-                  className="px-2.5 py-1.5 rounded-full bg-white/15 hover:bg-white/25 border border-white/20 text-white cursor-pointer active:scale-95 transition-all text-xs font-bold shadow-xs backdrop-blur-md"
+                  className="px-3 py-2 rounded-full bg-white/15 hover:bg-white/25 border border-white/20 text-white cursor-pointer active:scale-95 transition-all text-xs font-bold shadow-xs backdrop-blur-md"
                   title="Toggle Language"
                 >
                   <span>{isHindi ? "EN" : "HI"}</span>
@@ -661,10 +661,10 @@ export const NewHireView: React.FC<NewHireViewProps> = ({
                   <button
                     type="button"
                     onClick={onOpenManagerConsole}
-                    className="w-10 h-10 rounded-full bg-white/15 hover:bg-white/25 border border-white/20 text-white cursor-pointer active:scale-95 transition-all flex items-center justify-center shadow-xs backdrop-blur-md"
+                    className="w-12 h-12 rounded-full bg-white/15 hover:bg-white/25 border border-white/20 text-white cursor-pointer active:scale-95 transition-all flex items-center justify-center shadow-xs backdrop-blur-md"
                     title={isHindi ? "मैनेजर कंसोल" : "Manager Console"}
                   >
-                    <Eye className="w-4 h-4 text-white" />
+                    <Eye className="w-5 h-5 text-white" />
                   </button>
                 )}
 
@@ -673,102 +673,82 @@ export const NewHireView: React.FC<NewHireViewProps> = ({
                   <button
                     type="button"
                     onClick={() => setShowNextStepModal(true)}
-                    className="w-11 h-11 rounded-full bg-white/15 hover:bg-white/25 border border-white/20 backdrop-blur-md flex items-center justify-center text-white cursor-pointer active:scale-95 transition-all shadow-xs"
+                    className="w-12 h-12 rounded-full bg-white/15 hover:bg-white/25 border border-white/20 backdrop-blur-md flex items-center justify-center text-white cursor-pointer active:scale-95 transition-all shadow-xs"
                     title={isHindi ? "अलर्ट व अगला कदम" : "Alerts & Next Step"}
                   >
-                    <Bell className="w-5 h-5 text-white stroke-[2.2]" />
+                    <Bell className="w-6 h-6 text-white stroke-[2.2]" />
                   </button>
                   <span className="w-2.5 h-2.5 rounded-full bg-emerald-400 border-2 border-[#06296b] absolute top-1.5 right-1.5 animate-pulse" />
                 </div>
               </div>
             </div>
 
-            {/* Center Area: Balance label & 22% & Growth Pill */}
-            <div className="flex flex-col items-center justify-center text-center pt-2 relative z-10 space-y-2">
-              <span className="text-sm font-medium text-blue-200/85 tracking-wide">
-                {isHindi ? "करियर रेडीनेस" : "Balance"}
+            {/* Center Area: Role Readiness label & 22% & Days Remaining Pill */}
+            <div className="flex flex-col items-center justify-center text-center pt-2 relative z-10 space-y-2.5">
+              <span className="text-base sm:text-lg font-semibold text-blue-200/90 tracking-wider uppercase">
+                {isHindi ? "रोल रेडीनेस" : "Role Readiness"}
               </span>
 
               <div className="flex items-baseline justify-center">
-                <span className="text-[58px] sm:text-[66px] font-black text-white tracking-tight leading-none drop-shadow-sm font-sans">
+                <span className="text-[72px] sm:text-[84px] font-black text-white tracking-tight leading-none drop-shadow-md font-sans">
                   {authoritativeReadiness ?? 22}%
                 </span>
               </div>
 
-              {/* Trend Pill matching screenshot: ↗ 2.46% this month */}
-              <div className="pt-1">
-                <button
-                  type="button"
-                  onClick={() => setShowNextStepModal(true)}
-                  className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-full bg-white/15 hover:bg-white/25 border border-white/20 backdrop-blur-md text-blue-100 font-semibold text-xs transition-all shadow-xs cursor-pointer active:scale-95"
-                >
-                  <ArrowUpRight className="w-3.5 h-3.5 text-blue-200 stroke-[2.5]" />
-                  <span>
-                    {isHindi ? "2.46% इस महीने • ऑन ट्रैक" : "2.46% this month"}
-                  </span>
-                </button>
-              </div>
+              {/* Days Remaining Pill: e.g. 6 days remaining */}
+              {(() => {
+                const daysRemaining = Math.max(1, 10 - currentDay);
+                return (
+                  <div className="pt-1.5">
+                    <button
+                      type="button"
+                      onClick={() => setShowNextStepModal(true)}
+                      className="inline-flex items-center gap-1.5 px-4 py-2 rounded-full bg-white/15 hover:bg-white/25 border border-white/25 backdrop-blur-md text-blue-100 font-bold text-xs sm:text-sm transition-all shadow-xs cursor-pointer active:scale-95"
+                    >
+                      <Clock className="w-4 h-4 text-cyan-300 stroke-[2.5]" />
+                      <span>
+                        {isHindi
+                          ? `${daysRemaining} दिन शेष`
+                          : `${daysRemaining} ${daysRemaining === 1 ? "day remaining" : "days remaining"}`}
+                      </span>
+                    </button>
+                  </div>
+                );
+              })()}
             </div>
 
-            {/* Bottom Stacked Card Layers (Matching the screenshot's layered credit-card deck) */}
-            <div className="pt-3 relative z-10">
+            {/* Bottom Stacked Card Layers (Layered deck with Date and 'Start your day') */}
+            <div className="pt-4 relative z-10">
               {/* Layer 1 - back-most card peek */}
               <div className="w-[82%] h-2.5 bg-white/10 rounded-t-xl mx-auto -mb-1 backdrop-blur-xs border-t border-white/10" />
               
               {/* Layer 2 - middle card peek */}
               <div className="w-[91%] h-2.5 bg-white/15 rounded-t-2xl mx-auto -mb-1 backdrop-blur-xs border-t border-white/15" />
 
-              {/* Layer 3 - front card */}
+              {/* Layer 3 - front card: numbers replaced to date (same fonts), VISA replaced to Start your day */}
               <div
-                onClick={() => setShowNextStepModal(true)}
-                className="w-full bg-white/[0.18] hover:bg-white/[0.22] backdrop-blur-md border border-white/25 rounded-2xl p-4 text-white shadow-[0_8px_24px_rgba(0,0,0,0.15)] flex items-center justify-between cursor-pointer transition-all active:scale-[0.99] group"
+                onClick={() => setShowTodaysGoalView(true)}
+                className="w-full bg-white/[0.18] hover:bg-white/[0.24] backdrop-blur-md border border-white/30 rounded-2xl p-4 sm:p-5 text-white shadow-[0_10px_28px_rgba(0,0,0,0.18)] flex items-center justify-between cursor-pointer transition-all active:scale-[0.99] group"
               >
-                <div className="flex items-center gap-4">
+                {/* Numbers replaced to date, keeping the exact same fonts */}
+                <div className="flex items-center gap-3 sm:gap-4">
                   <span className="font-mono text-xs sm:text-sm font-bold tracking-widest text-white/90 group-hover:text-white transition-colors">
-                    •••• 9286
+                    {new Date().toLocaleDateString("en-GB", { day: "2-digit", month: "short", year: "numeric" }).toUpperCase()}
                   </span>
                   <span className="font-mono text-xs sm:text-sm font-semibold tracking-wider text-white/80">
-                    08 / 32
+                    DAY {currentDay} / 10
                   </span>
                 </div>
 
-                <div className="flex items-center gap-2">
-                  <span className="font-black italic tracking-widest text-sm text-white/95 drop-shadow-xs">
-                    VISA
+                {/* VISA text replaced with 'Start your day' keeping italic tracking-widest font */}
+                <div className="flex items-center gap-1.5">
+                  <span className="font-black italic tracking-widest text-xs sm:text-sm text-white/95 drop-shadow-xs uppercase">
+                    {isHindi ? "दिन शुरू करें" : "Start your day"}
                   </span>
+                  <ArrowRight className="w-4 h-4 text-cyan-300 group-hover:translate-x-1 transition-transform stroke-[2.5]" />
                 </div>
               </div>
             </div>
-          </div>
-
-          {/* Quick Actions Row Matching Screenshot (Deposit / Transfer / Withdraw) */}
-          <div className="grid grid-cols-3 gap-2.5 px-4 pt-1">
-            <button
-              type="button"
-              onClick={() => setShowTodaysGoalView(true)}
-              className="bg-white/10 hover:bg-white/15 border border-white/10 rounded-2xl py-3 px-2 text-white font-bold text-xs flex items-center justify-center gap-1.5 backdrop-blur-md shadow-sm active:scale-95 transition-all cursor-pointer group"
-            >
-              <ArrowUpRight className="w-4 h-4 text-cyan-400 stroke-[2.2] group-hover:scale-110 transition-transform" />
-              <span className="truncate">{isHindi ? "लक्ष्य" : "Deposit"}</span>
-            </button>
-
-            <button
-              type="button"
-              onClick={() => setActiveModal("work")}
-              className="bg-white/10 hover:bg-white/15 border border-white/10 rounded-2xl py-3 px-2 text-white font-bold text-xs flex items-center justify-center gap-1.5 backdrop-blur-md shadow-sm active:scale-95 transition-all cursor-pointer group"
-              title={isHindi ? "फ्लोर टूल्स" : "Shift Tools"}
-            >
-              <ArrowDownUp className="w-4 h-4 text-cyan-400 stroke-[2.2] group-hover:scale-110 transition-transform" />
-            </button>
-
-            <button
-              type="button"
-              onClick={() => setShowNextStepModal(true)}
-              className="bg-white/10 hover:bg-white/15 border border-white/10 rounded-2xl py-3 px-2 text-white font-bold text-xs flex items-center justify-center gap-1.5 backdrop-blur-md shadow-sm active:scale-95 transition-all cursor-pointer group"
-            >
-              <ArrowDownRight className="w-4 h-4 text-cyan-400 stroke-[2.2] group-hover:scale-110 transition-transform" />
-              <span className="truncate">{isHindi ? "टूल्स" : "Withdraw"}</span>
-            </button>
           </div>
 
           {/* Pop-up Modal for Next Step Highlights & Context */}
@@ -1017,6 +997,41 @@ export const NewHireView: React.FC<NewHireViewProps> = ({
                 </button>
               </div>
             )}
+
+            {/* Quick Actions Row Moved to Bottom of Screen (Deposit / Arrow Up & Down / Withdraw) */}
+            <div id="home-bottom-quick-actions" className="pt-2 pb-1">
+              <div className="grid grid-cols-3 gap-2.5">
+                <button
+                  type="button"
+                  id="bottom-action-deposit"
+                  onClick={() => setShowTodaysGoalView(true)}
+                  className="bg-white/10 hover:bg-white/15 border border-white/15 rounded-2xl py-3.5 px-2 text-white font-bold text-xs sm:text-sm flex items-center justify-center gap-2 backdrop-blur-md shadow-lg active:scale-95 transition-all cursor-pointer group"
+                >
+                  <ArrowUpRight className="w-4 h-4 text-cyan-400 stroke-[2.5] group-hover:scale-110 transition-transform" />
+                  <span className="truncate">{isHindi ? "लक्ष्य" : "Deposit"}</span>
+                </button>
+
+                <button
+                  type="button"
+                  id="bottom-action-transfer"
+                  onClick={() => setActiveModal("work")}
+                  className="bg-white/10 hover:bg-white/15 border border-white/15 rounded-2xl py-3.5 px-2 text-white font-bold text-xs sm:text-sm flex items-center justify-center gap-2 backdrop-blur-md shadow-lg active:scale-95 transition-all cursor-pointer group"
+                  title={isHindi ? "फ्लोर टूल्स" : "Shift Tools"}
+                >
+                  <ArrowDownUp className="w-5 h-5 text-cyan-400 stroke-[2.5] group-hover:scale-110 transition-transform" />
+                </button>
+
+                <button
+                  type="button"
+                  id="bottom-action-withdraw"
+                  onClick={() => setShowNextStepModal(true)}
+                  className="bg-white/10 hover:bg-white/15 border border-white/15 rounded-2xl py-3.5 px-2 text-white font-bold text-xs sm:text-sm flex items-center justify-center gap-2 backdrop-blur-md shadow-lg active:scale-95 transition-all cursor-pointer group"
+                >
+                  <ArrowDownRight className="w-4 h-4 text-cyan-400 stroke-[2.5] group-hover:scale-110 transition-transform" />
+                  <span className="truncate">{isHindi ? "टूल्स" : "Withdraw"}</span>
+                </button>
+              </div>
+            </div>
           </div>
         </div>
 
@@ -1034,7 +1049,7 @@ export const NewHireView: React.FC<NewHireViewProps> = ({
   if (activeSection === "dial") {
     return (
       <div 
-        className="max-w-md mx-auto pb-28 select-none min-h-screen relative bg-[#14161d] animate-in fade-in duration-200"
+        className="max-w-md mx-auto pb-36 select-none min-h-screen relative bg-[#14161d] animate-in fade-in duration-200"
       >
         {/* Soft elegant gradient overlay */}
         <div className="absolute inset-0 bg-slate-950/20 backdrop-blur-[1px] z-0" />
@@ -1257,14 +1272,14 @@ export const NewHireView: React.FC<NewHireViewProps> = ({
   }
 
   return (
-    <div className="max-w-md mx-auto px-4 py-3 space-y-4 pb-28 select-none">
+    <div className="max-w-md mx-auto px-4 py-3 space-y-4 pb-36 select-none">
       {/* ========================================================= */}
       {/* 1. HOME: WHERE AM I? WHAT TO DO NOW? WHY? WHO HELPS?       */}
       {/* ========================================================= */}
 
 
       {activeSection === "journey" && (
-        <div className="-mx-4 -my-3 px-4 py-4 min-h-screen bg-[#eaedf2] pb-28">
+        <div className="-mx-4 -my-3 px-4 py-4 min-h-screen bg-[#eaedf2] pb-36">
           <TenDaySkillJourneyView
             newHires={[newHire]}
             activeHireId={newHire.id}
