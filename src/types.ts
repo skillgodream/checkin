@@ -87,7 +87,7 @@ export const DARK_STORE_CAPABILITIES: CapabilityDefinition[] = [
   {
     id: 1,
     code: "DSP-01-SAFETY-ZONES",
-    name: "Store Safety, PPE & Zone Navigation",
+    name: "Store Safety",
     description: "Emergency exits, slip hazard prevention, safety shoe compliance, and main floor traffic thoroughfares.",
     category: "Foundations & Safety",
     defaultOrder: 1,
@@ -96,7 +96,7 @@ export const DARK_STORE_CAPABILITIES: CapabilityDefinition[] = [
   {
     id: 2,
     code: "DSP-02-SCANNER-BASICS",
-    name: "Handheld Terminal & Scanner Hardware Basics",
+    name: "Scanner Basics",
     description: "Terminal login, Bluetooth ring-scanner pairing, battery dock exchange, and basic barcode aiming.",
     category: "Foundations & Safety",
     defaultOrder: 2,
@@ -105,7 +105,7 @@ export const DARK_STORE_CAPABILITIES: CapabilityDefinition[] = [
   {
     id: 3,
     code: "DSP-03-LOCATION-NAV",
-    name: "Aisle, Rack & Bin Coordinate Navigation",
+    name: "Coordinate Navigation",
     description: "Reading the Rack-Bay-Shelf-Bin coordinate numbering system (Aisles 1–8) and navigating high-frequency zones.",
     category: "Foundations & Safety",
     defaultOrder: 3,
@@ -115,7 +115,7 @@ export const DARK_STORE_CAPABILITIES: CapabilityDefinition[] = [
   {
     id: 4,
     code: "DSP-04-COLD-CHAIN-ENTRY",
-    name: "Cold Room & Deep Freeze Entry Protocols",
+    name: "Cold Room Protocols",
     description: "Chilled dairy/beverage room entry, thermal gear usage, fast door-close discipline, and lens condensation clearing.",
     category: "Foundations & Safety",
     defaultOrder: 4,
@@ -124,7 +124,7 @@ export const DARK_STORE_CAPABILITIES: CapabilityDefinition[] = [
   {
     id: 5,
     code: "DSP-05-SINGLE-ORDER-PICK",
-    name: "Basic Single-Order Pick Sequence",
+    name: "Single-Order Pick",
     description: "Accepting a single customer order on terminal, following the directed pick path, and confirming bin barcode scans.",
     category: "Foundations & Safety",
     defaultOrder: 5,
@@ -134,7 +134,7 @@ export const DARK_STORE_CAPABILITIES: CapabilityDefinition[] = [
   {
     id: 6,
     code: "DSP-06-VARIANT-CHECK",
-    name: "3-Point Variant Differentiation (Brand, Weight, Size)",
+    name: "Variant Differentiation",
     description: "Distinguishing look-alike packaging variants (e.g. 200g vs 500g pouch, diet vs regular) before scanning.",
     category: "Core Fulfillment & Accuracy",
     defaultOrder: 6,
@@ -144,7 +144,7 @@ export const DARK_STORE_CAPABILITIES: CapabilityDefinition[] = [
   {
     id: 7,
     code: "DSP-07-PRODUCE-WEIGH",
-    name: "Produce & Loose Items Selection & Weighment",
+    name: "Produce Weighment",
     description: "Selecting fresh produce, visual quality check, digital scale taring, and price look-up barcode printing.",
     category: "Core Fulfillment & Accuracy",
     defaultOrder: 7,
@@ -153,7 +153,7 @@ export const DARK_STORE_CAPABILITIES: CapabilityDefinition[] = [
   {
     id: 8,
     code: "DSP-08-FRAGILE-HANDLING",
-    name: "Fragile, Glass & Bakery Item Handling",
+    name: "Fragile Handling",
     description: "Careful handling of eggs, glass jars, and bakery items; preventing crushing under heavy staples.",
     category: "Core Fulfillment & Accuracy",
     defaultOrder: 8,
@@ -162,7 +162,7 @@ export const DARK_STORE_CAPABILITIES: CapabilityDefinition[] = [
   {
     id: 9,
     code: "DSP-09-MULTI-QTY-PICK",
-    name: "Multi-Item & Multi-Quantity Batch Picking",
+    name: "Multi-Item Batching",
     description: "Accurately picking multiple identical items (e.g. 6x instant noodles), verifying exact unit count into tote.",
     category: "Core Fulfillment & Accuracy",
     defaultOrder: 9,
@@ -172,7 +172,7 @@ export const DARK_STORE_CAPABILITIES: CapabilityDefinition[] = [
   {
     id: 10,
     code: "DSP-10-TOTE-PACKING",
-    name: "Tote Organization & Weight Balancing",
+    name: "Tote Balancing",
     description: "Heavy grocery items at bottom, chemical isolation from food products, and optimal tote space utilization.",
     category: "Core Fulfillment & Accuracy",
     defaultOrder: 10,
@@ -181,7 +181,7 @@ export const DARK_STORE_CAPABILITIES: CapabilityDefinition[] = [
   {
     id: 11,
     code: "DSP-11-STOCK-EXCEPTIONS",
-    name: "Short-Pick, Out-of-Stock & Substitution Flow",
+    name: "Stock Exceptions",
     description: "Executing 30-sec secondary shelf checks, backstock bin queries, and system-approved digital substitutions.",
     category: "Exceptions & Pacing",
     defaultOrder: 11,
@@ -190,7 +190,7 @@ export const DARK_STORE_CAPABILITIES: CapabilityDefinition[] = [
   {
     id: 12,
     code: "DSP-12-DAMAGED-QC",
-    name: "Damaged, Leaking & Near-Expiry Goods Flagging",
+    name: "Damaged Goods & QC",
     description: "Inspecting expiration dates, seal integrity, and dented packaging; routing damaged items to quarantine bin.",
     category: "Exceptions & Pacing",
     defaultOrder: 12,
@@ -199,7 +199,7 @@ export const DARK_STORE_CAPABILITIES: CapabilityDefinition[] = [
   {
     id: 13,
     code: "DSP-13-MANUAL-BARCODE",
-    name: "Manual Barcode Fallback & Damaged Label Recovery",
+    name: "Manual Barcode Entry",
     description: "Rapid manual 13-digit EAN entry on terminal when product barcodes are smudged, torn, or unreadable.",
     category: "Exceptions & Pacing",
     defaultOrder: 13,
@@ -208,7 +208,7 @@ export const DARK_STORE_CAPABILITIES: CapabilityDefinition[] = [
   {
     id: 14,
     code: "DSP-14-ROUTE-OPTIMIZE",
-    name: "Fast-Paced Pick Route Optimization",
+    name: "Route Optimization",
     description: "Anticipating next pick along serpentine layout to eliminate backtracking and reduce unnecessary floor walking.",
     category: "Exceptions & Pacing",
     defaultOrder: 14,
@@ -218,7 +218,7 @@ export const DARK_STORE_CAPABILITIES: CapabilityDefinition[] = [
   {
     id: 15,
     code: "DSP-15-SLA-TIMER-PACING",
-    name: "10-Minute Order SLA Timer Pacing",
+    name: "SLA Timer Pacing",
     description: "Pacing under 10-minute delivery countdown timers; escalating pick bottlenecks before SLA breaches occur.",
     category: "Exceptions & Pacing",
     defaultOrder: 15,
@@ -228,7 +228,7 @@ export const DARK_STORE_CAPABILITIES: CapabilityDefinition[] = [
   {
     id: 16,
     code: "DSP-16-DISPATCH-HANDOFF",
-    name: "Dispatch Staging & QC Handoff Protocol",
+    name: "Dispatch Staging",
     description: "Transporting completed pick totes to dispatch buffer, scanning tote barcodes, and handoff to QC checkers.",
     category: "Dispatch & Autonomous Ops",
     defaultOrder: 16,
@@ -237,7 +237,7 @@ export const DARK_STORE_CAPABILITIES: CapabilityDefinition[] = [
   {
     id: 17,
     code: "DSP-17-RIDER-BAG-SEAL",
-    name: "Rider Handoff & Bag Seal Verification",
+    name: "Rider Bag Sealing",
     description: "Securing tamper-evident zip seals and thermal insulation bags for chilled goods prior to rider dispatch.",
     category: "Dispatch & Autonomous Ops",
     defaultOrder: 17,
@@ -246,7 +246,7 @@ export const DARK_STORE_CAPABILITIES: CapabilityDefinition[] = [
   {
     id: 18,
     code: "DSP-18-TEAM-ESCALATION",
-    name: "Floor Communication & Supervisor Escalation",
+    name: "Floor Escalation",
     description: "Proactively reporting aisle congestion, inventory discrepancies, and hazards via floor radio or shift supervisor.",
     category: "Dispatch & Autonomous Ops",
     defaultOrder: 18,
@@ -255,7 +255,7 @@ export const DARK_STORE_CAPABILITIES: CapabilityDefinition[] = [
   {
     id: 19,
     code: "DSP-19-SHIFT-CLOSEOUT",
-    name: "End-of-Shift Staging, Scanner Docking & Clean-up",
+    name: "Shift Closeout",
     description: "Returning handheld terminals to battery charging docks, sanitizing pick totes, and completing shift log.",
     category: "Dispatch & Autonomous Ops",
     defaultOrder: 19,
@@ -264,7 +264,7 @@ export const DARK_STORE_CAPABILITIES: CapabilityDefinition[] = [
   {
     id: 20,
     code: "DSP-20-AUTONOMOUS-MASTERY",
-    name: "Autonomous Multi-Zone Peak Pacing (Full Job Readiness)",
+    name: "Autonomous Picking",
     description: "Sustaining independent high-velocity picking across all 8 dark-store aisles with 50+ items/hr and 99% accuracy.",
     category: "Dispatch & Autonomous Ops",
     defaultOrder: 20,

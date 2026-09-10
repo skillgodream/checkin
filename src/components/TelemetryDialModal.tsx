@@ -18,7 +18,7 @@ export const TelemetryDialModal: React.FC<TelemetryDialModalProps> = ({
   newHire,
   currentDay,
 }) => {
-  const [isHindi, setIsHindi] = useState<boolean>(true);
+  const [isHindi, setIsHindi] = useState<boolean>(false);
   const [subModal, setSubModal] = useState<"map" | "scanner" | "buddy" | "target" | null>(null);
   const [buddyAlertSent, setBuddyAlertSent] = useState<boolean>(false);
 

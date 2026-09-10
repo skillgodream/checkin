@@ -102,8 +102,8 @@ export const NewHireView: React.FC<NewHireViewProps> = ({
     statusReason: newHire.statusReason,
   };
 
-  // Language state: true = Hindi / Hinglish, false = Simple English
-  const [localIsHindi, setLocalIsHindi] = useState<boolean>(true);
+  // Language state: true = Hindi / Hinglish, false = Simple English (Default English)
+  const [localIsHindi, setLocalIsHindi] = useState<boolean>(false);
   const isHindi = propIsHindi !== undefined ? propIsHindi : localIsHindi;
   const setIsHindi = propSetIsHindi || setLocalIsHindi;
 

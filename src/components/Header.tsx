@@ -39,6 +39,7 @@ interface HeaderProps {
   isHomeScreen?: boolean;
   learnerName?: string;
   buddyName?: string;
+  onOpenSplash?: () => void;
 }
 
 export const Header: React.FC<HeaderProps> = ({
@@ -56,11 +57,12 @@ export const Header: React.FC<HeaderProps> = ({
   doingWellCount = 8,
   needsAttentionCount = 3,
   atRiskCount = 1,
-  isHindi = true,
+  isHindi = false,
   onToggleLanguage,
   isHomeScreen = true,
   learnerName = "Rahul",
   buddyName = "Vikram",
+  onOpenSplash,
 }) => {
   const [isEyeMenuOpen, setIsEyeMenuOpen] = useState(false);
   const eyeMenuRef = useRef<HTMLDivElement>(null);
@@ -99,7 +101,17 @@ export const Header: React.FC<HeaderProps> = ({
         {/* Top bar: Brand + Live Tag + Actions */}
         <div className="flex items-center justify-between gap-2">
           {/* Brand Identity / Store Header */}
-          <div className="flex items-center gap-2 min-w-0">
+          <div
+            onClick={onOpenSplash}
+            role={onOpenSplash ? "button" : undefined}
+            tabIndex={onOpenSplash ? 0 : undefined}
+            title={onOpenSplash ? "View Checkin Checkout Splash Screen Animation" : undefined}
+            className={`flex items-center gap-2 min-w-0 ${
+              onOpenSplash
+                ? "cursor-pointer group hover:opacity-90 active:scale-98 transition-all"
+                : ""
+            }`}
+          >
             <Logo variant="compact" size="sm" />
             <span className="text-[11px] text-slate-300 font-medium truncate">• Dark Store #104</span>
           </div>

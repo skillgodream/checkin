@@ -18,11 +18,15 @@ import {
   X,
   Target,
   UserCheck,
+  Activity,
   Radio,
   TrendingUp,
   Bell,
+  AlertCircle,
+  XCircle,
 } from "lucide-react";
 import { NewHire, TrainingModule, DayRecord } from "../types";
+import { MANDATORY_TRAINING_MODULES } from "../data/modulesData";
 import { assessReadiness } from "../services/intelligence";
 import { LearnerSection } from "./FloatingGlassMenu";
 
@@ -90,6 +94,8 @@ export const TodaysGoalLandingView: React.FC<TodaysGoalLandingViewProps> = ({
   const [isFloorActionsExpanded, setIsFloorActionsExpanded] = useState<boolean>(false);
   const [isRxAlertActive, setIsRxAlertActive] = useState<boolean>(true);
   const [isDiagnosisNotesOpen, setIsDiagnosisNotesOpen] = useState<boolean>(false);
+  const [isTodaysActivityModalOpen, setIsTodaysActivityModalOpen] = useState<boolean>(false);
+  const [isEodSimulation, setIsEodSimulation] = useState<boolean>(false);
 
   // Live floor performance data
   const currentRecord = (newHire?.daysHistory || []).find((d) => d.dayNumber === currentDay) || {
@@ -293,83 +299,65 @@ export const TodaysGoalLandingView: React.FC<TodaysGoalLandingViewProps> = ({
   };
 
   return (
-    <div className="min-h-screen bg-[#070b13] text-[#e2e8f0] pb-28 select-none relative font-sans">
-      {/* ========================================================= */}
-      {/* 1. APP BAR - MINIMALIST HEADER WITH GREEN BLINKING DOT    */}
-      {/* ========================================================= */}
-      <div className="w-full bg-[#0d1321] text-white pt-3 pb-3 px-4 border-b border-[#1e293b] relative z-20 shadow-xl">
-        <div className="flex items-center justify-between">
-          {/* Floating Back Action */}
-          <button
-            type="button"
-            onClick={onBack}
-            className="w-10 h-10 rounded-xl bg-slate-800/80 hover:bg-slate-700 active:scale-95 transition-all flex items-center justify-center text-white border border-[#2e3e59] cursor-pointer shadow-md"
-            title={isHindi ? "वापस जाएं" : "Back to Home"}
-          >
-            <ChevronLeft className="w-5 h-5 stroke-[2.5]" />
-          </button>
-
-          {/* Green Blinking Status Dot */}
-          <div className="flex items-center justify-center">
-            <span className="relative flex h-3 w-3">
-              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75" />
-              <span className="relative inline-flex rounded-full h-3 w-3 bg-emerald-500 shadow-sm shadow-emerald-500/50" />
-            </span>
-          </div>
-
-          {/* Language Selector */}
-          {onToggleLanguage ? (
-            <button
-              type="button"
-              onClick={onToggleLanguage}
-              className="px-3 py-1.5 rounded-xl bg-slate-800/80 hover:bg-slate-700 text-white text-[11px] font-black tracking-wide border border-[#2e3e59] transition-all cursor-pointer active:scale-95 flex items-center gap-1"
-            >
-              <Languages className="w-3.5 h-3.5 text-blue-400" />
-              <span>{isHindi ? "हिंदी" : "EN"}</span>
-            </button>
-          ) : (
-            <div className="w-10" />
-          )}
-        </div>
-      </div>
-
+    <div className="min-h-screen bg-[#eef0f4] text-slate-900 pb-28 select-none relative font-sans">
       {/* MAIN CONTENT CONTAINER */}
-      <div className="max-w-md mx-auto px-4 space-y-7 pt-4">
+      <div className="max-w-md mx-auto px-3 sm:px-4 space-y-3.5 pt-3 sm:pt-4">
         {/* ========================================================= */}
         {/* SECTION 1: 3-TAB PROGRESS CARD (DAY, CAREER, YESTERDAY)   */}
         {/* ========================================================= */}
         <div className="space-y-2">
           <div
             id="circular-telemetry-dial-widget"
-            className="bg-gradient-to-b from-[#0b1739] via-[#071128] to-[#040816] rounded-[36px] p-5 sm:p-6 border border-white/10 shadow-2xl shadow-blue-950/50 space-y-4 select-none relative overflow-hidden text-white"
+            className="bg-gradient-to-b from-[#1b42df] via-[#0c268a] to-[#040b32] rounded-[28px] p-4 shadow-xl space-y-3 select-none relative overflow-hidden text-white border border-blue-500/20"
           >
-            {/* Background ambient radial glow */}
-            <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-64 h-64 bg-blue-600/15 rounded-full blur-3xl pointer-events-none" />
+            {/* Top Bar inside Hero Banner: Back Button, Blinking Green Dot, and Hindi Language Icon */}
+            <div className="flex items-center justify-between relative z-20 pb-0.5">
+              {/* Floating Back Action */}
+              <button
+                type="button"
+                onClick={onBack}
+                className="w-8 h-8 rounded-xl bg-white/10 hover:bg-white/20 active:scale-95 transition-all flex items-center justify-center text-white border border-white/15 cursor-pointer"
+                title={isHindi ? "वापस जाएं" : "Back to Home"}
+              >
+                <ChevronLeft className="w-4 h-4 stroke-[2.5]" />
+              </button>
 
-            {/* Top User Pill (Matching the screenshot capsule: Amit Verma · 18% ready · दिन 1) */}
-            <div className="flex items-center gap-3 bg-white/[0.06] border border-white/10 backdrop-blur-md rounded-full px-4 py-2.5 w-full max-w-xs mx-auto shadow-sm">
-              <div className="w-8 h-8 rounded-full bg-gradient-to-tr from-cyan-400 to-blue-600 text-white font-bold text-xs flex items-center justify-center shrink-0 border border-white/20">
-                {newHire.name ? newHire.name.charAt(0) : "A"}
+              {/* Green Blinking Status Dot */}
+              <div className="flex items-center justify-center gap-1.5 px-2.5 py-1 rounded-full bg-emerald-500/20 border border-emerald-400/30">
+                <span className="relative flex h-2 w-2">
+                  <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75" />
+                  <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-400" />
+                </span>
+                <span className="text-[9px] font-black uppercase tracking-wider text-emerald-300">
+                  {isHindi ? "लाइव" : "LIVE"}
+                </span>
               </div>
-              <div className="min-w-0 flex-1">
-                <h4 className="text-xs font-bold text-white truncate leading-tight">
-                  {newHire.name || "Amit Verma"}
-                </h4>
-                <p className="text-[11px] text-slate-300 truncate mt-0.5">
-                  {liveReadinessPct}% ready · {isHindi ? `दिन ${currentDay}` : `Day ${currentDay}`}
-                </p>
-              </div>
+
+              {/* Hindi / Language Selector Icon */}
+              {onToggleLanguage ? (
+                <button
+                  type="button"
+                  onClick={onToggleLanguage}
+                  className="px-2.5 py-1.5 rounded-xl bg-white/10 hover:bg-white/20 text-white text-[11px] font-black tracking-wide border border-white/15 transition-all cursor-pointer active:scale-95 flex items-center gap-1"
+                  title="Toggle Hindi / English"
+                >
+                  <Languages className="w-3 h-3 text-cyan-400" />
+                  <span>{isHindi ? "हिंदी" : "EN"}</span>
+                </button>
+              ) : (
+                <div className="w-8" />
+              )}
             </div>
 
             {/* 1. Three-Tab Pill Selector (Day, Career, Yesterday) */}
-            <div className="flex items-center justify-center gap-1.5 bg-black/40 backdrop-blur-md p-1 rounded-full max-w-xs mx-auto border border-white/10">
+            <div className="flex items-center justify-center gap-1 bg-white/10 p-1 rounded-full max-w-xs mx-auto border border-white/15">
               <button
                 type="button"
                 onClick={() => setActiveDialTab("day")}
-                className={`flex-1 py-1.5 px-2.5 rounded-full text-xs font-medium transition-all cursor-pointer truncate ${
+                className={`flex-1 py-1 px-2 rounded-full text-[11px] font-medium transition-all cursor-pointer truncate ${
                   activeDialTab === "day"
-                    ? "bg-white text-slate-950 font-bold shadow-sm"
-                    : "text-slate-300 hover:text-white"
+                    ? "bg-white text-slate-900 font-bold shadow-sm"
+                    : "text-white/70 hover:text-white"
                 }`}
               >
                 {isHindi ? "📅 दिन" : "📅 Day"}
@@ -377,10 +365,10 @@ export const TodaysGoalLandingView: React.FC<TodaysGoalLandingViewProps> = ({
               <button
                 type="button"
                 onClick={() => setActiveDialTab("career")}
-                className={`flex-1 py-1.5 px-2.5 rounded-full text-xs font-medium transition-all cursor-pointer truncate ${
+                className={`flex-1 py-1 px-2 rounded-full text-[11px] font-medium transition-all cursor-pointer truncate ${
                   activeDialTab === "career"
-                    ? "bg-white text-slate-950 font-bold shadow-sm"
-                    : "text-slate-300 hover:text-white"
+                    ? "bg-white text-slate-900 font-bold shadow-sm"
+                    : "text-white/70 hover:text-white"
                 }`}
               >
                 {isHindi ? "📈 करियर" : "📈 Career"}
@@ -388,10 +376,10 @@ export const TodaysGoalLandingView: React.FC<TodaysGoalLandingViewProps> = ({
               <button
                 type="button"
                 onClick={() => setActiveDialTab("yesterday")}
-                className={`flex-1 py-1.5 px-2.5 rounded-full text-xs font-medium transition-all cursor-pointer truncate ${
+                className={`flex-1 py-1 px-2 rounded-full text-[11px] font-medium transition-all cursor-pointer truncate ${
                   activeDialTab === "yesterday"
-                    ? "bg-white text-slate-950 font-bold shadow-sm"
-                    : "text-slate-300 hover:text-white"
+                    ? "bg-white text-slate-900 font-bold shadow-sm"
+                    : "text-white/70 hover:text-white"
                 }`}
               >
                 {isHindi ? "⏮️ कल" : "⏮️ Yesterday"}
@@ -399,7 +387,7 @@ export const TodaysGoalLandingView: React.FC<TodaysGoalLandingViewProps> = ({
             </div>
 
             {/* 2. Four Quick Action Circular Buttons */}
-            <div className="flex items-center justify-center gap-3.5 pt-0.5">
+            <div className="flex items-center justify-center gap-3 pt-1">
               {/* Action 1: Aisle Map */}
               <button
                 type="button"
@@ -408,9 +396,9 @@ export const TodaysGoalLandingView: React.FC<TodaysGoalLandingViewProps> = ({
                   else if (onSelectSection) onSelectSection("dial");
                 }}
                 title={isHindi ? "आइसल मैप" : "Aisle Guide"}
-                className="w-9 h-9 rounded-full flex items-center justify-center border transition-all cursor-pointer bg-white/[0.07] text-white border-white/10 hover:border-white/30 hover:bg-white/15 active:scale-95"
+                className="w-8 h-8 rounded-full flex items-center justify-center border transition-all cursor-pointer bg-white/10 text-white border-white/15 hover:bg-white/20 active:scale-95"
               >
-                <Zap className="w-4 h-4 text-cyan-300 stroke-[1.6]" />
+                <Zap className="w-3.5 h-3.5 text-cyan-400 stroke-[1.8]" />
               </button>
 
               {/* Action 2: Scanner Lock / Fix */}
@@ -421,9 +409,9 @@ export const TodaysGoalLandingView: React.FC<TodaysGoalLandingViewProps> = ({
                   else if (onSelectSection) onSelectSection("dial");
                 }}
                 title={isHindi ? "स्कैनर चेक" : "Scanner Terminal"}
-                className="w-9 h-9 rounded-full flex items-center justify-center border transition-all cursor-pointer bg-white/[0.07] text-white border-white/10 hover:border-white/30 hover:bg-white/15 active:scale-95"
+                className="w-8 h-8 rounded-full flex items-center justify-center border transition-all cursor-pointer bg-white/10 text-white border-white/15 hover:bg-white/20 active:scale-95"
               >
-                <Clock className="w-4 h-4 text-blue-300 stroke-[1.6]" />
+                <Clock className="w-3.5 h-3.5 text-blue-300 stroke-[1.8]" />
               </button>
 
               {/* Action 3: Target Goal */}
@@ -434,9 +422,9 @@ export const TodaysGoalLandingView: React.FC<TodaysGoalLandingViewProps> = ({
                   else if (onSelectSection) onSelectSection("dial");
                 }}
                 title={isHindi ? "पिक टारगेट" : "Ramp Target"}
-                className="w-9 h-9 rounded-full flex items-center justify-center border transition-all cursor-pointer bg-white/[0.07] text-white border-white/10 hover:border-white/30 hover:bg-white/15 active:scale-95"
+                className="w-8 h-8 rounded-full flex items-center justify-center border transition-all cursor-pointer bg-white/10 text-white border-white/15 hover:bg-white/20 active:scale-95"
               >
-                <Target className="w-4 h-4 text-cyan-400 stroke-[1.6]" />
+                <Target className="w-3.5 h-3.5 text-teal-300 stroke-[1.8]" />
               </button>
 
               {/* Action 4: Floor Buddy */}
@@ -448,54 +436,53 @@ export const TodaysGoalLandingView: React.FC<TodaysGoalLandingViewProps> = ({
                   else if (onSelectSection) onSelectSection("buddy");
                 }}
                 title={isHindi ? "विक्रम भैया को बुलाएं" : "Call Floor Buddy"}
-                className="w-9 h-9 rounded-full flex items-center justify-center border transition-all cursor-pointer bg-white/[0.07] text-white border-white/10 hover:border-white/30 hover:bg-white/15 active:scale-95"
+                className="w-8 h-8 rounded-full flex items-center justify-center border transition-all cursor-pointer bg-white/10 text-white border-white/15 hover:bg-white/20 active:scale-95"
               >
-                <UserCheck className="w-4 h-4 text-emerald-300 stroke-[1.6]" />
+                <UserCheck className="w-3.5 h-3.5 text-emerald-300 stroke-[1.8]" />
               </button>
             </div>
 
-            {/* 3. The Circular Dial / Gauge (Exact styling from screenshot: white arc, blue sphere) */}
-            <div className="relative flex items-center justify-center py-2">
-              <div className="relative w-56 h-56 sm:w-60 sm:h-60 flex items-center justify-center">
+            {/* 3. The Circular Dial / Gauge */}
+            <div className="relative flex items-center justify-center py-1">
+              <div className="relative w-40 h-40 sm:w-44 sm:h-44 flex items-center justify-center">
                 <svg
                   viewBox="0 0 220 220"
                   className="w-full h-full select-none -rotate-90"
                 >
                   <defs>
-                    <radialGradient id="screenshotSphereGrad" cx="50%" cy="40%" r="60%">
-                      <stop offset="0%" stopColor="#354e8c" stopOpacity="0.8" />
-                      <stop offset="60%" stopColor="#1a2b56" stopOpacity="0.95" />
-                      <stop offset="100%" stopColor="#0b1328" stopOpacity="1" />
+                    <radialGradient id="midnightSphereGrad" cx="50%" cy="40%" r="60%">
+                      <stop offset="0%" stopColor="#1a3475" stopOpacity="1" />
+                      <stop offset="100%" stopColor="#081432" stopOpacity="1" />
                     </radialGradient>
                   </defs>
 
-                  {/* Inner Shaded Blue Sphere */}
+                  {/* Inner Shaded Sphere */}
                   <circle
                     cx="110"
                     cy="110"
                     r="68"
-                    fill="url(#screenshotSphereGrad)"
+                    fill="url(#midnightSphereGrad)"
                     className="rotate-90 origin-center"
                   />
 
-                  {/* Outer Semi-Transparent Track */}
+                  {/* Outer Track */}
                   <circle
                     cx="110"
                     cy="110"
                     r="84"
                     fill="none"
-                    stroke="rgba(255, 255, 255, 0.12)"
-                    strokeWidth="18"
+                    stroke="#1e3a6e"
+                    strokeWidth="16"
                   />
 
-                  {/* Active Solid White Progress Arc (Exact match to screenshot) */}
+                  {/* Active Solid White Progress Arc */}
                   <circle
                     cx="110"
                     cy="110"
                     r="84"
                     fill="none"
                     stroke="#ffffff"
-                    strokeWidth="18"
+                    strokeWidth="16"
                     strokeLinecap="round"
                     strokeDasharray={2 * Math.PI * 84}
                     strokeDashoffset={
@@ -505,20 +492,20 @@ export const TodaysGoalLandingView: React.FC<TodaysGoalLandingViewProps> = ({
                   />
                 </svg>
 
-                {/* Centered Gauge Typography (Matching screenshot layout) */}
-                <div className="absolute inset-0 flex flex-col items-center justify-center text-center select-none pointer-events-none px-4">
+                {/* Centered Gauge Typography */}
+                <div className="absolute inset-0 flex flex-col items-center justify-center text-center select-none pointer-events-none px-3">
                   <div className="flex items-baseline justify-center text-white">
-                    <span className="text-4xl sm:text-5xl font-black tracking-tight">{displayedPercentage}</span>
-                    <span className="text-xl sm:text-2xl font-bold text-white/90 ml-0.5">%</span>
+                    <span className="text-3xl sm:text-4xl font-black tracking-tight">{displayedPercentage}</span>
+                    <span className="text-lg sm:text-xl font-bold text-white/80 ml-0.5">%</span>
                   </div>
-                  <span className="text-[13px] sm:text-sm font-bold text-white mt-1">
+                  <span className="text-xs font-bold text-white mt-0.5">
                     {activeDialTab === "career"
                       ? (isHindi ? "कुल रेडीनेस" : "Total Readiness")
                       : activeDialTab === "day"
                       ? (isHindi ? "दैनिक लक्ष्य" : "Daily Goal")
                       : (isHindi ? "कल का स्कोर" : "Yesterday Score")}
                   </span>
-                  <span className="text-[11px] font-medium text-slate-300/80 mt-0.5">
+                  <span className="text-[10px] font-medium text-white/70">
                     {isHindi
                       ? `दिन ${currentDay} · ${activeDialTab === "career" ? "करियर रेडी" : activeDialTab === "day" ? "शिफ्ट प्रोग्रेस" : "प्रदर्शन"}`
                       : `Day ${currentDay} · ${activeDialTab === "career" ? "Career Ready" : activeDialTab === "day" ? "Shift Progress" : "Performance"}`}
@@ -527,27 +514,10 @@ export const TodaysGoalLandingView: React.FC<TodaysGoalLandingViewProps> = ({
               </div>
             </div>
 
-            {/* 4. White CTA Button (Exact styling from screenshot: "शुरू करें · आज का लक्ष्य ➔") */}
-            <div className="pt-1 space-y-2">
-              <button
-                type="button"
-                onClick={() => {
-                  document.getElementById("floor-checklist-section")?.scrollIntoView({ behavior: "smooth" });
-                }}
-                className="w-full py-3.5 px-6 rounded-full bg-white hover:bg-slate-100 active:scale-95 text-slate-950 font-black text-base tracking-tight shadow-xl shadow-white/10 flex items-center justify-center gap-2 cursor-pointer transition-all"
-              >
-                <span>{isHindi ? "शुरू करें · आज का लक्ष्य" : "Start · Today's Goal"}</span>
-                <span className="text-lg leading-none">➔</span>
-              </button>
-              <p className="text-xs font-normal text-slate-300 text-center">
-                {isHindi ? "दैनिक लक्ष्य और चेकलिस्ट पर जाएं" : "Go to daily goals & checklist"}
-              </p>
-            </div>
-
-            {/* Context Note based on Active Tab */}
-            <div className="bg-black/30 rounded-xl px-3.5 py-2 border border-white/5 flex items-center justify-between text-[11px] text-slate-300">
-              <span className="font-medium text-cyan-300">{dialSubtext}</span>
-              <span className="font-mono text-white text-[10.5px]">
+            {/* Context Note */}
+            <div className="bg-white/10 rounded-xl px-3 py-2 border border-white/15 flex items-center justify-between text-[11px] text-white/90">
+              <span className="font-semibold text-white">{dialSubtext}</span>
+              <span className="font-mono text-white/80 text-[10px]">
                 {activeDialTab === "day" && `Speed: ${actualPickRate}/${targetPickRate} • Acc: ${accuracyRate}%`}
                 {activeDialTab === "career" && `Benchmark: 85%+ • Current: ${liveReadinessPct}%`}
                 {activeDialTab === "yesterday" && `Pace: ${yestActualPace}/${yestTargetPace} • Acc: ${yestAccuracy}%`}
@@ -557,165 +527,100 @@ export const TodaysGoalLandingView: React.FC<TodaysGoalLandingViewProps> = ({
         </div>
 
         {/* ========================================================= */}
-        {/* SECTION 2: PERFORMANCE & CLINIC RX (TEAL UNIFIED CARD)    */}
+        {/* SECTION 2: TODAY'S LIVE METRICS (MINIMALIST 4-GRID CARD)  */}
         {/* ========================================================= */}
         <div className="space-y-2">
           <div className="flex items-center gap-2 px-1">
-            <span className="h-4 w-1 bg-[#00d0a5] rounded-full" />
-            <h3 className="text-[11px] font-black tracking-widest uppercase text-slate-400">
-              {isHindi ? "फ्लोर परफॉर्मेंस व डॉक्टर सुझाव" : "PERFORMANCE & CLINIC RX"}
+            <span className="h-4 w-1 bg-slate-900 rounded-full" />
+            <h3 className="text-[11px] font-black tracking-widest uppercase text-slate-500">
+              {isHindi ? "आज के लाइव मेट्रिक्स" : "TODAY'S LIVE METRICS"}
             </h3>
           </div>
 
-          {/* Cohesive Teal Card formatted exactly like the user's reference image */}
-          <div className="bg-gradient-to-b from-[#02564d] via-[#014d45] to-[#014038] border border-[#0d786d]/80 rounded-[24px] overflow-hidden shadow-xl shadow-teal-950/30 text-white">
-            {/* Top Half: 2 Metrics in equal columns with vertical divider */}
-            <div className="p-4 sm:p-5 grid grid-cols-2">
-              {/* Left Column: Active Speed */}
-              <div
-                onClick={() => onSelectSection && onSelectSection("dial")}
-                className="pr-3 sm:pr-4 flex flex-col justify-between cursor-pointer group select-none"
-              >
-                <div className="space-y-0.5">
-                  <span className="text-[10px] sm:text-[11px] font-black tracking-wider uppercase text-[#7be0d0] leading-tight block">
-                    {isHindi ? "पिकिंग स्पीड" : "ACTIVE SPEED"}
-                  </span>
-                  <span className="text-[8.5px] font-bold text-[#52bfae] uppercase tracking-wider block">
-                    {isHindi ? "यूनिट्स / घंटा" : "PICK RATE, P/H"}
-                  </span>
-                </div>
-
-                <div className="flex items-center gap-2 mt-3">
-                  <div className="text-[#00ffd5] group-hover:scale-110 transition-transform shrink-0">
-                    <Zap className="w-5 h-5 fill-[#00ffd5]/30 stroke-[2.5]" />
-                  </div>
-                  <div className="flex items-baseline gap-1">
-                    <span className="text-2xl sm:text-3xl font-black text-white tracking-tight leading-none">
-                      {actualPickRate}
-                    </span>
-                    <span className="text-[10px] font-bold text-[#7be0d0]/80">
-                      /{targetPickRate}
-                    </span>
-                  </div>
-                </div>
-              </div>
-
-              {/* Right Column: Store Accuracy & Doctor Rx */}
-              <div className="border-l border-[#0d786d] pl-3 sm:pl-4 flex flex-col justify-between">
-                <div
-                  onClick={() => {
-                    setIsPrescribedExpanded(true);
-                    document.getElementById("prescribed-modules-section")?.scrollIntoView({ behavior: "smooth" });
-                  }}
-                  className="cursor-pointer group select-none"
-                >
-                  <div className="space-y-0.5">
-                    <span className="text-[10px] sm:text-[11px] font-black tracking-wider uppercase text-[#7be0d0] leading-tight block">
-                      {isHindi ? "सटीकता व आरएक्स" : "ACCURACY & RX"}
-                    </span>
-                    <span className="text-[8.5px] font-bold text-[#52bfae] uppercase tracking-wider block">
-                      {isHindi ? "क्वालिटी स्कोर" : "QUALITY SCORE, %"}
-                    </span>
-                  </div>
-
-                  <div className="flex items-center gap-2 mt-3">
-                    <div className="text-[#00ffd5] group-hover:scale-110 transition-transform shrink-0">
-                      <Stethoscope className="w-5 h-5 stroke-[2.5]" />
-                    </div>
-                    <div className="flex items-baseline gap-1.5">
-                      <span className="text-2xl sm:text-3xl font-black text-white tracking-tight leading-none">
-                        {accuracyRate}%
-                      </span>
-                      <span className="text-[9.5px] font-black text-[#00ffd5] bg-[#00ffd5]/15 px-1.5 py-0.5 rounded border border-[#00ffd5]/25">
-                        2 Rx
-                      </span>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            {/* Middle Row: Notification Label + Title + Bell & Toggle Switch */}
-            <div className="bg-[#013f38] border-t border-[#0d786d] px-4 py-3 sm:px-5 flex items-center justify-between gap-3">
-              <div className="min-w-0">
-                <span className="text-[9px] sm:text-[9.5px] font-black tracking-wider uppercase text-[#7be0d0] block leading-tight">
-                  {isHindi ? "नोटिफिकेशन प्राप्त करें जब" : "RECIEVE NOTIFICATION WHEN"}
-                </span>
-                <span className="text-xs sm:text-sm font-black text-white truncate block mt-0.5">
-                  {isHindi ? "डॉक्टर आरएक्स ड्रिल चालू हो" : "Doctor Rx turns on"}
-                </span>
-              </div>
-
-              <div className="flex items-center gap-2.5 shrink-0">
-                <div className={`transition-colors ${isRxAlertActive ? "text-[#00ffd5]" : "text-slate-400"}`}>
-                  <Bell className="w-4 h-4 stroke-[2.2]" />
-                </div>
-                <button
-                  type="button"
-                  onClick={() => setIsRxAlertActive((prev) => !prev)}
-                  className={`w-11 h-6 rounded-full transition-colors relative p-0.5 cursor-pointer shrink-0 ${
-                    isRxAlertActive ? "bg-[#00c9a7]" : "bg-[#022f29]"
-                  }`}
-                  aria-label="Toggle doctor alert notifications"
-                >
-                  <div
-                    className={`w-5 h-5 rounded-full bg-white shadow-sm transition-transform duration-200 ${
-                      isRxAlertActive ? "translate-x-5" : "translate-x-0"
-                    }`}
-                  />
-                </button>
-              </div>
-            </div>
-
-            {/* Bottom Row: Action link / Chevron Toggle */}
-            <button
-              type="button"
-              onClick={() => setIsDiagnosisNotesOpen((prev) => !prev)}
-              className="w-full bg-[#003730] hover:bg-[#00312b] border-t border-[#0d786d] px-4 py-3 sm:px-5 flex items-center justify-between text-xs font-semibold text-white/90 hover:text-white transition-colors cursor-pointer group"
-            >
-              <span className="text-[11px] sm:text-xs font-semibold text-[#8deedd] group-hover:text-white">
-                {isHindi ? "अन्य ज़ोन व डॉक्टर सुझाव के लिए नोटिफिकेशन सेट करें" : "Set up notifications for other zones"}
+          <div className="bg-white rounded-[24px] p-4 shadow-xs text-slate-900 space-y-3">
+            <div className="flex items-center justify-between">
+              <span className="text-[10px] font-black uppercase tracking-wider text-slate-700 flex items-center gap-1.5">
+                <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
+                {isHindi ? "लाइव शिफ्ट मेट्रिक्स" : "LIVE SHIFT METRICS"}
               </span>
-              <ChevronRight
-                className={`w-4 h-4 text-[#7be0d0] group-hover:text-white transition-transform duration-200 ${
-                  isDiagnosisNotesOpen ? "rotate-90" : ""
-                }`}
-              />
-            </button>
+              <span className="text-[9px] font-bold text-slate-600 bg-slate-100 px-2 py-0.5 rounded-full">
+                {isHindi ? `दिन ${currentDay} लाइव` : `Day ${currentDay} Live`}
+              </span>
+            </div>
 
-            {/* Expandable Diagnosis Drawer */}
-            {isDiagnosisNotesOpen && (
-              <div className="bg-[#002d27] px-4 py-3.5 sm:px-5 border-t border-[#0d786d] text-xs space-y-2.5 animate-in fade-in duration-200">
-                <div className="flex items-start gap-2.5">
-                  <div className="w-6 h-6 rounded-lg bg-[#00ffd5]/15 text-[#00ffd5] flex items-center justify-center shrink-0 mt-0.5 border border-[#00ffd5]/20">
-                    <Sparkles className="w-3.5 h-3.5" />
-                  </div>
-                  <div className="space-y-1">
-                    <span className="text-[10px] font-black uppercase tracking-wider text-[#7be0d0] block">
-                      {isHindi ? "AI स्टोर डॉक्टर डायग्नोसिस आधार:" : "AI Clinic Diagnosis Basis:"}
-                    </span>
-                    <p className="leading-relaxed text-slate-200 text-[11.5px]">
-                      {doctorDiagnosis}
-                    </p>
-                  </div>
-                </div>
-
-                <div className="pt-1 flex justify-end">
-                  <button
-                    type="button"
-                    onClick={() => {
-                      setIsPrescribedExpanded(true);
-                      document.getElementById("prescribed-modules-section")?.scrollIntoView({ behavior: "smooth" });
-                    }}
-                    className="text-[10.5px] font-black text-[#00ffd5] hover:underline flex items-center gap-1 cursor-pointer"
-                  >
-                    <span>{isHindi ? "निर्धारित मॉड्यूल खोलें" : "Open Prescribed Modules"}</span>
-                    <ChevronRight className="w-3 h-3" />
-                  </button>
-                </div>
+            <div className="grid grid-cols-4 gap-2">
+              {/* 1. Live Module Completion % */}
+              <div className="bg-slate-50 rounded-xl p-2.5 text-center flex flex-col items-center justify-center">
+                <span className="text-[8px] font-bold uppercase text-slate-500 tracking-tight truncate w-full">
+                  {isHindi ? "मॉड्यूल" : "Modules"}
+                </span>
+                <span className="text-base sm:text-lg font-black text-slate-900 mt-0.5 leading-none">
+                  {Math.min(100, Math.round((completedCount / 4) * 100))}%
+                </span>
+                <span className="text-[7.5px] font-semibold text-emerald-600 mt-0.5 truncate w-full">
+                  {isHindi ? `${completedCount}/4 पूर्ण` : `${completedCount}/4 Done`}
+                </span>
               </div>
-            )}
+
+              {/* 2. Pick Rate Live */}
+              <div className="bg-slate-50 rounded-xl p-2.5 text-center flex flex-col items-center justify-center">
+                <span className="text-[8px] font-bold uppercase text-slate-500 tracking-tight truncate w-full">
+                  {isHindi ? "पिक रेट" : "Pick Rate"}
+                </span>
+                <span className="text-base sm:text-lg font-black text-slate-900 mt-0.5 leading-none">
+                  {actualPickRate}
+                </span>
+                <span className="text-[7.5px] font-semibold text-blue-600 mt-0.5 truncate w-full">
+                  /{targetPickRate} P/H
+                </span>
+              </div>
+
+              {/* 3. Accuracy Live */}
+              <div className="bg-slate-50 rounded-xl p-2.5 text-center flex flex-col items-center justify-center">
+                <span className="text-[8px] font-bold uppercase text-slate-500 tracking-tight truncate w-full">
+                  {isHindi ? "सटीकता" : "Accuracy"}
+                </span>
+                <span className="text-base sm:text-lg font-black text-slate-900 mt-0.5 leading-none">
+                  {accuracyRate}%
+                </span>
+                <span className="text-[7.5px] font-semibold text-emerald-600 mt-0.5 truncate w-full">
+                  {isHindi ? "लक्ष्य पार" : "On Target"}
+                </span>
+              </div>
+
+              {/* 4. Quality Check */}
+              <div className="bg-slate-50 rounded-xl p-2.5 text-center flex flex-col items-center justify-center">
+                <span className="text-[8px] font-bold uppercase text-slate-500 tracking-tight truncate w-full">
+                  {isHindi ? "क्वालिटी" : "QC Check"}
+                </span>
+                <span className="text-base sm:text-lg font-black text-slate-900 mt-0.5 leading-none">
+                  98.5%
+                </span>
+                <span className="text-[7.5px] font-semibold text-blue-600 mt-0.5 truncate w-full">
+                  {isHindi ? "पास (OK)" : "Passed"}
+                </span>
+              </div>
+            </div>
           </div>
+        </div>
+
+        {/* ========================================================= */}
+        {/* TODAY'S ACTIVITY PILL (CLICKABLE TO OPEN DETAILED MODAL)  */}
+        {/* ========================================================= */}
+        <div className="pt-0.5 flex justify-center">
+          <button
+            type="button"
+            onClick={() => setIsTodaysActivityModalOpen(true)}
+            className="flex items-center gap-2.5 bg-white/[0.08] hover:bg-white/[0.14] border border-white/20 backdrop-blur-md rounded-full px-4.5 py-2 shadow-md select-none cursor-pointer transition-all active:scale-95 group"
+          >
+            <div className="w-7 h-7 rounded-full bg-gradient-to-tr from-cyan-400 to-blue-600 text-white flex items-center justify-center shrink-0 border border-white/25 shadow-xs group-hover:scale-105 transition-transform">
+              <Activity className="w-3.5 h-3.5 stroke-[2.5]" />
+            </div>
+            <span className="text-xs font-bold text-white tracking-wide group-hover:text-cyan-200 transition-colors">
+              {isHindi ? "आज की गतिविधि (विस्तृत टैब)" : "Today's Activity (Detailed Tab)"}
+            </span>
+            <ChevronRight className="w-3.5 h-3.5 text-slate-400 group-hover:translate-x-0.5 transition-transform" />
+          </button>
         </div>
 
         {/* ========================================================= */}
@@ -1038,6 +943,215 @@ export const TodaysGoalLandingView: React.FC<TodaysGoalLandingViewProps> = ({
               >
                 <span>{isHindi ? "कार्य शुरू करें" : "Open Task Workspace"}</span>
                 <ArrowRight className="w-3.5 h-3.5" />
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* ========================================================= */}
+      {/* 10. CONTROL TOWER VIEW: DEAN PRESCRIBED ACTIVITIES LIST   */}
+      {/* ========================================================= */}
+      {isTodaysActivityModalOpen && (
+        <div className="fixed inset-0 bg-black/85 backdrop-blur-md flex items-end sm:items-center justify-center z-50 p-3 sm:p-4 animate-in fade-in duration-200">
+          <div className="w-full max-w-lg max-h-[90vh] overflow-y-auto bg-[#0d1321] border border-cyan-500/30 rounded-t-3xl sm:rounded-3xl p-5 sm:p-6 space-y-4 shadow-2xl relative animate-in slide-in-from-bottom duration-300">
+            {/* Close button */}
+            <button
+              onClick={() => setIsTodaysActivityModalOpen(false)}
+              className="absolute top-4 right-4 w-9 h-9 rounded-full bg-[#1b2536] hover:bg-slate-700 flex items-center justify-center text-slate-400 hover:text-white border border-[#2b3c54] transition-colors cursor-pointer"
+            >
+              <X className="w-4 h-4" />
+            </button>
+
+            {/* Modal Header */}
+            <div className="space-y-1 pr-8">
+              <div className="flex items-center gap-2">
+                <span className="text-[10px] font-bold px-2 py-0.5 rounded bg-cyan-500/15 text-cyan-300 border border-cyan-500/30 font-mono">
+                  {isHindi ? "कंट्रोल टॉवर व्यू" : "Control Tower View"}
+                </span>
+                <span className="text-[10px] font-bold text-emerald-400 bg-emerald-500/10 px-2.5 py-0.5 rounded-full flex items-center gap-1 border border-emerald-500/20">
+                  <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
+                  {isHindi ? `दिन ${currentDay} निगरानी` : `Day ${currentDay} Monitor`}
+                </span>
+              </div>
+              <h2 className="text-base sm:text-lg font-black text-white leading-tight">
+                {isHindi ? "डीन द्वारा निर्धारित आज की गतिविधियां" : "Dean Prescribed Activities & 5-Activity Breakdown"}
+              </h2>
+              <p className="text-[11px] text-slate-400">
+                {isHindi
+                  ? "यह केवल नियंत्रण कक्ष (Control Tower) का अवलोकन है। यहां से कोई कार्रवाई या सबमिशन नहीं होता।"
+                  : "Read-only control tower viewpoint. Displays all prescribed LMS sub-modules and floor tasks with shift tracking."}
+              </p>
+            </div>
+
+            {/* EOD Simulation Toggle Switch */}
+            <div className="bg-[#141b2c] border border-white/10 rounded-xl p-3 flex items-center justify-between gap-3">
+              <div className="flex items-center gap-2.5">
+                <div className={`w-7 h-7 rounded-lg flex items-center justify-center ${isEodSimulation ? 'bg-red-500/20 text-red-400' : 'bg-amber-500/20 text-amber-400'}`}>
+                  <Clock className="w-3.5 h-3.5" />
+                </div>
+                <div>
+                  <span className="text-xs font-bold text-white block">
+                    {isHindi ? "एंड-ऑफ-डे (EOD) सिमुलेशन" : "End-of-Day (EOD) Shift Simulation"}
+                  </span>
+                  <span className="text-[10px] text-slate-400">
+                    {isEodSimulation
+                      ? (isHindi ? "अपूर्ण कार्य लाल (Red) दिखाए जा रहे हैं" : "Unfinished tasks flagged Red for EOD")
+                      : (isHindi ? "सक्रिय शिफ्ट - अपूर्ण कार्य पीले (Amber)" : "Active shift - unfinished tasks in Amber")}
+                  </span>
+                </div>
+              </div>
+              <button
+                type="button"
+                onClick={() => setIsEodSimulation(!isEodSimulation)}
+                className={`relative inline-flex h-5 w-9 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none ${isEodSimulation ? 'bg-red-600' : 'bg-slate-700'}`}
+              >
+                <span className={`pointer-events-none inline-block h-4 w-4 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out ${isEodSimulation ? 'translate-x-4' : 'translate-x-0'}`} />
+              </button>
+            </div>
+
+            <div className="h-px bg-white/10" />
+
+            {/* Flat Control Tower List of Prescribed LMS Modules and 5 Sub-Activities */}
+            <div className="space-y-3">
+              <span className="text-[10px] font-black uppercase tracking-wider text-purple-300 block">
+                {isHindi ? "1. निर्धारित एलएमएस मॉड्यूल (5 उप-गतिविधियां)" : "1. Prescribed LMS Modules (All 5 Sub-Activities)"}
+              </span>
+
+              <div className="space-y-2">
+                {todaysPrescribedModules.map((prescribedMod) => {
+                  const fullModData = MANDATORY_TRAINING_MODULES.find((m) => m.id === prescribedMod.id) || prescribedMod;
+                  const activities = fullModData.activities || [];
+
+                  return (
+                    <div key={prescribedMod.id} className="bg-[#131927] border border-white/10 rounded-xl p-3.5 space-y-2.5">
+                      <div className="flex items-center justify-between pb-2 border-b border-white/5">
+                        <div className="flex items-center gap-2">
+                          <span className="text-[9px] font-bold px-1.5 py-0.5 rounded bg-purple-500/20 text-purple-300 font-mono">
+                            {prescribedMod.code}
+                          </span>
+                          <span className="text-xs font-bold text-white">
+                            {isHindi ? prescribedMod.titleHi : prescribedMod.title}
+                          </span>
+                        </div>
+                        <span className="text-[10px] font-semibold text-slate-400 font-mono">
+                          {prescribedMod.durationMinutes}m
+                        </span>
+                      </div>
+
+                      {/* Flat list of 5 sub-activities (No nested cards) */}
+                      <div className="space-y-1.5 pl-1">
+                        {activities.map((act, actIdx) => {
+                          const isDone = act.completed;
+                          const statusColor = isDone
+                            ? "text-emerald-400 bg-emerald-500/10 border-emerald-500/20"
+                            : isEodSimulation
+                            ? "text-red-400 bg-red-500/15 border-red-500/30"
+                            : "text-amber-300 bg-amber-500/10 border-amber-500/20";
+
+                          return (
+                            <div
+                              key={act.id || actIdx}
+                              className={`px-3 py-2 rounded-lg border flex items-center justify-between gap-2 text-xs ${statusColor}`}
+                            >
+                              <div className="flex items-center gap-2 min-w-0">
+                                {isDone ? (
+                                  <CheckCircle2 className="w-3.5 h-3.5 text-emerald-400 shrink-0" />
+                                ) : isEodSimulation ? (
+                                  <XCircle className="w-3.5 h-3.5 text-red-400 shrink-0" />
+                                ) : (
+                                  <Clock className="w-3.5 h-3.5 text-amber-400 shrink-0" />
+                                )}
+                                <span className="font-medium text-slate-200 truncate">
+                                  {actIdx + 1}. {isHindi ? (act.titleHi || act.title) : act.title}
+                                </span>
+                              </div>
+
+                              <div className="shrink-0">
+                                {isDone ? (
+                                  <span className="text-[9px] font-bold px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-300">
+                                    {isHindi ? "पूर्ण" : "DONE"}
+                                  </span>
+                                ) : isEodSimulation ? (
+                                  <span className="text-[9px] font-bold px-2 py-0.5 rounded-full bg-red-500/20 text-red-300">
+                                    {isHindi ? "अपूर्ण (लाल)" : "OVERDUE"}
+                                  </span>
+                                ) : (
+                                  <span className="text-[9px] font-bold px-2 py-0.5 rounded-full bg-amber-500/20 text-amber-300">
+                                    {isHindi ? "लंबित" : "PENDING"}
+                                  </span>
+                                )}
+                              </div>
+                            </div>
+                          );
+                        })}
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+
+            {/* Flat Control Tower List of Floor Practice Tasks */}
+            <div className="space-y-2.5 pt-1">
+              <span className="text-[10px] font-black uppercase tracking-wider text-cyan-300 block">
+                {isHindi ? "2. फ्लोर अभ्यास और व्यावहारिक कार्य" : "2. Prescribed Floor Practice Tasks"}
+              </span>
+
+              <div className="space-y-1.5">
+                {todaysTasks.map((t) => {
+                  const isDone = completedTaskIds[t.id];
+                  const statusColor = isDone
+                    ? "text-emerald-400 bg-emerald-500/10 border-emerald-500/20"
+                    : isEodSimulation
+                    ? "text-red-400 bg-red-500/15 border-red-500/30"
+                    : "text-slate-200 bg-[#131927] border-white/10";
+
+                  return (
+                    <div
+                      key={t.id}
+                      className={`px-3 py-2.5 rounded-lg border flex items-center justify-between gap-2 text-xs ${statusColor}`}
+                    >
+                      <div className="flex items-center gap-2.5 min-w-0">
+                        {isDone ? (
+                          <CheckCircle2 className="w-3.5 h-3.5 text-emerald-400 shrink-0" />
+                        ) : isEodSimulation ? (
+                          <XCircle className="w-3.5 h-3.5 text-red-400 shrink-0" />
+                        ) : (
+                          <Clock className="w-3.5 h-3.5 text-amber-400 shrink-0" />
+                        )}
+                        <span className="font-semibold text-white truncate">{t.title}</span>
+                      </div>
+
+                      <div className="shrink-0 flex items-center gap-2">
+                        <span className="text-[9px] text-slate-400 font-mono">{t.duration}</span>
+                        {isDone ? (
+                          <span className="text-[9px] font-bold px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-300">
+                            {isHindi ? "पूर्ण" : "DONE"}
+                          </span>
+                        ) : isEodSimulation ? (
+                          <span className="text-[9px] font-bold px-2 py-0.5 rounded-full bg-red-500/20 text-red-300">
+                            {isHindi ? "लाल (EOD)" : "OVERDUE"}
+                          </span>
+                        ) : (
+                          <span className="text-[9px] font-bold px-2 py-0.5 rounded-full bg-amber-500/20 text-amber-300">
+                            {isHindi ? "लंबित" : "PENDING"}
+                          </span>
+                        )}
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+
+            {/* Modal Footer */}
+            <div className="pt-2">
+              <button
+                onClick={() => setIsTodaysActivityModalOpen(false)}
+                className="py-3 px-6 rounded-xl font-bold text-xs uppercase tracking-wider bg-[#1b2536] hover:bg-[#253247] text-slate-200 transition-all w-full cursor-pointer border border-white/10"
+              >
+                <span>{isHindi ? "बंद करें" : "Close Control Tower View"}</span>
               </button>
             </div>
           </div>

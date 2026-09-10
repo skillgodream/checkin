@@ -48,7 +48,7 @@ export const ChatBotPullout: React.FC<ChatBotPulloutProps> = ({
   currentDay,
   learnerName = "Rahul",
   buddyName = "Vikram",
-  isHindi = true,
+  isHindi = false,
   onAlertBuddy,
   newHire,
   onOpenFullScreenJourney,

@@ -237,9 +237,8 @@ export const CommercialCertificationCard: React.FC<CommercialCertificationCardPr
   const activeBlockers = criteriaList.filter((c) => !c.met);
   const isCertifiedReady = activeBlockers.length === 0;
 
-  // Track expanded state for all 7 criteria
-  // Default: expand the first blocker so the user immediately sees the drill-down
-  const [expandedIds, setExpandedIds] = useState<string[]>(["mandatory-training"]);
+  // Track expanded state for all 7 criteria (collapsed by default on landing)
+  const [expandedIds, setExpandedIds] = useState<string[]>([]);
 
   const toggleCriterion = (id: string) => {
     setExpandedIds((prev) =>

@@ -244,15 +244,15 @@ export const ModulesView: React.FC<ModulesViewProps> = ({
 
   const getModuleShortLabel = (dayNumber: number, hindiMode: boolean) => {
     const map: Record<number, { en: string; hi: string }> = {
-      1: { en: "Store Safety & PPE", hi: "सुरक्षा व PPE" },
-      2: { en: "PDA Barcode", hi: "PDA बारकोड" },
-      3: { en: "Cold Chain", hi: "कोल्ड चेन" },
-      4: { en: "High Picking", hi: "हाई पिकिंग" },
-      5: { en: "Multi Totes", hi: "मल्टी टोट्स" },
-      6: { en: "Packaging", hi: "पैकेजिंग" },
-      7: { en: "Speed Drill", hi: "स्पीड ड्रिल" },
-      8: { en: "Quality Check", hi: "क्वालिटी चेक" },
-      9: { en: "Rush Hours", hi: "रश आवर्स" },
+      1: { en: "Store Safety", hi: "स्टोर सुरक्षा" },
+      2: { en: "Scanner Basics", hi: "स्कैनर बेसिक्स" },
+      3: { en: "Location Nav", hi: "लोकेशन नेविगेशन" },
+      4: { en: "Cold Room", hi: "कोल्ड रूम" },
+      5: { en: "Single Pick", hi: "सिंगल पिक" },
+      6: { en: "Variant Check", hi: "वेरिएंट चेक" },
+      7: { en: "Weighment", hi: "वजन जांच" },
+      8: { en: "Fragile Care", hi: "नाजुक सामान" },
+      9: { en: "Batch Pick", hi: "बैच पिक" },
       10: { en: "Certification", hi: "सर्टिफिकेशन" },
     };
     return hindiMode ? map[dayNumber]?.hi || `डे ${dayNumber}` : map[dayNumber]?.en || `Day ${dayNumber}`;
@@ -503,21 +503,8 @@ export const ModulesView: React.FC<ModulesViewProps> = ({
 
           return (
             <>
-              <div className="flex items-center justify-between px-1 mt-2 mb-0.5">
-                <span className="text-xs font-medium text-slate-300 tracking-wide">
-                  {activeCategoryObj
-                    ? (isHindi ? `${activeCategoryObj.titleHindi} • ${activeCategoryObj.subtitleHindi} (${skillsToDisplay.length})` : `${activeCategoryObj.titleEnglish} • ${activeCategoryObj.subtitleEnglish} (${skillsToDisplay.length})`)
-                    : (isHindi ? `सभी कौशल (${skillsToDisplay.length})` : `All Skills (${skillsToDisplay.length})`)}
-                </span>
-                <button
-                  onClick={() => setSelectedSkillCategory(selectedSkillCategory === "all" ? "aisles_1_3" : "all")}
-                  className="text-xs font-normal text-cyan-400 hover:text-cyan-300 transition-colors cursor-pointer"
-                >
-                  {selectedSkillCategory === "all"
-                    ? (isHindi ? "श्रेणी फ़िल्टर" : "Filter by Category")
-                    : (isHindi ? "सभी 20 कौशल देखें" : "View All 20 Skills")}
-                </button>
-              </div>
+              {/* Empty space placeholder preserving layout height without text */}
+              <div className="h-4 my-1" aria-hidden="true" />
 
               {skillsToDisplay.map((cap) => {
                 const statusStr = getCapabilityStatus(cap.id);

@@ -33,6 +33,7 @@ interface ClientDemoModalProps {
   onSelectTab: (tab: "new_hire" | "manager" | "organization") => void;
   onResetDemo: () => void;
   isHindi?: boolean;
+  onOpenSplash?: () => void;
 }
 
 interface DemoScenarioStep {
@@ -214,6 +215,7 @@ export const ClientDemoModal: React.FC<ClientDemoModalProps> = ({
   onSelectTab,
   onResetDemo,
   isHindi = false,
+  onOpenSplash,
 }) => {
   const [selectedScenarioId, setSelectedScenarioId] = useState<string>("demo-2");
   const [justRanId, setJustRanId] = useState<string | null>(null);
@@ -527,14 +529,29 @@ export const ClientDemoModal: React.FC<ClientDemoModalProps> = ({
         </div>
 
         {/* Footer */}
-        <div className="bg-[#13151b] px-6 py-3.5 border-t border-white/10 flex items-center justify-between text-xs">
-          <button
-            onClick={onResetDemo}
-            className="px-3 py-2 rounded-xl text-slate-300 hover:text-white font-bold hover:bg-white/5 transition-all cursor-pointer flex items-center gap-1.5 border border-white/10"
-          >
-            <RotateCcw className="w-3.5 h-3.5" />
-            <span>Reset Demo to Baseline</span>
-          </button>
+        <div className="bg-[#13151b] px-6 py-3.5 border-t border-white/10 flex items-center justify-between gap-2 text-xs">
+          <div className="flex items-center gap-2">
+            <button
+              onClick={onResetDemo}
+              className="px-3 py-2 rounded-xl text-slate-300 hover:text-white font-bold hover:bg-white/5 transition-all cursor-pointer flex items-center gap-1.5 border border-white/10"
+            >
+              <RotateCcw className="w-3.5 h-3.5" />
+              <span>Reset Demo to Baseline</span>
+            </button>
+
+            {onOpenSplash && (
+              <button
+                onClick={() => {
+                  onClose();
+                  onOpenSplash();
+                }}
+                className="px-3 py-2 rounded-xl text-cyan-400 hover:text-cyan-300 font-bold hover:bg-cyan-500/10 transition-all cursor-pointer flex items-center gap-1.5 border border-cyan-500/20"
+                title="Play Checkin Checkout Splash Screen Animation"
+              >
+                <span>✨ Replay Splash</span>
+              </button>
+            )}
+          </div>
 
           <button
             onClick={onClose}

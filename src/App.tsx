@@ -9,6 +9,7 @@ import { TelemetryDialModal } from "./components/TelemetryDialModal";
 import { GoogleFormFeedModal } from "./components/GoogleFormFeedModal";
 import { ClientDemoModal } from "./components/ClientDemoModal";
 import { ChatBotPullout } from "./components/ChatBotPullout";
+import { SplashScreen } from "./components/SplashScreen";
 import { LearnerSection } from "./components/FloatingGlassMenu";
 import { initialCohort, initialOrgSummary } from "./data/seedData";
 import {
@@ -74,8 +75,10 @@ export default function App() {
   const [isClientDemoModalOpen, setIsClientDemoModalOpen] = useState<boolean>(false);
   const [hasApiKey, setHasApiKey] = useState<boolean>(false);
   const [isFramed, setIsFramed] = useState<boolean>(true);
-  const [isHindi, setIsHindi] = useState<boolean>(true);
+  const [isHindi, setIsHindi] = useState<boolean>(false);
   const [learnerSection, setLearnerSection] = useState<LearnerSection>("home");
+  // Splash Screen appears on landing, animates checkin -> checkout for 4-5s
+  const [showSplash, setShowSplash] = useState<boolean>(true);
   // Onboarding page is the default first page by its own
   const [isOnboarding, setIsOnboarding] = useState<boolean>(true);
 
@@ -312,6 +315,14 @@ export default function App() {
         isFramed ? "md:py-6 md:px-4" : ""
       }`}
     >
+      {/* Brand Splash Screen Animation (CHECKIN dissolves -> CHECKOUT stays 4-5s) */}
+      {showSplash && (
+        <SplashScreen
+          onFinish={() => setShowSplash(false)}
+          stayDurationSeconds={4.5}
+        />
+      )}
+
       {/* Mobile Device Chassis Shell */}
       <div
         className={`w-full mx-auto flex flex-col transition-all duration-300 ${
@@ -392,6 +403,7 @@ export default function App() {
                 isHomeScreen={activeTab === "new_hire" && learnerSection === "home"}
                 learnerName={activeHire.name}
                 buddyName={activeHire.buddy}
+                onOpenSplash={() => setShowSplash(true)}
               />
             )}
 
@@ -498,6 +510,7 @@ export default function App() {
         onSelectTab={setActiveTab}
         onResetDemo={handleResetDemo}
         isHindi={isHindi}
+        onOpenSplash={() => setShowSplash(true)}
       />
     </div>
   );
