@@ -320,14 +320,38 @@ export default function App() {
               ? "max-w-[390px] md:rounded-[44px] md:shadow-[0_24px_60px_rgba(0,0,0,0.6)] md:overflow-hidden min-h-screen md:min-h-[844px] bg-[#14161d]"
               : "max-w-md min-h-screen bg-[#14161d]"
             : isFramed
-            ? "max-w-md md:rounded-[36px] md:shadow-2xl md:border md:border-white/10 md:overflow-hidden md:ring-8 md:ring-slate-950 min-h-screen md:min-h-[850px] bg-[#14161d]"
-            : "max-w-lg min-h-screen shadow-2xl bg-[#14161d]"
+            ? `max-w-md md:rounded-[36px] md:shadow-2xl md:border md:border-white/10 md:overflow-hidden md:ring-8 md:ring-slate-950 min-h-screen md:min-h-[850px] ${
+                activeTab === "new_hire" && learnerSection === "journey"
+                  ? "bg-[#eaedf2]"
+                  : activeTab === "new_hire" && learnerSection === "modules"
+                  ? "bg-[#0a0b0e]"
+                  : "bg-[#14161d]"
+              }`
+            : `max-w-lg min-h-screen shadow-2xl ${
+                activeTab === "new_hire" && learnerSection === "journey"
+                  ? "bg-[#eaedf2]"
+                  : activeTab === "new_hire" && learnerSection === "modules"
+                  ? "bg-[#0a0b0e]"
+                  : "bg-[#14161d]"
+              }`
         }`}
       >
         {/* Subtle phone speaker notch for framed mobile experience on desktop (only during active shift views) */}
         {isFramed && !isOnboarding && (
-          <div className="hidden md:flex items-center justify-center pt-2 pb-1 bg-slate-950 border-b border-white/5">
-            <div className="w-16 h-1 rounded-full bg-white/20"></div>
+          <div className={`hidden md:flex items-center justify-center pt-2 pb-1 border-b ${
+            activeTab === "new_hire" && learnerSection === "journey"
+              ? "bg-[#eaedf2] border-slate-300"
+              : activeTab === "new_hire" && learnerSection === "modules"
+              ? "bg-[#0a0b0e] border-white/5"
+              : activeTab === "new_hire" && learnerSection === "dashboard"
+              ? "bg-[#081b4e] border-transparent"
+              : "bg-slate-950 border-white/5"
+          }`}>
+            <div className={`w-16 h-1 rounded-full ${
+              activeTab === "new_hire" && learnerSection === "journey"
+                ? "bg-slate-400"
+                : "bg-white/20"
+            }`}></div>
           </div>
         )}
 
@@ -342,7 +366,7 @@ export default function App() {
         ) : (
           <>
             {/* Global Mobile Header (Only during active shift views) */}
-            {!(activeTab === "new_hire" && (learnerSection === "modules" || learnerSection === "home")) && (
+            {!(activeTab === "new_hire" && (learnerSection === "modules" || learnerSection === "home" || learnerSection === "journey" || learnerSection === "dashboard")) && (
               <Header
                 activeTab={activeTab}
                 setActiveTab={setActiveTab}

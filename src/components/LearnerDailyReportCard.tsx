@@ -137,7 +137,7 @@ export const LearnerDailyReportCard: React.FC<LearnerDailyReportCardProps> = ({
             <Calendar className="w-4 h-4 text-cyan-400" />
           </div>
           <div>
-            <span className="text-lg sm:text-xl font-black uppercase tracking-wider text-white block">
+            <span className="text-lg sm:text-base sm:text-lg font-black uppercase tracking-wider text-white block">
               {isHindi ? "कल का स्नैपशॉट" : "YESTERDAY SNAPSHOT"}
             </span>
           </div>
@@ -153,102 +153,95 @@ export const LearnerDailyReportCard: React.FC<LearnerDailyReportCardProps> = ({
             89%
           </div>
 
-          <button
-            type="button"
-            onClick={handlePlayAudio}
-            className="p-1.5 rounded-full text-slate-300 hover:text-white transition-colors cursor-pointer"
-            title="Listen aloud"
-          >
-            <Volume2 className={`w-4 h-4 ${playingAudio ? "animate-bounce text-cyan-400" : ""}`} />
-          </button>
+          
         </div>
       </div>
 
       {/* 2. 4-PILLAR METRIC GRID TILES */}
-      <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5 pt-0.5">
+      <div className="grid grid-cols-4 gap-2 pt-0.5">
         {/* Pillar 1: Training Completion */}
-        <div className={`p-3 rounded-2xl flex flex-col justify-between space-y-2 hover:bg-white/5 transition-all ${
+        <div className={`p-2 rounded-xl flex flex-col justify-between space-y-2 hover:bg-white/5 transition-all ${
           isTrainingRed
             ? "bg-[#2c0f0f] border border-red-500/50 text-red-200 animate-[pulse_1.5s_infinite] shadow-[0_0_12px_rgba(239,68,68,0.5)]"
             : "bg-black/25 border border-white/5 text-slate-300"
         }`}>
           <div className="flex items-center justify-between">
-            <span className={`text-[10px] font-bold uppercase tracking-wider ${isTrainingRed ? "text-red-300" : "text-slate-300"}`}>
+            <span className={`text-[8px] sm:text-[9px] font-black uppercase tracking-tighter sm:tracking-wider truncate max-w-[50px] sm:max-w-full tracking-wider ${isTrainingRed ? "text-red-300" : "text-slate-300"}`}>
               {isHindi ? "ट्रेनिंग" : "Training"}
             </span>
-            <div className="w-6 h-6 rounded-lg bg-white/10 border border-white/10 text-purple-300 flex items-center justify-center shadow-2xs">
+            <div className="w-5 h-5 rounded-md hidden sm:flex bg-white/10 border border-white/10 text-purple-300 items-center justify-center shadow-2xs">
               🎓
             </div>
           </div>
           <div>
             <div className="flex items-baseline gap-1">
-              <span className="text-xl font-black text-white leading-none">{completedCount}/3</span>
+              <span className="text-base sm:text-lg font-black text-white leading-none">{completedCount}/3</span>
               {isTrainingRed && <span className="text-red-400 font-extrabold text-[10px] ml-1">⚠️</span>}
             </div>
           </div>
         </div>
 
         {/* Pillar 2: Pick Speed */}
-        <div className={`p-3 rounded-2xl flex flex-col justify-between space-y-2 hover:bg-white/5 transition-all ${
+        <div className={`p-2 rounded-xl flex flex-col justify-between space-y-2 hover:bg-white/5 transition-all ${
           isSpeedRed
             ? "bg-[#2c0f0f] border border-red-500/50 text-red-200 animate-[pulse_1.5s_infinite] shadow-[0_0_12px_rgba(239,68,68,0.5)]"
             : "bg-black/25 border border-white/5 text-slate-300"
         }`}>
           <div className="flex items-center justify-between">
-            <span className={`text-[10px] font-bold uppercase tracking-wider ${isSpeedRed ? "text-red-300" : "text-slate-300"}`}>
+            <span className={`text-[8px] sm:text-[9px] font-black uppercase tracking-tighter sm:tracking-wider truncate max-w-[50px] sm:max-w-full tracking-wider ${isSpeedRed ? "text-red-300" : "text-slate-300"}`}>
               {isHindi ? "स्पीड" : "Speed"}
             </span>
-            <div className="w-6 h-6 rounded-lg bg-white/10 border border-white/10 text-cyan-300 flex items-center justify-center shadow-2xs">
+            <div className="w-5 h-5 rounded-md hidden sm:flex bg-white/10 border border-white/10 text-cyan-300 items-center justify-center shadow-2xs">
               <TrendingUp className="w-3.5 h-3.5 text-cyan-400" />
             </div>
           </div>
           <div>
             <div className="flex items-baseline gap-1">
-              <span className="text-xl font-black text-white leading-none">{actualPace}</span>
+              <span className="text-base sm:text-lg font-black text-white leading-none">{actualPace}</span>
               {isSpeedRed && <span className="text-red-400 font-extrabold text-[10px] ml-1">⚠️</span>}
             </div>
           </div>
         </div>
 
         {/* Pillar 3: Scan Accuracy */}
-        <div className={`p-3 rounded-2xl flex flex-col justify-between space-y-2 hover:bg-white/5 transition-all ${
+        <div className={`p-2 rounded-xl flex flex-col justify-between space-y-2 hover:bg-white/5 transition-all ${
           isAccuracyRed
             ? "bg-[#2c0f0f] border border-red-500/50 text-red-200 animate-[pulse_1.5s_infinite] shadow-[0_0_12px_rgba(239,68,68,0.5)]"
             : "bg-black/25 border border-white/5 text-slate-300"
         }`}>
           <div className="flex items-center justify-between">
-            <span className={`text-[10px] font-bold uppercase tracking-wider ${isAccuracyRed ? "text-red-300" : "text-slate-300"}`}>
+            <span className={`text-[8px] sm:text-[9px] font-black uppercase tracking-tighter sm:tracking-wider truncate max-w-[50px] sm:max-w-full tracking-wider ${isAccuracyRed ? "text-red-300" : "text-slate-300"}`}>
               {isHindi ? "एक्यूरेसी" : "Accuracy"}
             </span>
-            <div className="w-6 h-6 rounded-lg bg-white/10 border border-white/10 text-emerald-300 flex items-center justify-center shadow-2xs">
+            <div className="w-5 h-5 rounded-md hidden sm:flex bg-white/10 border border-white/10 text-emerald-300 items-center justify-center shadow-2xs">
               <ShieldCheck className="w-3.5 h-3.5 text-emerald-400" />
             </div>
           </div>
           <div>
             <div className="flex items-baseline gap-1">
-              <span className="text-xl font-black text-white leading-none">{accuracy}%</span>
+              <span className="text-base sm:text-lg font-black text-white leading-none">{accuracy}%</span>
               {isAccuracyRed && <span className="text-red-400 font-extrabold text-[10px] ml-1">⚠️</span>}
             </div>
           </div>
         </div>
 
         {/* Pillar 4: Orders SLA */}
-        <div className={`p-3 rounded-2xl flex flex-col justify-between space-y-2 hover:bg-white/5 transition-all ${
+        <div className={`p-2 rounded-xl flex flex-col justify-between space-y-2 hover:bg-white/5 transition-all ${
           isOrdersRed
             ? "bg-[#2c0f0f] border border-red-500/50 text-red-200 animate-[pulse_1.5s_infinite] shadow-[0_0_12px_rgba(239,68,68,0.5)]"
             : "bg-black/25 border border-white/5 text-slate-300"
         }`}>
           <div className="flex items-center justify-between">
-            <span className={`text-[10px] font-bold uppercase tracking-wider ${isOrdersRed ? "text-red-300" : "text-slate-300"}`}>
+            <span className={`text-[8px] sm:text-[9px] font-black uppercase tracking-tighter sm:tracking-wider truncate max-w-[50px] sm:max-w-full tracking-wider ${isOrdersRed ? "text-red-300" : "text-slate-300"}`}>
               {isHindi ? "ऑर्डर" : "Orders"}
             </span>
-            <div className="w-6 h-6 rounded-lg bg-white/10 border border-white/10 text-blue-300 flex items-center justify-center shadow-2xs">
+            <div className="w-5 h-5 rounded-md hidden sm:flex bg-white/10 border border-white/10 text-blue-300 items-center justify-center shadow-2xs">
               <Package className="w-3.5 h-3.5 text-blue-400" />
             </div>
           </div>
           <div>
             <div className="flex items-baseline gap-1">
-              <span className="text-xl font-black text-white leading-none">{ordersCompleted}</span>
+              <span className="text-base sm:text-lg font-black text-white leading-none">{ordersCompleted}</span>
               {isOrdersRed && <span className="text-red-400 font-extrabold text-[10px] ml-1">⚠️</span>}
             </div>
           </div>

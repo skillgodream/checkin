@@ -9,7 +9,7 @@ import {
   UserCheck,
   TrendingUp,
   ShieldCheck,
-  Volume2,
+  Phone,
 } from "lucide-react";
 import { NewHire } from "../types";
 import { deriveLearnerRoadmap, CanonicalRoadmapStage } from "../services/intelligence";
@@ -128,11 +128,11 @@ export const LearnerJourneyRoadmap: React.FC<LearnerJourneyRoadmapProps> = ({
           <div className="flex items-center gap-1.5">
             <button
               type="button"
-              onClick={handlePlayAudio}
+              onClick={() => onNavigateToSection && onNavigateToSection("buddy")}
               className="p-1.5 rounded-full text-slate-400 hover:text-purple-600 transition-colors cursor-pointer"
-              title="Listen aloud"
+              title="Call Buddy"
             >
-              <Volume2 className={`w-4 h-4 ${playingAudio ? "animate-bounce text-purple-600" : ""}`} />
+              <Phone className="w-4 h-4" />
             </button>
             <button
               type="button"
@@ -208,47 +208,14 @@ export const LearnerJourneyRoadmap: React.FC<LearnerJourneyRoadmapProps> = ({
   return (
     <div
       id="learner-job-ready-roadmap-card"
-      className="bg-gradient-to-br from-cyan-500 to-blue-600 rounded-[26px] p-4 sm:p-5 border border-white/20 shadow-xl shadow-cyan-500/10 space-y-3.5 select-none"
+      className="bg-transparent rounded-2xl p-2 sm:p-3 border border-white/10 select-none relative"
     >
-      {/* CARD HEADER: WHERE AM I? */}
-      <div className="flex items-center justify-between">
-        <div className="flex items-center gap-2.5">
-          <div className="w-9 h-9 rounded-xl bg-white/20 text-white flex items-center justify-center shadow-xs">
-            <Sparkles className="w-4 h-4" />
-          </div>
-          <div>
-            <div className="flex items-center gap-2">
-              <span className="text-xs font-black uppercase tracking-wider text-white bg-white/25 px-2.5 py-0.5 rounded-full border border-white/10">
-                {isHindi ? "जॉब-रेडी सफर" : "Job-Ready Journey"}
-              </span>
-              <span className="text-xs font-bold text-white/90">
-                {currentStage.stageNumber}/6
-              </span>
-            </div>
-            <h3 className="text-base font-black text-white leading-tight mt-1">
-              {isHindi ? currentStage.titleHi : currentStage.titleEn}
-            </h3>
-          </div>
-        </div>
-
-        <div className="flex items-center gap-1.5">
-          <button
-            type="button"
-            onClick={handlePlayAudio}
-            className="p-2 rounded-full bg-white/15 hover:bg-white/25 text-white transition-colors cursor-pointer"
-            title="Listen aloud"
-          >
-            <Volume2 className={`w-4 h-4 ${playingAudio ? "animate-bounce" : ""}`} />
-          </button>
-        </div>
-      </div>
-
-      {/* 6-STAGE VISUAL PROGRESSION TRACK */}
-      <div className="relative pt-2 pb-1">
+      {/* 6-STAGE VISUAL PROGRESSION TRACK (JOURNEY PATH ONLY) */}
+      <div className="relative pt-3 pb-2">
         {/* Connection line */}
-        <div className="absolute top-6 left-4 right-4 h-1 bg-white/20 rounded-full z-0">
+        <div className="absolute top-7 left-4 right-4 h-1 bg-white/20 rounded-full z-0">
           <div
-            className="h-full bg-white rounded-full transition-all duration-700 shadow-xs"
+            className="h-full bg-cyan-400 rounded-full transition-all duration-700 shadow-xs"
             style={{
               width: `${(currentStageIndex / (stages.length - 1)) * 100}%`,
             }}
@@ -273,23 +240,23 @@ export const LearnerJourneyRoadmap: React.FC<LearnerJourneyRoadmapProps> = ({
                 <div
                   className={`w-8 h-8 rounded-full flex items-center justify-center transition-all ${
                     isCompleted
-                      ? "bg-emerald-400 text-slate-900 shadow-xs"
+                      ? "bg-emerald-400 text-slate-950 shadow-sm"
                       : isCurrent
-                      ? "bg-white text-blue-600 ring-4 ring-white/25 shadow-md scale-110"
-                      : "bg-white/15 border-2 border-white/15 text-white/90 group-hover:border-white/25"
+                      ? "bg-cyan-400 text-slate-950 ring-4 ring-cyan-400/30 shadow-md scale-110"
+                      : "bg-white/10 border-2 border-white/20 text-white/90 group-hover:border-white/40"
                   }`}
                 >
                   {isCompleted ? (
                     <CheckCircle2 className="w-4 h-4 stroke-[2.5]" />
                   ) : isCurrent ? (
-                    <div className="w-2.5 h-2.5 rounded-full bg-blue-600 animate-pulse" />
+                    <div className="w-2.5 h-2.5 rounded-full bg-slate-950 animate-pulse" />
                   ) : (
                     <span className="text-xs font-black">{stage.stageNumber}</span>
                   )}
                 </div>
                 <span
-                  className={`text-[11px] sm:text-xs mt-1.5 font-bold truncate max-w-[56px] text-center ${
-                    isCurrent ? "text-white font-black drop-shadow-xs" : isCompleted ? "text-emerald-300" : "text-white/70"
+                  className={`text-[11px] sm:text-xs mt-2 font-bold truncate max-w-[56px] text-center ${
+                    isCurrent ? "text-cyan-300 font-black drop-shadow-xs" : isCompleted ? "text-emerald-300" : "text-slate-400"
                   }`}
                 >
                   {label}

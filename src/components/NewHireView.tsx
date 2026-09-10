@@ -13,6 +13,8 @@ import { LearnerDailyReportCard } from "./LearnerDailyReportCard";
 import { YesterdayShiftDetailModal } from "./YesterdayShiftDetailModal";
 import { TodaysGoalLandingView } from "./TodaysGoalLandingView";
 import { DailyCoachReportView } from "./DailyCoachReportView";
+import { DashboardHeader } from "./DashboardHeader";
+import { CommercialCertificationCard } from "./CommercialCertificationCard";
 import {  Mic,
   MicOff,
   Send,
@@ -34,7 +36,7 @@ import {  Mic,
   MessageCircle,
   User,
   ArrowRight,
-  ChevronRight,
+  ChevronRight, ChevronUp,
   Footprints,
   ShieldCheck,
   PackageCheck,
@@ -45,6 +47,10 @@ import {  Mic,
   Globe,
   ChevronDown,
   Check,
+  Bell,
+  ArrowUpRight,
+  ArrowDownUp,
+  ArrowDownRight,
 } from "lucide-react";
 
 interface NewHireViewProps {
@@ -108,6 +114,7 @@ export const NewHireView: React.FC<NewHireViewProps> = ({
 
   // Learner Switcher Dropdown local states
   const [isLearnerDropdownOpen, setIsLearnerDropdownOpen] = useState<boolean>(false);
+  const [showNextStepModal, setShowNextStepModal] = useState<boolean>(false);
   const learnerDropdownRef = React.useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -536,10 +543,12 @@ export const NewHireView: React.FC<NewHireViewProps> = ({
   if (activeSection === "modules") {
     return (
       <div 
-        className="max-w-md mx-auto pb-28 select-none min-h-screen relative bg-[#14161d] animate-in fade-in duration-200"
+        id="modules-view-container" 
+        className="max-w-md mx-auto pb-28 select-none min-h-screen relative bg-[#0a0b0e] text-white overflow-hidden animate-in fade-in duration-200"
       >
-        {/* Soft elegant gradient overlay */}
-        <div className="absolute inset-0 bg-slate-950/20 backdrop-blur-[1px] z-0" />
+        {/* Subtle dark ambient accents */}
+        <div className="absolute -top-16 -left-16 w-80 h-80 bg-blue-900/10 rounded-full blur-3xl pointer-events-none z-0" />
+        <div className="absolute bottom-1/3 -right-16 w-80 h-80 bg-indigo-950/15 rounded-full blur-3xl pointer-events-none z-0" />
         
         {/* Content wrapper */}
         <div className="relative z-10">
@@ -572,46 +581,39 @@ export const NewHireView: React.FC<NewHireViewProps> = ({
         
         {/* Content wrapper */}
         <div className="relative z-10 space-y-4">
-          {/* 1. HERO BANNER: FULL BLEED FROM TOP AND SIDES, ROUNDED AT THE BOTTOM */}
+          {/* 1. HERO BANNER: ADOPTING EXACT SCREENSHOT HERO CARD COLOR & STACKED DECK LAYOUT */}
           <div
             id="todays-focus-card"
-            className="moving-dark-gradient rounded-b-[32px] p-5 sm:p-6 text-white shadow-xl border-b border-white/10 relative space-y-5"
+            className="hero-card-screenshot-bg rounded-b-[44px] pt-7 pb-6 px-5 sm:px-6 text-white shadow-2xl border-b border-white/20 relative space-y-5 overflow-hidden"
           >
-            {/* Real-time moving/flowing dark visual and halftone mesh dots as requested */}
-            <div className="absolute inset-0 dotted-halftone-pattern rounded-b-[32px] pointer-events-none opacity-85 z-0" />
-            
-            {/* Subtle premium accent glow to lift the look */}
-            <div className="absolute -top-16 -left-16 w-56 h-56 bg-cyan-500/15 rounded-full blur-3xl pointer-events-none z-0" />
-            <div className="absolute -bottom-16 -right-16 w-56 h-56 bg-blue-600/10 rounded-full blur-3xl pointer-events-none z-0" />
+            {/* Luminous soft radial glow inside bottom of the card */}
+            <div className="absolute inset-0 pointer-events-none bg-[radial-gradient(ellipse_at_50%_92%,rgba(33,136,248,0.45)_0%,transparent_64%)] z-0" />
 
-            {/* Top Bar: Profile Selector (Left) & Actions (Right) */}
-            <div className="flex items-center justify-between relative z-30 gap-2">
-              {/* Profile selector dropdown */}
+            {/* Top Bar: Profile Avatar (Left) & Notification Bell + Language Controls (Right) */}
+            <div className="flex items-center justify-between relative z-30">
+              {/* Profile selector avatar dropdown */}
               <div className="relative" ref={learnerDropdownRef}>
                 <button
                   type="button"
                   id="home-learner-dropdown-btn"
                   onClick={() => setIsLearnerDropdownOpen((prev) => !prev)}
-                  className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-white/10 hover:bg-white/20 border border-white/10 text-white cursor-pointer active:scale-95 transition-all text-xs font-black shadow-xs shrink-0"
+                  className="w-12 h-12 rounded-full overflow-hidden border-2 border-white/35 shadow-md cursor-pointer active:scale-95 transition-transform shrink-0 block"
+                  title={newHire.name}
                 >
-                  <div className="w-5 h-5 rounded-full overflow-hidden border border-white/40 shrink-0">
-                    <img
-                      src={newHire.avatar || "https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150&auto=format&fit=crop&q=80"}
-                      alt={newHire.name}
-                      className="w-full h-full object-cover"
-                      referrerPolicy="no-referrer"
-                    />
-                  </div>
-                  <span className="truncate max-w-[85px]">{newHire.name.split(" ")[0]}</span>
-                  <ChevronDown className="w-3.5 h-3.5 text-cyan-400 shrink-0" />
+                  <img
+                    src={newHire.avatar || "https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150&auto=format&fit=crop&q=80"}
+                    alt={newHire.name}
+                    className="w-full h-full object-cover"
+                    referrerPolicy="no-referrer"
+                  />
                 </button>
 
                 {isLearnerDropdownOpen && newHires && (
                   <div
                     id="home-learner-dropdown-popover"
-                    className="absolute left-0 mt-2 w-48 rounded-2xl bg-[#1b1e26] border border-white/10 shadow-2xl py-1.5 z-50 text-white text-xs font-bold animate-in fade-in zoom-in-95 duration-150"
+                    className="absolute left-0 mt-2 w-48 rounded-2xl bg-[#092252]/95 border border-white/20 shadow-2xl py-1.5 z-50 text-white text-xs font-bold animate-in fade-in zoom-in-95 duration-150 backdrop-blur-xl"
                   >
-                    <div className="px-3 py-1.5 text-[9px] font-black uppercase tracking-wider text-slate-400 border-b border-white/5 mb-1.5">
+                    <div className="px-3 py-1.5 text-[9px] font-black uppercase tracking-wider text-blue-200/70 border-b border-white/10 mb-1">
                       {isHindi ? "प्रोफ़ाइल बदलें" : "Switch Profile"}
                     </div>
                     {newHires.map((hire) => (
@@ -622,12 +624,12 @@ export const NewHireView: React.FC<NewHireViewProps> = ({
                           if (onSelectHire) onSelectHire(hire.id);
                           setIsLearnerDropdownOpen(false);
                         }}
-                        className={`w-full text-left px-3 py-2 flex items-center justify-between hover:bg-white/5 transition-all cursor-pointer ${
-                          hire.id === newHire.id ? "text-cyan-400 font-bold" : "text-slate-300 font-medium"
+                        className={`w-full text-left px-3 py-2 flex items-center justify-between hover:bg-white/10 transition-all cursor-pointer ${
+                          hire.id === newHire.id ? "text-cyan-300 font-bold" : "text-blue-100 font-medium"
                         }`}
                       >
                         <div className="flex items-center gap-2 min-w-0">
-                          <div className="w-5 h-5 rounded-full overflow-hidden border border-white/20 shrink-0">
+                          <div className="w-5 h-5 rounded-full overflow-hidden border border-white/30 shrink-0">
                             <img
                               src={hire.avatar}
                               alt={hire.name}
@@ -637,254 +639,360 @@ export const NewHireView: React.FC<NewHireViewProps> = ({
                           </div>
                           <span className="truncate">{hire.name}</span>
                         </div>
-                        {hire.id === newHire.id && <Check className="w-3.5 h-3.5 text-cyan-400 shrink-0 stroke-[3]" />}
+                        {hire.id === newHire.id && <Check className="w-3.5 h-3.5 text-cyan-300 shrink-0 stroke-[3]" />}
                       </button>
                     ))}
                   </div>
                 )}
               </div>
 
-              {/* Action Buttons */}
-              <div className="flex items-center gap-1.5 shrink-0">
+              {/* Action Buttons: Language toggle, Manager Console, and Bell Notification Icon */}
+              <div className="flex items-center gap-2">
+                <button
+                  type="button"
+                  onClick={() => setIsHindi(!isHindi)}
+                  className="px-2.5 py-1.5 rounded-full bg-white/15 hover:bg-white/25 border border-white/20 text-white cursor-pointer active:scale-95 transition-all text-xs font-bold shadow-xs backdrop-blur-md"
+                  title="Toggle Language"
+                >
+                  <span>{isHindi ? "EN" : "HI"}</span>
+                </button>
+
                 {onOpenManagerConsole && (
                   <button
                     type="button"
                     onClick={onOpenManagerConsole}
-                    className="p-1.5 rounded-full bg-white/10 hover:bg-white/20 text-white cursor-pointer active:scale-95 transition-all"
+                    className="w-10 h-10 rounded-full bg-white/15 hover:bg-white/25 border border-white/20 text-white cursor-pointer active:scale-95 transition-all flex items-center justify-center shadow-xs backdrop-blur-md"
                     title={isHindi ? "मैनेजर कंसोल" : "Manager Console"}
                   >
-                    <Eye className="w-4 h-4 text-cyan-400" />
+                    <Eye className="w-4 h-4 text-white" />
                   </button>
                 )}
 
-                <button
-                  type="button"
-                  onClick={() => setIsHindi(!isHindi)}
-                  className="px-2.5 py-1.5 rounded-full bg-white/10 hover:bg-white/20 text-white cursor-pointer active:scale-95 transition-all flex items-center gap-1 font-bold text-[11px]"
-                  title="Toggle Language"
-                >
-                  <Globe className="w-3.5 h-3.5 text-cyan-400" />
-                  <span>{isHindi ? "EN" : "HI"}</span>
-                </button>
-
-                <button
-                  type="button"
-                  onClick={() => {
-                    const completedCount = newHire.modulesCompleted ?? 3;
-                    const quizAvg = newHire.quizAverageScore ?? 94;
-                    const actualPace = currentRecord.workSignal?.actualPickRate ?? 35;
-                    const targetPace = currentRecord.workSignal?.targetPickRate ?? 50;
-                    const accuracy = currentRecord.workSignal?.accuracyRate ?? 98;
-                    const ordersCompleted = currentRecord.workSignal?.ordersCompleted ?? 38;
-                    const targetOrders = currentRecord.workRecord || currentRecord.workSignal?.targetOrders || 42;
-                    const trainingScore = Math.min(100, Math.round(((completedCount / 3) * 50 + (quizAvg / 100) * 50)));
-                    const speedScore = Math.min(100, Math.round((actualPace / targetPace) * 100));
-                    const accuracyScore = Math.min(100, Math.round(accuracy));
-                    const ordersScore = Math.min(100, Math.round((ordersCompleted / Number(targetOrders)) * 100));
-                    const compositeScore = Math.round(
-                      trainingScore * 0.25 + speedScore * 0.30 + accuracyScore * 0.30 + ordersScore * 0.15
-                    );
-                    handlePlayAudio(
-                      "status-card",
-                      isHindi ? `दैनिक स्कोर ${compositeScore} प्रतिशत है।` : `Daily performance score is ${compositeScore} percent.`
-                    );
-                  }}
-                  className="flex items-center gap-1 px-2.5 py-1 rounded-full bg-white text-slate-950 text-xs font-black shadow-xs cursor-pointer active:scale-95 transition-all"
-                  title="Listen aloud"
-                >
-                  <Volume2
-                    className={`w-3.5 h-3.5 ${
-                      playingAudioId === "status-card" ? "text-purple-600 animate-bounce" : "text-slate-800"
-                    }`}
-                  />
-                  <span>{isHindi ? "सुनिए" : "Listen"}</span>
-                </button>
+                {/* Frosted circular Bell button matching screenshot */}
+                <div className="relative">
+                  <button
+                    type="button"
+                    onClick={() => setShowNextStepModal(true)}
+                    className="w-11 h-11 rounded-full bg-white/15 hover:bg-white/25 border border-white/20 backdrop-blur-md flex items-center justify-center text-white cursor-pointer active:scale-95 transition-all shadow-xs"
+                    title={isHindi ? "अलर्ट व अगला कदम" : "Alerts & Next Step"}
+                  >
+                    <Bell className="w-5 h-5 text-white stroke-[2.2]" />
+                  </button>
+                  <span className="w-2.5 h-2.5 rounded-full bg-emerald-400 border-2 border-[#06296b] absolute top-1.5 right-1.5 animate-pulse" />
+                </div>
               </div>
             </div>
 
-            {/* Circular Percentage in the Card */}
-            {(() => {
-              const completedCount = newHire.modulesCompleted ?? 3;
-              const quizAvg = newHire.quizAverageScore ?? 94;
-              const actualPace = currentRecord.workSignal?.actualPickRate ?? 35;
-              const targetPace = currentRecord.workSignal?.targetPickRate ?? 50;
-              const accuracy = currentRecord.workSignal?.accuracyRate ?? 98;
-              const ordersCompleted = currentRecord.workSignal?.ordersCompleted ?? 38;
-              const targetOrders = currentRecord.workSignal?.targetOrders ?? 42;
-              const trainingScore = Math.min(100, Math.round(((completedCount / 3) * 50 + (quizAvg / 100) * 50)));
-              const speedScore = Math.min(100, Math.round((actualPace / targetPace) * 100));
-              const accuracyScore = Math.min(100, Math.round(accuracy));
-              const ordersScore = Math.min(100, Math.round((ordersCompleted / targetOrders) * 100));
-              const compositeScore = Math.round(
-                trainingScore * 0.25 + speedScore * 0.30 + accuracyScore * 0.30 + ordersScore * 0.15
-              );
+            {/* Center Area: Balance label & 22% & Growth Pill */}
+            <div className="flex flex-col items-center justify-center text-center pt-2 relative z-10 space-y-2">
+              <span className="text-sm font-medium text-blue-200/85 tracking-wide">
+                {isHindi ? "करियर रेडीनेस" : "Balance"}
+              </span>
 
-              return (
-                <div className="flex flex-col items-center justify-center py-2 relative z-10">
-                  <div className="relative w-40 h-40 flex items-center justify-center">
-                    <svg className="w-full h-full transform -rotate-90" viewBox="0 0 100 100">
-                      <circle
-                        cx="50"
-                        cy="50"
-                        r="40"
-                        fill="transparent"
-                        stroke="rgba(255, 255, 255, 0.15)"
-                        strokeWidth="8"
-                      />
-                      <circle
-                        cx="50"
-                        cy="50"
-                        r="40"
-                        fill="transparent"
-                        stroke="#22d3ee" // dynamic glowing color (cyan) for outstanding readability
-                        strokeWidth="8"
-                        strokeDasharray={251.2}
-                        strokeDashoffset={251.2 - (251.2 * (authoritativeReadiness ?? 22)) / 100}
-                        strokeLinecap="round"
-                        className="transition-all duration-1000 drop-shadow-[0_0_6px_rgba(34,211,238,0.4)]"
-                      />
-                    </svg>
-                    <div className="absolute inset-0 flex flex-col items-center justify-center text-center">
-                      <span className="text-3xl font-black text-white">{authoritativeReadiness ?? 22}%</span>
-                      <span className="text-[10px] font-bold text-slate-300 uppercase tracking-tight">
-                        {isHindi ? "करियर प्रगति" : "Career Progress"}
-                      </span>
-                    </div>
-                  </div>
-                </div>
-              );
-            })()}
-
-            {/* Next Skill to Improve Section */}
-            {(() => {
-              const decisionType = currentRecord.recommendedAction?.decisionType;
-              const targetCapId = currentRecord.recommendedAction?.targetCapabilityId;
-              const targetCapDef = targetCapId ? DARK_STORE_CAPABILITIES.find((c) => c.id === targetCapId) : null;
-              
-              const isEnvironmentIssue = decisionType === "tool_remedy" || decisionType === "environment_support" || decisionType === "communication_support";
-              const isInsufficient = decisionType === "no_action_monitor" || currentRecord.identifiedPattern?.category === "insufficient_evidence";
-              
-              let skillDisplay = "safe";
-              let skillStatusBadge = "";
-              
-              if (isInsufficient || isEnvironmentIssue || !targetCapDef) {
-                skillDisplay = "safe";
-              } else {
-                skillDisplay = "actionable";
-                if (decisionType === "advance_default" || decisionType === "jump_ahead") {
-                  skillStatusBadge = isHindi ? "अगला स्तर" : "Ready for next level";
-                } else {
-                  skillStatusBadge = isHindi ? "अभ्यास की आवश्यकता है" : "Needs practice";
-                }
-              }
-
-              return (
-                <div className="flex flex-col items-center text-center mt-3 mb-2 relative z-10 w-full px-2">
-                  <span className="text-[10px] font-black uppercase tracking-widest text-slate-400 mb-2">
-                    {isHindi ? "सुधारने के लिए अगला कौशल" : "NEXT SKILL TO IMPROVE"}
-                  </span>
-                  
-                  {skillDisplay === "safe" ? (
-                    <div className="bg-black/20 rounded-xl p-3 border border-white/5 w-full max-w-[260px]">
-                      <h3 className="text-sm font-bold text-emerald-400 mb-1">
-                        {isHindi ? "आप अच्छा कर रहे हैं।" : "You're doing well."}
-                      </h3>
-                      <p className="text-[11px] text-slate-400 leading-snug">
-                        {isHindi ? "हम आपका अगला सुधार क्षेत्र खोजने के लिए आपकी निगरानी कर रहे हैं।" : "We'll keep observing your work to find your next improvement area."}
-                      </p>
-                    </div>
-                  ) : (
-                    <div className="bg-black/20 rounded-xl p-3.5 border border-white/10 w-full max-w-[280px] flex flex-col items-center">
-                      <h3 className="text-[15px] font-black text-white text-center leading-tight">{targetCapDef?.name}</h3>
-                      <span className={`text-[10px] font-bold ${skillStatusBadge.includes('practice') || skillStatusBadge.includes('अभ्यास') ? 'text-amber-400' : 'text-emerald-400'} uppercase tracking-wider block mt-1`}>
-                        {skillStatusBadge}
-                      </span>
-                    </div>
-                  )}
-                </div>
-              );
-            })()}
-
-            {/* Yesterday -> Today Section */}
-            {(() => {
-              const decisionType = currentRecord.recommendedAction?.decisionType;
-              const isInsufficient = decisionType === "no_action_monitor" || currentRecord.identifiedPattern?.category === "insufficient_evidence";
-              const isSteady = decisionType === "advance_default" || decisionType === "jump_ahead";
-              
-              if (isInsufficient) {
-                return (
-                  <div className="flex flex-col items-center w-full px-2 mb-6 mt-2 relative z-10">
-                    <div className="flex flex-col bg-black/20 rounded-xl p-3.5 border border-white/5 relative text-center w-full max-w-[280px]">
-                      <span className="text-[9px] font-black uppercase tracking-widest text-slate-400 mb-1">{isHindi ? "कल से आज" : "YESTERDAY → TODAY"}</span>
-                      <p className="text-[12px] font-semibold text-white leading-snug">{isHindi ? "हम अभी भी आपके काम को समझ रहे हैं।" : "We're still learning about your work."}</p>
-                      <p className="text-[11px] font-semibold text-slate-400 mt-1">{status.action}</p>
-                    </div>
-                  </div>
-                );
-              }
-              
-              if (isSteady) {
-                return (
-                  <div className="flex flex-col items-center w-full px-2 mb-6 mt-2 relative z-10">
-                    <div className="flex flex-col bg-black/20 rounded-xl p-3.5 border border-white/5 relative text-center w-full max-w-[280px]">
-                      <span className="text-[9px] font-black uppercase tracking-widest text-slate-400 mb-1">{isHindi ? "कल से आज" : "YESTERDAY → TODAY"}</span>
-                      <p className="text-[12px] font-semibold text-emerald-400 leading-snug">{isHindi ? "आप लगातार अच्छा कर रहे हैं।" : "You're building consistency."}</p>
-                      <p className="text-[11px] font-semibold text-slate-300 mt-1">{isHindi ? "आज का लक्ष्य पूरा करें।" : "Keep working on today's goal."}</p>
-                    </div>
-                  </div>
-                );
-              }
-              
-              return (
-                <div className="flex flex-col items-center w-full px-2 mb-6 mt-2 relative z-10">
-                  <div className="flex flex-col bg-black/20 rounded-xl p-4 border border-white/10 relative w-full max-w-[280px]">
-                    <span className="text-[9px] font-black uppercase tracking-widest text-slate-400 mb-1">{isHindi ? "कल" : "YESTERDAY"}</span>
-                    <p className="text-[13px] font-semibold text-slate-200 leading-snug">{status.shortWhy}</p>
-                    
-                    <div className="flex justify-center my-3 relative">
-                      <div className="w-full h-[1px] bg-white/10 absolute top-1/2 -translate-y-1/2 left-0"></div>
-                      <div className="w-5 h-5 rounded-full bg-cyan-500/20 border border-cyan-500/30 flex items-center justify-center relative z-10 shadow-sm shadow-cyan-900/20">
-                        <span className="text-cyan-400 text-[10px] font-bold">↓</span>
-                      </div>
-                    </div>
-                    
-                    <span className="text-[9px] font-black uppercase tracking-widest text-slate-400 mb-1">{isHindi ? "आज" : "TODAY"}</span>
-                    <p className="text-[13px] font-semibold text-white leading-snug">{status.action}</p>
-                  </div>
-                </div>
-              );
-            })()}
-
-            {/* Next Best Action Section */}
-            <div className="flex flex-col items-center text-center mt-2 mb-2 relative z-10 space-y-3">
-              <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-cyan-500/10 border border-cyan-500/20">
-                <Zap className="w-3.5 h-3.5 text-cyan-400 fill-cyan-400/20" />
-                <span className="text-[10px] font-black uppercase tracking-widest text-cyan-400">
-                  {isHindi ? "आपका अगला कदम" : "YOUR NEXT STEP"}
+              <div className="flex items-baseline justify-center">
+                <span className="text-[58px] sm:text-[66px] font-black text-white tracking-tight leading-none drop-shadow-sm font-sans">
+                  {authoritativeReadiness ?? 22}%
                 </span>
               </div>
-              
-              <h2 className="text-lg sm:text-[19px] font-black text-white leading-tight px-4 mb-2">
-                {status.target || status.action}
-              </h2>
+
+              {/* Trend Pill matching screenshot: ↗ 2.46% this month */}
+              <div className="pt-1">
+                <button
+                  type="button"
+                  onClick={() => setShowNextStepModal(true)}
+                  className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-full bg-white/15 hover:bg-white/25 border border-white/20 backdrop-blur-md text-blue-100 font-semibold text-xs transition-all shadow-xs cursor-pointer active:scale-95"
+                >
+                  <ArrowUpRight className="w-3.5 h-3.5 text-blue-200 stroke-[2.5]" />
+                  <span>
+                    {isHindi ? "2.46% इस महीने • ऑन ट्रैक" : "2.46% this month"}
+                  </span>
+                </button>
+              </div>
             </div>
 
-            {/* Start Button / Tab */}
-            <div className="pt-1 flex justify-center relative z-10">
-              <button
-                id="home-primary-cta-btn"
-                type="button"
-                onClick={() => setShowTodaysGoalView(true)}
-                className="max-w-[180px] w-full py-2.5 px-4 rounded-xl bg-cyan-500 text-slate-950 hover:bg-cyan-400 font-black text-xs sm:text-sm shadow-lg shadow-cyan-500/25 active:scale-98 transition-all flex items-center justify-center gap-1.5 cursor-pointer border border-cyan-400"
+            {/* Bottom Stacked Card Layers (Matching the screenshot's layered credit-card deck) */}
+            <div className="pt-3 relative z-10">
+              {/* Layer 1 - back-most card peek */}
+              <div className="w-[82%] h-2.5 bg-white/10 rounded-t-xl mx-auto -mb-1 backdrop-blur-xs border-t border-white/10" />
+              
+              {/* Layer 2 - middle card peek */}
+              <div className="w-[91%] h-2.5 bg-white/15 rounded-t-2xl mx-auto -mb-1 backdrop-blur-xs border-t border-white/15" />
+
+              {/* Layer 3 - front card */}
+              <div
+                onClick={() => setShowNextStepModal(true)}
+                className="w-full bg-white/[0.18] hover:bg-white/[0.22] backdrop-blur-md border border-white/25 rounded-2xl p-4 text-white shadow-[0_8px_24px_rgba(0,0,0,0.15)] flex items-center justify-between cursor-pointer transition-all active:scale-[0.99] group"
               >
-                <span>{status.primaryBtnText}</span>
-                <ArrowRight className="w-4 h-4 stroke-[2.5]" />
-              </button>
+                <div className="flex items-center gap-4">
+                  <span className="font-mono text-xs sm:text-sm font-bold tracking-widest text-white/90 group-hover:text-white transition-colors">
+                    •••• 9286
+                  </span>
+                  <span className="font-mono text-xs sm:text-sm font-semibold tracking-wider text-white/80">
+                    08 / 32
+                  </span>
+                </div>
+
+                <div className="flex items-center gap-2">
+                  <span className="font-black italic tracking-widest text-sm text-white/95 drop-shadow-xs">
+                    VISA
+                  </span>
+                </div>
+              </div>
             </div>
           </div>
 
+          {/* Quick Actions Row Matching Screenshot (Deposit / Transfer / Withdraw) */}
+          <div className="grid grid-cols-3 gap-2.5 px-4 pt-1">
+            <button
+              type="button"
+              onClick={() => setShowTodaysGoalView(true)}
+              className="bg-white/10 hover:bg-white/15 border border-white/10 rounded-2xl py-3 px-2 text-white font-bold text-xs flex items-center justify-center gap-1.5 backdrop-blur-md shadow-sm active:scale-95 transition-all cursor-pointer group"
+            >
+              <ArrowUpRight className="w-4 h-4 text-cyan-400 stroke-[2.2] group-hover:scale-110 transition-transform" />
+              <span className="truncate">{isHindi ? "लक्ष्य" : "Deposit"}</span>
+            </button>
+
+            <button
+              type="button"
+              onClick={() => setActiveModal("work")}
+              className="bg-white/10 hover:bg-white/15 border border-white/10 rounded-2xl py-3 px-2 text-white font-bold text-xs flex items-center justify-center gap-1.5 backdrop-blur-md shadow-sm active:scale-95 transition-all cursor-pointer group"
+              title={isHindi ? "फ्लोर टूल्स" : "Shift Tools"}
+            >
+              <ArrowDownUp className="w-4 h-4 text-cyan-400 stroke-[2.2] group-hover:scale-110 transition-transform" />
+            </button>
+
+            <button
+              type="button"
+              onClick={() => setShowNextStepModal(true)}
+              className="bg-white/10 hover:bg-white/15 border border-white/10 rounded-2xl py-3 px-2 text-white font-bold text-xs flex items-center justify-center gap-1.5 backdrop-blur-md shadow-sm active:scale-95 transition-all cursor-pointer group"
+            >
+              <ArrowDownRight className="w-4 h-4 text-cyan-400 stroke-[2.2] group-hover:scale-110 transition-transform" />
+              <span className="truncate">{isHindi ? "टूल्स" : "Withdraw"}</span>
+            </button>
+          </div>
+
+          {/* Pop-up Modal for Next Step Highlights & Context */}
+          {showNextStepModal && (
+            <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70 backdrop-blur-sm animate-in fade-in duration-200">
+              <div 
+                className="relative w-full max-w-md bg-slate-900/95 border border-cyan-500/30 rounded-2xl shadow-2xl p-5 overflow-hidden text-left"
+                onClick={(e) => e.stopPropagation()}
+              >
+                {/* Header with Title and Close button */}
+                <div className="flex items-center justify-between pb-3 border-b border-white/10 mb-4">
+                  <div className="flex items-center gap-2">
+                    <div className="w-8 h-8 rounded-full bg-cyan-500/20 border border-cyan-500/40 flex items-center justify-center">
+                      <Zap className="w-4 h-4 text-cyan-400 fill-cyan-400/20" />
+                    </div>
+                    <div>
+                      <span className="text-[10px] font-black uppercase tracking-widest text-cyan-400 block">
+                        {isHindi ? "आपका अगला कदम" : "YOUR NEXT STEP"}
+                      </span>
+                      <h3 className="text-base font-black text-white leading-tight">
+                        {isHindi ? "कौशल और शिफ्ट संदर्भ" : "Action Highlights & Context"}
+                      </h3>
+                    </div>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => setShowNextStepModal(false)}
+                    className="p-1.5 rounded-full text-slate-400 hover:text-white bg-white/5 hover:bg-white/10 cursor-pointer transition-colors"
+                  >
+                    <X className="w-5 h-5" />
+                  </button>
+                </div>
+
+                {/* Target action highlight */}
+                <div className="mb-4 bg-cyan-500/10 border border-cyan-500/25 rounded-xl p-3">
+                  <span className="text-[9.5px] font-black text-cyan-400 uppercase tracking-widest block mb-1">
+                    {isHindi ? "आज का मुख्य लक्ष्य" : "TODAY'S TARGET FOCUS"}
+                  </span>
+                  <p className="text-sm font-black text-white leading-snug">
+                    {status.target || status.action}
+                  </p>
+                </div>
+
+                {/* Highlights Content: Next Skill Focus & Yesterday → Today Impact */}
+                <div className="bg-white/[0.04] rounded-xl p-3.5 border border-white/10 space-y-3.5">
+                  {/* 1. Next Skill to Improve Highlight */}
+                  {(() => {
+                    const decisionType = currentRecord.recommendedAction?.decisionType;
+                    const targetCapId = currentRecord.recommendedAction?.targetCapabilityId;
+                    const targetCapDef = targetCapId ? DARK_STORE_CAPABILITIES.find((c) => c.id === targetCapId) : null;
+                    
+                    const isEnvironmentIssue = decisionType === "tool_remedy" || decisionType === "environment_support" || decisionType === "communication_support";
+                    const isInsufficient = decisionType === "no_action_monitor" || currentRecord.identifiedPattern?.category === "insufficient_evidence";
+                    
+                    if (isInsufficient || isEnvironmentIssue || !targetCapDef) {
+                      return (
+                        <div className="flex items-center justify-between gap-2 pb-3 border-b border-white/10">
+                          <div className="flex items-center gap-2">
+                            <Sparkles className="w-4 h-4 text-cyan-400 shrink-0" />
+                            <span className="text-[11px] font-black text-slate-300 uppercase tracking-wide">
+                              {isHindi ? "कौशल स्थिति" : "SKILL FOCUS"}
+                            </span>
+                          </div>
+                          <span className="text-[10px] font-black px-2.5 py-1 rounded-full bg-emerald-500/20 text-emerald-300 border border-emerald-500/30">
+                            {isHindi ? "आप अच्छा कर रहे हैं" : "On Track"}
+                          </span>
+                        </div>
+                      );
+                    }
+
+                    const isLevelUp = decisionType === "advance_default" || decisionType === "jump_ahead";
+                    const statusBadge = isLevelUp 
+                      ? (isHindi ? "अगला स्तर" : "Ready for next level") 
+                      : (isHindi ? "अभ्यास की जरूरत" : "Needs practice");
+
+                    return (
+                      <div className="flex items-center justify-between gap-2 pb-3 border-b border-white/10">
+                        <div className="flex items-center gap-2 min-w-0">
+                          <Sparkles className="w-4 h-4 text-cyan-400 shrink-0" />
+                          <div>
+                            <span className="text-[9px] font-black uppercase tracking-wider text-slate-400 block">
+                              {isHindi ? "सुधारने का कौशल" : "NEXT SKILL"}
+                            </span>
+                            <span className="text-sm font-bold text-white truncate block">
+                              {targetCapDef.name}
+                            </span>
+                          </div>
+                        </div>
+                        <span className={`text-[10px] font-black uppercase tracking-wider px-2.5 py-1 rounded-full shrink-0 ${
+                          isLevelUp 
+                            ? "bg-emerald-500/20 text-emerald-300 border border-emerald-500/30" 
+                            : "bg-amber-500/20 text-amber-300 border border-amber-500/30"
+                        }`}>
+                          {statusBadge}
+                        </span>
+                      </div>
+                    );
+                  })()}
+
+                  {/* 2. Yesterday → Today Progression Context */}
+                  {(() => {
+                    const decisionType = currentRecord.recommendedAction?.decisionType;
+                    const isInsufficient = decisionType === "no_action_monitor" || currentRecord.identifiedPattern?.category === "insufficient_evidence";
+                    const isSteady = decisionType === "advance_default" || decisionType === "jump_ahead";
+                    
+                    if (isInsufficient) {
+                      return (
+                        <div className="space-y-1">
+                          <span className="text-[9px] font-black uppercase tracking-widest text-slate-400 block">
+                            {isHindi ? "कल से आज" : "YESTERDAY → TODAY"}
+                          </span>
+                          <p className="text-slate-200 text-xs leading-relaxed">
+                            {isHindi ? "हम अभी भी आपके काम को समझ रहे हैं।" : "We're still observing your baseline shift patterns."}
+                          </p>
+                        </div>
+                      );
+                    }
+
+                    if (isSteady) {
+                      return (
+                        <div className="space-y-1">
+                          <span className="text-[9px] font-black uppercase tracking-widest text-slate-400 block">
+                            {isHindi ? "कल से आज" : "YESTERDAY → TODAY"}
+                          </span>
+                          <p className="text-emerald-300 font-semibold text-xs leading-relaxed">
+                            {isHindi ? "आप लगातार अच्छा कर रहे हैं। आज का लक्ष्य पूरा करें।" : "Consistent high performance. Keep working on today's goal."}
+                          </p>
+                        </div>
+                      );
+                    }
+
+                    return (
+                      <div className="grid grid-cols-2 gap-2.5">
+                        <div className="bg-white/5 rounded-xl p-3 border border-white/5">
+                          <span className="text-[9px] font-black uppercase tracking-widest text-slate-400 block mb-1">
+                            {isHindi ? "कल" : "YESTERDAY"}
+                          </span>
+                          <p className="text-slate-200 text-xs leading-snug">
+                            {status.shortWhy}
+                          </p>
+                        </div>
+                        <div className="bg-cyan-500/15 rounded-xl p-3 border border-cyan-500/30">
+                          <span className="text-[9px] font-black uppercase tracking-widest text-cyan-400 block mb-1">
+                            {isHindi ? "आज" : "TODAY"}
+                          </span>
+                          <p className="text-white font-bold text-xs leading-snug">
+                            {status.action}
+                          </p>
+                        </div>
+                      </div>
+                    );
+                  })()}
+                </div>
+
+                {/* Pop-up Action Button */}
+                <div className="mt-5 flex gap-2">
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setShowNextStepModal(false);
+                      setShowTodaysGoalView(true);
+                    }}
+                    className="flex-1 py-2.5 px-4 rounded-xl bg-cyan-500 text-slate-950 hover:bg-cyan-400 font-black text-xs sm:text-sm shadow-lg shadow-cyan-500/25 active:scale-98 transition-all flex items-center justify-center gap-1.5 cursor-pointer border border-cyan-400"
+                  >
+                    <span>{status.primaryBtnText}</span>
+                    <ArrowRight className="w-4 h-4 stroke-[2.5]" />
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setShowNextStepModal(false)}
+                    className="px-4 py-2.5 rounded-xl bg-white/10 hover:bg-white/15 text-white font-bold text-xs cursor-pointer active:scale-98 transition-all"
+                  >
+                    {isHindi ? "बंद करें" : "Close"}
+                  </button>
+                </div>
+              </div>
+            </div>
+          )}
+
           {/* Wrapper for remaining sections below the full-bleed banner */}
           <div className="px-4 space-y-4">
+            {/* SLEEK STATUS TAB: CURRENT DAY & ON-TRACK STATUS */}
+            {(() => {
+              const totalDays = 10;
+              const isOnTrack = newHire.status === "Doing well" || currentRecord.statusAtEnd === "Doing well";
+
+              return (
+                <div
+                  id="learner-training-status-tab"
+                  className="rounded-2xl bg-white/[0.04] border border-white/10 px-4 py-2.5 flex items-center justify-between backdrop-blur-md shadow-sm"
+                >
+                  <div className="flex items-center gap-2">
+                    <span className="text-xs font-semibold text-slate-400">
+                      {isHindi ? "ट्रेनिंग दिन" : "Day"}
+                    </span>
+                    <span className="text-sm font-black text-white">
+                      {currentDay} <span className="text-slate-500 font-bold text-xs">/ {totalDays}</span>
+                    </span>
+                  </div>
+
+                  <div className="flex items-center gap-1.5">
+                    <span
+                      className={`w-2 h-2 rounded-full ${
+                        isOnTrack ? "bg-emerald-400 animate-pulse" : "bg-amber-400"
+                      }`}
+                    />
+                    <span
+                      className={`text-xs font-black tracking-wide ${
+                        isOnTrack ? "text-emerald-400" : "text-amber-400"
+                      }`}
+                    >
+                      {isOnTrack
+                        ? isHindi
+                          ? "ऑन ट्रैक"
+                          : "On Track"
+                        : isHindi
+                        ? "सुधार की जरूरत"
+                        : "Needs Attention"}
+                    </span>
+                  </div>
+                </div>
+              );
+            })()}
+
             {/* 2. YESTERDAY — QUICK SNAPSHOT & WHAT IT MEANS */}
             <LearnerDailyReportCard
               newHire={newHire}
@@ -894,61 +1002,6 @@ export const NewHireView: React.FC<NewHireViewProps> = ({
               onOpenWorkTools={() => setActiveModal("work")}
               onOpenBuddy={() => setActiveSection("buddy")}
               onOpenModules={() => setActiveSection("modules")}
-            />
-
-            {/* 3. BUDDY VIKRAM CARD (GLASSMORPHIC STYLING) */}
-            <div
-              onClick={() => setActiveSection("buddy")}
-              className="bg-white/10 backdrop-blur-md rounded-[26px] p-4 text-white shadow-xl border border-white/20 flex items-center justify-between gap-3 cursor-pointer group active:scale-[0.99] transition-all relative overflow-hidden"
-            >
-              <div className="flex items-center gap-3.5 min-w-0">
-                <div className="relative shrink-0">
-                  <div className="w-14 h-14 rounded-full overflow-hidden border-2 border-white/80 shadow-md">
-                    <img
-                      src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=150&h=150&fit=crop&crop=face"
-                      alt={newHire.buddy}
-                      className="w-full h-full object-cover"
-                    />
-                  </div>
-                  <span className="absolute bottom-0 right-0 w-3.5 h-3.5 rounded-full bg-emerald-500 border-2 border-slate-900 animate-pulse" />
-                </div>
-                <div className="min-w-0">
-                  <div className="flex items-center gap-2">
-                    <h3 className="text-base font-black tracking-wider text-white uppercase">
-                      VIKRAM
-                    </h3>
-                    <span className="px-2 py-0.5 rounded-full text-[10px] font-black tracking-wider uppercase bg-white/20 text-white backdrop-blur-xs">
-                      LIVE
-                    </span>
-                  </div>
-                  <p className="text-xs text-slate-300 font-semibold mt-0.5">
-                    {isHindi ? "फ्लोर साथी • आइसल 4-8" : "Floor Buddy • Aisle 4-8"}
-                  </p>
-                </div>
-              </div>
-
-              <button
-                type="button"
-                onClick={(e) => {
-                  e.stopPropagation();
-                  setActiveSection("buddy");
-                }}
-                className="w-11 h-11 rounded-full bg-white text-slate-900 hover:bg-slate-50 flex items-center justify-center shadow-md shrink-0 cursor-pointer active:scale-95 transition-all"
-                title="Call Buddy"
-              >
-                <Phone className="w-5 h-5 stroke-[2.5]" />
-              </button>
-            </div>
-
-            {/* 4. JOB READY & ROADMAP CARD */}
-            <LearnerJourneyRoadmap
-              newHire={newHire}
-              currentDay={currentDay}
-              isHindi={isHindi}
-              compact={true}
-              onNavigateToSection={(sec) => setActiveSection(sec)}
-              onOpenWorkTools={() => setActiveModal("work")}
-              onSelectStage={() => setActiveSection("dashboard")}
             />
 
             {/* Quick Access: Revisit Onboarding Welcome Walkthrough */}
@@ -1211,16 +1264,19 @@ export const NewHireView: React.FC<NewHireViewProps> = ({
 
 
       {activeSection === "journey" && (
-        <TenDaySkillJourneyView
-          newHires={[newHire]}
-          activeHireId={newHire.id}
-          onSelectHire={() => {}}
-          currentDay={currentDay}
-          isLearnerMode={true}
-          isHindi={isHindi}
-          onNavigateToSection={(sec) => setActiveSection(sec)}
-          onOpenTodaysGoal={() => setShowTodaysGoalView(true)}
-        />
+        <div className="-mx-4 -my-3 px-4 py-4 min-h-screen bg-[#eaedf2] pb-28">
+          <TenDaySkillJourneyView
+            newHires={[newHire]}
+            activeHireId={newHire.id}
+            onSelectHire={() => {}}
+            currentDay={currentDay}
+            isLearnerMode={true}
+            isHindi={isHindi}
+            onToggleLanguage={() => setIsHindi(!isHindi)}
+            onNavigateToSection={(sec) => setActiveSection(sec)}
+            onOpenTodaysGoal={() => setShowTodaysGoalView(true)}
+          />
+        </div>
       )}
 
       {/* ========================================================= */}
@@ -1424,21 +1480,25 @@ export const NewHireView: React.FC<NewHireViewProps> = ({
 
       {activeSection === "dashboard" && (
         <div className="space-y-4 animate-in fade-in duration-200">
-          {/* 1. INTERACTIVE 6-STAGE ROADMAP */}
-          <LearnerJourneyRoadmap
+          {/* Royal Blue Full-Bleed Dashboard Header */}
+          <DashboardHeader
             newHire={newHire}
             currentDay={currentDay}
             isHindi={isHindi}
+            onToggleLanguage={() => setIsHindi(!isHindi)}
           />
 
-          {/* 2. THE PRIMARY VISUAL: THE JOB-READY HUMAN FIGURE */}
-          <JobReadyHumanFigure
+          {/* DAY 10 COMMERCIAL CERTIFICATION (7 CRITERIA) - 7 EXPANDABLE STEPS */}
+          <CommercialCertificationCard
             newHire={newHire}
             currentDay={currentDay}
             isHindi={isHindi}
+            onOpenModules={() => setActiveSection("modules")}
+            onOpenWorkTools={() => setActiveModal("work")}
+            onOpenBuddy={() => setActiveSection("buddy")}
           />
 
-          {/* 3. DAILY SHIFT REPORT & CONTINUITY (CLICKABLE FOR FULL SUMMARY MODAL) */}
+          {/* DAILY SHIFT REPORT & CONTINUITY (CLICKABLE FOR FULL SUMMARY MODAL) */}
           <LearnerDailyReportCard
             newHire={newHire}
             currentDay={currentDay}

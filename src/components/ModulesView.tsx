@@ -28,10 +28,15 @@ import {
   ShoppingCart,
   AlertTriangle,
   Trophy,
+  Bell,
+  Package,
+  Layers,
+  Truck,
 } from "lucide-react";
 import { NewHire, TrainingModule, ModuleActivity, DARK_STORE_CAPABILITIES } from "../types";
 import { MANDATORY_TRAINING_MODULES } from "../data/modulesData";
 
+import { assessReadiness } from "../services/intelligence";
 export function checkDeanModuleGate(mod: TrainingModule, newHire: NewHire): { isGated: boolean; reason: string; correctiveAction: string } {
   const capabilities = newHire.capabilities || {};
   if (newHire.status === "At risk" || newHire.status === "Needs attention") {
@@ -76,8 +81,56 @@ export const ModulesView: React.FC<ModulesViewProps> = ({
   const [quizAnswerSelected, setQuizAnswerSelected] = useState<number | null>(null);
   const [quizSubmitted, setQuizSubmitted] = useState<boolean>(false);
   const [practiceChecked, setPracticeChecked] = useState<boolean>(false);
+  const [selectedSkillCategory, setSelectedSkillCategory] = useState<string>("aisles_1_3");
+
+
+
+  const SKILL_CATEGORIES = [
+    {
+      id: "aisles_1_3",
+      icon: Package,
+      titleHindi: "आइसल 1 से 3",
+      titleEnglish: "Aisle 1 to 3",
+      subtitleHindi: "चिप्स, बिस्कुट और मैगी",
+      subtitleEnglish: "Chips, Biscuits & Snacks",
+      skillIds: [1, 2, 3, 5, 14],
+      hasNotification: false,
+    },
+    {
+      id: "aisles_4_8",
+      icon: Layers,
+      titleHindi: "आइसल 4 से 8",
+      titleEnglish: "Aisle 4 to 8",
+      subtitleHindi: "आटा, दाल और भारी रैक",
+      subtitleEnglish: "Flour, Dal & Heavy Racks",
+      skillIds: [6, 7, 9, 10, 15],
+      hasNotification: true, // red dot matching the attached screenshot
+    },
+    {
+      id: "cold_room",
+      icon: Snowflake,
+      titleHindi: "कोल्ड रूम",
+      titleEnglish: "Cold Room",
+      subtitleHindi: "दूध, दही और पनीर (Aisle 8)",
+      subtitleEnglish: "Milk, Curd & Paneer (Aisle 8)",
+      skillIds: [4, 8, 11, 12, 13],
+      hasNotification: false,
+    },
+    {
+      id: "dispatch_table",
+      icon: Truck,
+      titleHindi: "डिस्पैच टेबल",
+      titleEnglish: "Dispatch Table",
+      subtitleHindi: "टोट चेकिंग और पॉलीबैग",
+      subtitleEnglish: "Tote Checking & Polybags",
+      skillIds: [16, 17, 18, 19, 20],
+      hasNotification: false,
+    },
+  ];
 
   const modulesCompletedCount = newHire.modulesCompleted ?? 3;
+  const capabilities = newHire.capabilities || DARK_STORE_CAPABILITIES;
+  const overallReadiness = typeof newHire.overallReadinessScore === "number" ? (newHire.overallReadinessScore <= 1 ? Math.round(newHire.overallReadinessScore * 100) : Math.round(newHire.overallReadinessScore)) : assessReadiness(capabilities, newHire);
   const completedIds = newHire.completedModuleIds || [
     "lms-mod-01",
     "lms-mod-02",
@@ -284,77 +337,106 @@ export const ModulesView: React.FC<ModulesViewProps> = ({
   const unmappedModules = MANDATORY_TRAINING_MODULES.filter((m) => !m.mappedCapabilityIds || m.mappedCapabilityIds.length === 0);
 
   return (
-    <div className="animate-in fade-in duration-200 select-none pb-20 text-white bg-[#14161d]">
+    <div className="animate-in fade-in duration-200 select-none pb-20 text-white bg-transparent">
       {/* ========================================================= */}
-      {/* 1. HERO BANNER */}
+      {/* 1. HERO BANNER CARD (MODULE TRAINING CONTENT & EXACT BG)  */}
       {/* ========================================================= */}
-      <div 
-        className="relative moving-dark-gradient rounded-b-[32px] rounded-t-none pt-10 pb-7 px-5 sm:px-6 text-white shadow-2xl border-b border-white/10 overflow-hidden"
-      >
-        {/* Real-time moving/flowing dark visual and halftone mesh dots as requested */}
-        <div className="absolute inset-0 dotted-halftone-pattern rounded-b-[32px] pointer-events-none opacity-85 z-0" />
+      <div className="p-3 sm:p-4">
+        <div 
+          id="modules-hero-banner-card"
+          className="module-banner-card-bg rounded-[32px] p-5 sm:p-6 text-white shadow-2xl border border-white/15 relative overflow-hidden space-y-4"
+        >
+          {/* Subtle soft ambient glow matching attachment palette */}
+          <div className="absolute -top-14 -left-14 w-52 h-52 bg-blue-500/20 rounded-full blur-3xl pointer-events-none z-0" />
+          <div className="absolute -bottom-14 -right-14 w-52 h-52 bg-indigo-600/20 rounded-full blur-3xl pointer-events-none z-0" />
 
-        {/* Subtle premium accent glow to lift the look */}
-        <div className="absolute -top-16 -left-16 w-56 h-56 bg-pink-500/10 rounded-full blur-3xl pointer-events-none z-0" />
-        <div className="absolute -bottom-16 -right-16 w-56 h-56 bg-rose-600/10 rounded-full blur-3xl pointer-events-none z-0" />
+          {/* Real-time flowing visual and subtle halftone mesh dots */}
+          <div className="absolute inset-0 dotted-halftone-pattern pointer-events-none opacity-20 z-0" />
 
-        <div className="relative z-10">
-          <div className="space-y-3.5">
-            <div className="inline-block px-3 py-1 rounded-full bg-pink-500/10 backdrop-blur-md text-pink-300 text-[10px] font-black uppercase tracking-wider border border-pink-500/20">
-              {isHindi ? "फीचर्ड प्रोग्राम" : "Featured"}
-            </div>
+          <div className="relative z-10 flex items-start justify-between gap-4">
+            <div className="flex-1 min-w-0 space-y-3">
+              <div className="space-y-1">
+                <h2 className="text-2xl sm:text-3xl font-black tracking-tight text-white drop-shadow-sm leading-tight">
+                  {isHindi ? "10-दिवसीय ट्रेनिंग और सर्टिफिकेशन" : "Certification & Training"}
+                </h2>
+                <p className="text-xs sm:text-sm text-blue-200/85 font-medium">
+                  {isHindi ? "वेयरहाउस एसोसिएट • डार्क स्टोर लॉजिस्टिक्स" : "Warehouse Associate • Dark Store Logistics"}
+                </p>
+              </div>
 
-            <div className="space-y-1">
-              <h2 className="text-xl sm:text-2xl font-black tracking-tight text-white drop-shadow-sm leading-tight">
-                {isHindi ? "10-दिवसीय ट्रेनिंग और सर्टिफिकेशन" : "Certification & Training"}
-              </h2>
-              <div className="flex items-center gap-2 text-xs text-slate-300 font-semibold drop-shadow-xs">
-                <span>⭐ 4.8</span>
-                <span>•</span>
-                <span>{isHindi ? `${modulesCompletedCount}/10 दिन पूर्ण` : `${modulesCompletedCount}/10 Days Done`}</span>
+              {/* Course Progress Bar */}
+              <div className="pt-2 space-y-2 max-w-[290px]">
+                <div className="flex items-center justify-between text-xs font-bold">
+                  <span className="text-slate-300 uppercase tracking-widest text-[10px]">
+                    {isHindi ? "कोर्स प्रगति" : "Course Progress"}
+                  </span>
+                  <span className="text-cyan-300 font-black">
+                    {Math.round((modulesCompletedCount / 10) * 100)}% {isHindi ? "पूर्ण" : "Completed"}
+                  </span>
+                </div>
+                <div className="h-2.5 w-full bg-black/40 rounded-full overflow-hidden border border-white/10 backdrop-blur-md shadow-inner">
+                  <div 
+                    className="h-full bg-gradient-to-r from-blue-600 via-blue-500 to-cyan-400 rounded-full transition-all duration-700 ease-out shadow-[0_0_12px_rgba(56,189,248,0.5)]"
+                    style={{ width: `${Math.max(6, Math.round((modulesCompletedCount / 10) * 100))}%` }}
+                  />
+                </div>
               </div>
             </div>
-          </div>
 
-          {/* Flat line progress bar */}
-          <div className="mt-6 space-y-2">
-            <div className="flex items-center justify-between text-xs font-bold drop-shadow-sm">
-              <span className="text-slate-200 uppercase tracking-widest text-[10px]">{isHindi ? "कोर्स प्रगति" : "Course Progress"}</span>
-              <span className="text-pink-400 font-black">{Math.round((modulesCompletedCount / 10) * 100)}% {isHindi ? "पूर्ण" : "Completed"}</span>
-            </div>
-            <div className="h-2.5 w-full bg-black/40 rounded-full overflow-hidden border border-white/5 backdrop-blur-md shadow-inner">
-              <div 
-                className="h-full bg-gradient-to-r from-pink-500 to-rose-600 rounded-full transition-all duration-700 ease-out shadow-[0_0_10px_rgba(255,0,127,0.5)]"
-                style={{ width: `${Math.round((modulesCompletedCount / 10) * 100)}%` }}
-              />
+            {/* Job Readiness Round Dial */}
+            <div className="shrink-0 w-24 h-24 sm:w-28 sm:h-28 flex items-center justify-center relative mt-1">
+              <div className="absolute inset-1.5 rounded-full bg-gradient-to-br from-white/10 via-blue-950/40 to-black/50 border border-white/15 shadow-[inset_0_3px_12px_rgba(255,255,255,0.1)] backdrop-blur-xs" />
+              <svg className="w-full h-full -rotate-90 relative z-10" viewBox="0 0 100 100">
+                <circle cx="50" cy="50" r="40" stroke="rgba(255,255,255,0.15)" strokeWidth="8" fill="transparent" />
+                <circle
+                  cx="50"
+                  cy="50"
+                  r="40"
+                  stroke="#34d399"
+                  strokeWidth="8"
+                  strokeLinecap="round"
+                  fill="transparent"
+                  strokeDasharray={2 * Math.PI * 40}
+                  strokeDashoffset={2 * Math.PI * 40 * (1 - overallReadiness / 100)}
+                  className="transition-all duration-1000 ease-out drop-shadow-[0_0_8px_rgba(52,211,153,0.7)]"
+                />
+              </svg>
+              <div className="absolute inset-0 flex flex-col items-center justify-center text-center z-20">
+                <span className="text-xl sm:text-2xl font-black text-white tracking-tight drop-shadow-md leading-none font-sans">
+                  {overallReadiness}%
+                </span>
+                <span className="text-[9px] font-black text-emerald-300 uppercase tracking-widest mt-1 drop-shadow-sm">
+                  {isHindi ? "तैयार" : "Ready"}
+                </span>
+              </div>
             </div>
           </div>
         </div>
       </div>
 
       {/* Main content wrapped in padding div to keep aligned */}
-      <div className="px-4 pt-4 space-y-4">
+      <div className="px-4 pt-1 space-y-4">
 
 
       {/* ========================================================= */}
       {/* YOUR CURRENT FOCUS (TARGET CAPABILITY)                      */}
       {/* ========================================================= */}
       {targetCapDef && (
-        <div className="bg-[#1b1e26] border border-white/10 rounded-2xl p-4 shadow-xl flex items-center justify-between gap-3 text-white mb-2">
+        <div className="bg-[#161820] border border-white/[0.08] rounded-2xl p-3.5 sm:p-4 shadow-lg flex items-center justify-between gap-3 text-white mb-2">
           <div className="flex items-center gap-3 min-w-0">
-            <div className="w-10 h-10 rounded-xl bg-[#13151b] text-cyan-400 border border-white/10 flex items-center justify-center shrink-0 font-black shadow-xs">
-              <Zap className="w-5 h-5 fill-cyan-400/20" />
+            <div className="w-10 h-10 rounded-xl bg-[#0f1117] text-cyan-400 border border-white/[0.08] flex items-center justify-center shrink-0 shadow-xs">
+              <Zap className="w-5 h-5 stroke-[1.6]" />
             </div>
             <div className="min-w-0">
               <div className="flex items-center gap-2">
-                <h4 className="text-xs font-black text-white uppercase tracking-wide">
+                <h4 className="text-xs font-medium text-slate-300 uppercase tracking-wider">
                   {isHindi ? "आपका वर्तमान ध्यान" : "Your Current Focus"}
                 </h4>
               </div>
-              <p className="text-[14px] text-cyan-400 font-bold truncate mt-1">
+              <p className="text-[14px] text-cyan-300 font-medium truncate mt-0.5">
                 {targetCapDef.name}
               </p>
-              <p className="text-[11px] text-slate-400 font-medium truncate mt-0.5">
+              <p className="text-xs text-slate-400 font-normal truncate mt-0.5">
                 {isHindi ? "अनुशंसित अभ्यास जारी रखें।" : "Continue the recommended practice."}
               </p>
             </div>
@@ -363,63 +445,136 @@ export const ModulesView: React.FC<ModulesViewProps> = ({
       )}
 
       {/* ========================================================= */}
-      {/* MY JOB SKILLS (CAPABILITIES LIST)                         */}
+      {/* MY JOB SKILLS (4 CATEGORY CARDS)                           */}
       {/* ========================================================= */}
-      <div className="flex flex-col gap-3.5 pb-8 mt-4">
-        <div className="flex items-center gap-2 mb-1 px-1">
-          <Sparkles className="w-4 h-4 text-pink-400" />
-          <h3 className="text-[13px] font-black text-white uppercase tracking-widest">{isHindi ? "मेरे नौकरी कौशल" : "My Job Skills"}</h3>
+      <div className="flex flex-col gap-3 pb-8 mt-3">
+        <div className="flex items-center justify-between px-1 mb-0.5">
+          <div className="flex items-center gap-2">
+            <Sparkles className="w-4 h-4 text-cyan-400 stroke-[1.6]" />
+            <h3 className="text-xs font-semibold text-slate-200 uppercase tracking-wider">
+              {isHindi ? "मेरे नौकरी कौशल" : "My Job Skills"}
+            </h3>
+          </div>
+          <span className="text-[11px] font-normal text-slate-400">
+            {isHindi ? "4 श्रेणियां • 20 कौशल" : "4 Categories • 20 Skills"}
+          </span>
         </div>
 
-        {capabilitiesToRender.map((cap) => {
-          const statusStr = getCapabilityStatus(cap.id);
-          const statusColor = getCapabilityStatusColor(statusStr);
-          const progText = getCapabilityProgressText(cap.id);
-          const { compAct, totalAct } = getCapabilityProgressRatio(cap.id);
-          
+        {/* 4 COMPACT CARDS IN 4-GRID PLACEMENT (NO TEXT, SLEEK ICONS) */}
+        <div className="grid grid-cols-4 gap-2 sm:gap-3 my-1">
+          {SKILL_CATEGORIES.map((cat) => {
+            const isSelected = selectedSkillCategory === cat.id;
+            const IconComponent = cat.icon;
+
+            return (
+              <button
+                key={cat.id}
+                type="button"
+                onClick={() => setSelectedSkillCategory(cat.id)}
+                title={isHindi ? `${cat.titleHindi} - ${cat.subtitleHindi}` : `${cat.titleEnglish} - ${cat.subtitleEnglish}`}
+                className={`relative aspect-square rounded-2xl sm:rounded-[22px] flex items-center justify-center transition-all duration-200 cursor-pointer select-none active:scale-95 shadow-sm ${
+                  isSelected
+                    ? "bg-gradient-to-b from-[#00d2ff] via-[#00aaff] to-[#0072ff] text-slate-950 shadow-cyan-500/25 ring-2 ring-cyan-300/60 scale-[1.02]"
+                    : "bg-[#181a22] hover:bg-[#20232c] border border-white/[0.08] text-white hover:border-white/20"
+                }`}
+              >
+                {/* Red alert dot if specified */}
+                {cat.hasNotification && (
+                  <span className="absolute top-2.5 right-2.5 w-2 h-2 rounded-full bg-[#ef4444] shadow-[0_0_6px_#ef4444]" />
+                )}
+
+                {/* Centered Sleek Icon Only (Generous size, elegant stroke) */}
+                <IconComponent
+                  className={`w-8 h-8 sm:w-8.5 sm:h-8.5 transition-transform ${
+                    isSelected ? "text-slate-950 stroke-[1.6] scale-105" : "text-white/95 stroke-[1.5]"
+                  }`}
+                />
+              </button>
+            );
+          })}
+        </div>
+
+        {/* Selected Category Skill Header & View-All Switcher */}
+        {(() => {
+          const activeCategoryObj = SKILL_CATEGORIES.find((c) => c.id === selectedSkillCategory);
+          const skillsToDisplay = selectedSkillCategory === "all"
+            ? DARK_STORE_CAPABILITIES
+            : DARK_STORE_CAPABILITIES.filter((c) => activeCategoryObj?.skillIds.includes(c.id));
+
           return (
-            <div
-              key={cap.id}
-              onClick={() => setActiveCapabilityModal(cap.id)}
-              className="w-full flex flex-col gap-2 p-4 transition-all duration-300 cursor-pointer select-none bg-[#111317] border border-white/5 rounded-[24px] hover:border-[#ff007f]/45 shadow-[inset_0_2px_8px_rgba(0,0,0,0.5)]"
-            >
-              <div className="flex items-start justify-between w-full">
-                <div className="flex flex-col">
-                  <h3 className="text-[15px] font-black text-white leading-snug tracking-tight">{cap.name}</h3>
-                  {statusStr ? (
-                    <span className={`text-[11px] font-bold mt-1 ${statusColor}`}>
-                      {statusStr}
-                    </span>
-                  ) : (
-                    <span className="text-[11px] font-bold mt-1 text-slate-500">
-                      {isHindi ? "शुरू नहीं हुआ" : "Not started"}
-                    </span>
-                  )}
-                </div>
-              </div>
-              
-              <div className="mt-2 flex items-center justify-between">
-                <div className="flex-1 mr-4">
-                  <div className="h-2 w-full bg-black rounded-full overflow-hidden border border-white/5">
-                    <div 
-                      className="h-full bg-pink-500 rounded-full transition-all duration-500" 
-                      style={{ width: totalAct > 0 ? `${(compAct / totalAct) * 100}%` : '0%' }}
-                    />
-                  </div>
-                </div>
-                <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider shrink-0">
-                  {progText}
+            <>
+              <div className="flex items-center justify-between px-1 mt-2 mb-0.5">
+                <span className="text-xs font-medium text-slate-300 tracking-wide">
+                  {activeCategoryObj
+                    ? (isHindi ? `${activeCategoryObj.titleHindi} • ${activeCategoryObj.subtitleHindi} (${skillsToDisplay.length})` : `${activeCategoryObj.titleEnglish} • ${activeCategoryObj.subtitleEnglish} (${skillsToDisplay.length})`)
+                    : (isHindi ? `सभी कौशल (${skillsToDisplay.length})` : `All Skills (${skillsToDisplay.length})`)}
                 </span>
+                <button
+                  onClick={() => setSelectedSkillCategory(selectedSkillCategory === "all" ? "aisles_1_3" : "all")}
+                  className="text-xs font-normal text-cyan-400 hover:text-cyan-300 transition-colors cursor-pointer"
+                >
+                  {selectedSkillCategory === "all"
+                    ? (isHindi ? "श्रेणी फ़िल्टर" : "Filter by Category")
+                    : (isHindi ? "सभी 20 कौशल देखें" : "View All 20 Skills")}
+                </button>
               </div>
-            </div>
+
+              {skillsToDisplay.map((cap) => {
+                const statusStr = getCapabilityStatus(cap.id);
+                const statusColor = getCapabilityStatusColor(statusStr);
+                const progText = getCapabilityProgressText(cap.id);
+                const { compAct, totalAct } = getCapabilityProgressRatio(cap.id);
+                
+                return (
+                  <div
+                    key={cap.id}
+                    onClick={() => setActiveCapabilityModal(cap.id)}
+                    className="w-full flex flex-col gap-2 p-3.5 sm:p-4 transition-all duration-200 cursor-pointer select-none bg-[#14161f] border border-white/[0.07] rounded-2xl hover:border-cyan-400/30 shadow-xs"
+                  >
+                    <div className="flex items-start justify-between w-full">
+                      <div className="flex flex-col">
+                        <h3 className="text-[14px] sm:text-[15px] font-medium text-slate-100 leading-snug tracking-normal">
+                          {cap.name}
+                        </h3>
+                        {statusStr ? (
+                          <span className={`text-[11px] font-medium mt-1 ${statusColor}`}>
+                            {statusStr}
+                          </span>
+                        ) : (
+                          <span className="text-[11px] font-normal mt-1 text-slate-400">
+                            {isHindi ? "शुरू नहीं हुआ" : "Not started"}
+                          </span>
+                        )}
+                      </div>
+                    </div>
+                    
+                    <div className="mt-1.5 flex items-center justify-between">
+                      <div className="flex-1 mr-4">
+                        <div className="h-1.5 w-full bg-white/[0.06] rounded-full overflow-hidden">
+                          <div 
+                            className="h-full bg-gradient-to-r from-blue-500 to-cyan-400 rounded-full transition-all duration-500" 
+                            style={{ width: totalAct > 0 ? `${(compAct / totalAct) * 100}%` : '0%' }}
+                          />
+                        </div>
+                      </div>
+                      <span className="text-[11px] font-normal text-slate-400 tracking-wide shrink-0">
+                        {progText}
+                      </span>
+                    </div>
+                  </div>
+                );
+              })}
+            </>
           );
-        })}
+        })()}
 
         {unmappedModules.length > 0 && (
           <>
             <div className="flex items-center gap-2 mb-1 mt-4 px-1">
-              <BookOpen className="w-4 h-4 text-pink-400" />
-              <h3 className="text-[13px] font-black text-white uppercase tracking-widest">{isHindi ? "अन्य शिक्षा" : "Other Learning"}</h3>
+              <BookOpen className="w-4 h-4 text-pink-400 stroke-[1.6]" />
+              <h3 className="text-xs font-semibold text-slate-200 uppercase tracking-wider">
+                {isHindi ? "अन्य शिक्षा" : "Other Learning"}
+              </h3>
             </div>
             {unmappedModules.map((mod) => (
               <div
@@ -428,11 +583,11 @@ export const ModulesView: React.FC<ModulesViewProps> = ({
                   setSelectedModuleId(mod.id);
                   setActiveDetailModule(mod);
                 }}
-                className="w-full flex flex-col gap-2 p-4 transition-all duration-300 cursor-pointer select-none bg-transparent rounded-[24px] border border-white/5 hover:bg-white/5"
+                className="w-full flex flex-col gap-2 p-3.5 transition-all duration-200 cursor-pointer select-none bg-transparent rounded-2xl border border-white/[0.07] hover:bg-white/[0.04]"
               >
                 <div className="flex items-center justify-between">
-                  <h3 className="text-sm font-bold text-white">{isHindi && mod.titleHi ? mod.titleHi : mod.title}</h3>
-                  <span className="text-white/20 text-lg font-light shrink-0">+</span>
+                  <h3 className="text-sm font-normal text-slate-200">{isHindi && mod.titleHi ? mod.titleHi : mod.title}</h3>
+                  <span className="text-white/30 text-base font-light shrink-0">+</span>
                 </div>
               </div>
             ))}
@@ -868,6 +1023,8 @@ export const ModulesView: React.FC<ModulesViewProps> = ({
           </div>
         </div>
       )}
+
+
       </div>
     </div>
   );
